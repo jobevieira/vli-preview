@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLI — Mês do Cliente | Toda entrega começa com uma parceria</title>
+<meta name="description" content="Campanha institucional Mês do Cliente VLI — soluções logísticas construídas em parceria.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --white:#ffffff;
+    --sand:#f3eee4;
+    --sand-deep:#e7dfce;
+    --green-deep:#0d2b22;
+    --green-deep-2:#123a2e;
+    --graphite:#22262a;
+    --graphite-muted:#5b6168;
+    --line:#d8d2c4;
+    --line-on-dark:#3c554a;
+    --yellow:#f2b705;
+    --text-on-light:#20241f;
+    --text-muted-on-light:#6b6f63;
+    --text-on-dark:#f3eee4;
+    --text-muted-on-dark:#aab7ac;
+
+    --serif: 'IBM Plex Serif', Georgia, serif;
+    --sans: 'IBM Plex Sans', -apple-system, Segoe UI, Roboto, sans-serif;
+
+    --max: 1440px;
+    --gutter: 96px;
+    --gap: 24px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    font-family:var(--sans);
+    color:var(--text-on-light);
+    background:var(--white);
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{ display:block; max-width:100%; }
+
+  .wrap{
+    max-width:var(--max);
+    margin:0 auto;
+    padding-left:var(--gutter);
+    padding-right:var(--gutter);
+  }
+
+  .grid12{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:var(--gap);
+  }
+
+  .eyebrow{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:13px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--text-muted-on-light);
+  }
+  .eyebrow.on-dark{ color:var(--text-muted-on-dark); }
+  .eyebrow.accent::before{
+    content:"";
+    display:inline-block;
+    width:22px;
+    height:1px;
+    background:var(--yellow);
+    margin-right:12px;
+    vertical-align:middle;
+  }
+
+  h1,h2,h3{ font-family:var(--serif); font-weight:400; margin:0; color:inherit; }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--sans);
+    font-weight:500;
+    font-size:16px;
+    letter-spacing:.01em;
+    padding:16px 30px;
+    border-radius:2px;
+    border:1px solid var(--graphite);
+    background:var(--graphite);
+    color:var(--white);
+    text-decoration:none;
+    cursor:pointer;
+    transition:background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn .arrow{ transition:transform .2s ease; }
+  .btn:hover .arrow{ transform:translateX(4px); }
+
+  .btn-light{
+    border-color:var(--white);
+    background:transparent;
+    color:var(--white);
+  }
+  .btn-light:hover{ background:var(--white); color:var(--green-deep); }
+
+  .btn-accent{
+    border-color:var(--yellow);
+    background:var(--yellow);
+    color:var(--green-deep);
+  }
+  .btn-accent:hover{ background:transparent; color:var(--yellow); }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky; top:0; z-index:40;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(180%) blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:88px;
+  }
+  .nav .mark{
+    font-family:var(--serif);
+    font-size:22px;
+    letter-spacing:.02em;
+    color:var(--graphite);
+    text-decoration:none;
+  }
+  .nav .mark b{ font-weight:500; }
+  .nav ul{
+    list-style:none; display:flex; gap:40px; margin:0; padding:0;
+  }
+  .nav a{
+    color:var(--graphite);
+    text-decoration:none;
+    font-size:15px;
+    font-weight:400;
+    border-bottom:1px solid transparent;
+    padding-bottom:4px;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .nav a:hover{ border-color:var(--yellow); }
+  .nav-links{ display:flex; align-items:center; gap:40px; }
+  .nav-cta{
+    padding:12px 22px; font-size:14px;
+  }
+
+  /* ---------- PHOTO PLACEHOLDER ---------- */
+  .photo-frame{
+    position:relative;
+    overflow:hidden;
+    background:
+      repeating-linear-gradient(135deg, rgba(34,38,42,.05) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, var(--sand-deep), var(--sand));
+    border:1px solid var(--line);
+  }
+  .photo-frame.on-dark{
+    background:
+      repeating-linear-gradient(135deg, rgba(243,238,228,.06) 0 1px, transparent 1px 34px),
+      linear-gradient(180deg, var(--green-deep-2), var(--green-deep));
+    border-color:var(--line-on-dark);
+  }
+  .photo-frame::before,
+  .photo-frame::after{
+    content:"";
+    position:absolute;
+    width:22px; height:22px;
+    border:1px solid currentColor;
+    opacity:.55;
+  }
+  .photo-frame::before{ top:20px; left:20px; border-right:none; border-bottom:none; }
+  .photo-frame::after{ bottom:20px; right:20px; border-left:none; border-top:none; }
+  .photo-frame{ color:var(--graphite-muted); }
+  .photo-frame.on-dark{ color:var(--text-muted-on-dark); }
+  .photo-label{
+    position:absolute;
+    left:20px; bottom:20px;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:inherit;
+  }
+  .photo-frame.on-dark .photo-label{ left:auto; right:20px; bottom:auto; top:20px; }
+
+  /* ---------- SECTION SPACING ---------- */
+  section{ padding-top:140px; padding-bottom:140px; }
+  .section-head{
+    grid-column:1/13;
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:var(--gap);
+    align-items:end;
+    margin-bottom:80px;
+  }
+  .section-head h2{
+    grid-column:1/9;
+    font-size:40px;
+    line-height:1.2;
+    color:var(--graphite);
+  }
+  .section-head p{
+    grid-column:9/13;
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    color:var(--text-muted-on-light);
+    margin:0;
+  }
+
+  .bg-sand{ background:var(--sand); }
+  .bg-white{ background:var(--white); }
+  .bg-green{ background:var(--green-deep); color:var(--text-on-dark); }
+
+  .divider{ border:0; border-top:1px solid var(--line); margin:0; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    padding-top:64px;
+    padding-bottom:96px;
+    background:var(--white);
+  }
+  .hero .grid12{ width:100%; align-items:center; }
+  .hero-copy{ grid-column:1/6; }
+  .hero-copy .eyebrow{ margin-bottom:28px; display:block; }
+  .hero-copy h1{
+    font-size:clamp(40px,4.6vw,68px);
+    line-height:1.08;
+    letter-spacing:-.01em;
+    color:var(--graphite);
+    margin-bottom:32px;
+  }
+  .hero-copy p{
+    font-size:19px;
+    line-height:1.65;
+    color:var(--text-muted-on-light);
+    max-width:440px;
+    margin:0 0 44px;
+  }
+  .hero-photo{
+    grid-column:7/13;
+    aspect-ratio:4/5;
+  }
+  .hero-scroll{
+    margin-top:100px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .hero-scroll .line{ width:64px; height:1px; background:var(--line); }
+  .hero-scroll span{
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-muted-on-light);
+  }
+
+  /* ---------- PARCERIA ---------- */
+  .partner-cards{ grid-column:1/13; display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); }
+  .partner-card{
+    background:var(--white);
+    border:1px solid var(--line);
+    padding:56px 40px;
+    min-height:360px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    transition:border-color .2s ease;
+  }
+  .partner-card:hover{ border-color:var(--yellow); }
+  .partner-card .num{
+    font-family:var(--serif);
+    font-size:15px;
+    color:var(--text-muted-on-light);
+  }
+  .partner-card h3{
+    font-size:26px;
+    line-height:1.3;
+    color:var(--graphite);
+    margin-top:120px;
+  }
+  .partner-card p{
+    font-size:15px;
+    line-height:1.7;
+    color:var(--text-muted-on-light);
+    margin-top:20px;
+  }
+
+  /* ---------- HISTORIAS / TIMELINE ---------- */
+  .timeline{ grid-column:1/13; position:relative; }
+  .timeline-track{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:var(--gap);
+    padding-top:36px;
+  }
+  .timeline-track::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:1px;
+    background:var(--line);
+  }
+  .case-card{ position:relative; padding-top:32px; }
+  .case-card::before{
+    content:"";
+    position:absolute;
+    top:-5px; left:0;
+    width:9px; height:9px;
+    border-radius:50%;
+    background:var(--yellow);
+  }
+  .case-tag{
+    font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--text-muted-on-light); margin-bottom:18px; display:block;
+  }
+  .case-card h3{
+    font-size:24px; color:var(--graphite); line-height:1.3; margin-bottom:24px;
+  }
+  .case-row{ padding:16px 0; border-top:1px solid var(--line); }
+  .case-row:last-child{ border-bottom:1px solid var(--line); }
+  .case-row .k{
+    font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--text-muted-on-light); margin-bottom:6px;
+  }
+  .case-row .v{ font-size:15px; line-height:1.6; color:var(--text-on-light); }
+  .case-impact{ font-family:var(--serif); font-size:22px; color:var(--graphite); }
+
+  /* ---------- ECOSSISTEMA ---------- */
+  .eco{ position:relative; }
+  .eco-wrap{ grid-column:1/13; position:relative; }
+  .eco-copy{ max-width:520px; margin-bottom:96px; }
+  .eco-copy h2{ font-size:40px; color:var(--text-on-dark); line-height:1.25; }
+  .eco-copy p{ font-size:16px; line-height:1.7; color:var(--text-muted-on-dark); margin-top:24px; }
+
+  .eco-diagram{
+    position:relative;
+    max-width:920px;
+    margin:0 auto;
+    aspect-ratio:16/9;
+  }
+  .eco-diagram svg{ width:100%; height:100%; }
+  .eco-node{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    text-align:center;
+  }
+  .eco-node .dot{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--sand);
+    margin:0 auto 14px;
+    border:1px solid var(--yellow);
+  }
+  .eco-node .lbl{
+    font-family:var(--sans); font-size:14px; font-weight:500;
+    color:var(--text-on-dark); white-space:nowrap;
+  }
+  .eco-hub{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    text-align:center;
+  }
+  .eco-hub .ring{
+    width:96px; height:96px; border-radius:50%;
+    border:1px solid var(--yellow);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-size:20px; color:var(--yellow);
+    margin:0 auto;
+  }
+
+  /* ---------- SOLUÇÕES ---------- */
+  .solutions{ grid-column:1/13; display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .solution-card{
+    background:var(--white);
+    padding:40px 28px;
+    min-height:420px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    position:relative;
+    overflow:hidden;
+    transition:background .25s ease;
+  }
+  .solution-card .idx{
+    position:absolute; top:32px; left:28px;
+    font-family:var(--serif); font-size:14px; color:var(--text-muted-on-light);
+  }
+  .solution-card .mark{
+    position:absolute; top:28px; right:24px;
+    width:26px; height:26px;
+  }
+  .solution-card .mark svg{ width:100%; height:100%; fill:none; }
+  .solution-card h3{
+    font-size:21px; line-height:1.3; color:var(--graphite); margin-bottom:14px;
+  }
+  .solution-card p{
+    font-size:14px; line-height:1.6; color:var(--text-muted-on-light);
+    max-height:0; opacity:0; overflow:hidden;
+    transition:max-height .3s ease, opacity .3s ease, margin .3s ease;
+    margin:0;
+  }
+  .solution-card:hover{ background:var(--green-deep); }
+  .solution-card:hover .idx{ color:var(--text-muted-on-dark); }
+  .solution-card:hover h3{ color:var(--white); }
+  .solution-card:hover p{ color:var(--text-muted-on-dark); max-height:120px; opacity:1; margin-top:0; }
+  .solution-card:hover .mark{ color:var(--yellow); }
+  .solution-card .mark{ color:var(--graphite-muted); }
+
+  /* ---------- DEPOIMENTOS ---------- */
+  .testimonials{ grid-column:1/13; display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); }
+  .testimonial{ border-top:1px solid var(--line); padding-top:36px; }
+  .testimonial .who{ display:flex; align-items:center; gap:14px; margin-bottom:32px; }
+  .testimonial .photo{
+    width:52px; height:52px; border-radius:50%;
+    background:linear-gradient(160deg,var(--sand-deep),var(--sand));
+    border:1px solid var(--line);
+  }
+  .testimonial .who-name{ font-size:14px; font-weight:600; color:var(--graphite); }
+  .testimonial .who-role{ font-size:13px; color:var(--text-muted-on-light); }
+  .testimonial h3{
+    font-size:22px; line-height:1.35; color:var(--graphite); margin-bottom:20px;
+  }
+  .testimonial p{ font-size:15px; line-height:1.75; color:var(--text-muted-on-light); }
+
+  /* ---------- MANIFESTO ---------- */
+  .manifesto{ grid-column:2/12; text-align:center; }
+  .manifesto .eyebrow{ display:block; margin-bottom:40px; justify-content:center; }
+  .manifesto h2{
+    font-size:clamp(28px,3.4vw,44px);
+    line-height:1.4;
+    color:var(--graphite);
+    font-weight:300;
+  }
+
+  /* ---------- CTA FINAL ---------- */
+  .cta-final{ text-align:center; }
+  .cta-final .grid12{ justify-items:center; }
+  .cta-final-inner{ grid-column:3/11; }
+  .cta-final .eyebrow{ justify-content:center; margin-bottom:32px; }
+  .cta-final h2{
+    font-size:clamp(32px,4vw,56px);
+    line-height:1.2;
+    color:var(--white);
+    margin-bottom:48px;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{ background:var(--white); border-top:1px solid var(--line); padding:64px 0 40px; }
+  .footer-top{
+    display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:56px; gap:40px; flex-wrap:wrap;
+  }
+  .footer-mark{ font-family:var(--serif); font-size:22px; color:var(--graphite); }
+  .footer-cols{ display:flex; gap:80px; flex-wrap:wrap; }
+  .footer-col h4{
+    font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted-on-light);
+    margin:0 0 16px; font-weight:600;
+  }
+  .footer-col a{
+    display:block; color:var(--text-on-light); text-decoration:none; font-size:14px; line-height:2.1;
+  }
+  .footer-col a:hover{ color:var(--yellow); }
+  .footer-bottom{
+    display:flex; justify-content:space-between; padding-top:32px; border-top:1px solid var(--line);
+    font-size:13px; color:var(--text-muted-on-light);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:1100px){
+    :root{ --gutter:48px; }
+    .hero-copy,.hero-photo{ grid-column:1/13; }
+    .hero-photo{ margin-top:56px; aspect-ratio:16/9; }
+    .section-head h2, .section-head p{ grid-column:1/13; }
+    .section-head p{ margin-top:16px; }
+    .partner-cards, .timeline-track, .testimonials{ grid-template-columns:1fr; }
+    .solutions{ grid-template-columns:repeat(2,1fr); }
+    .manifesto,.cta-final-inner{ grid-column:1/13; }
+    .nav ul{ display:none; }
+    .eco-diagram{ transform:scale(.82); }
+  }
+  @media (max-width:640px){
+    :root{ --gutter:24px; }
+    section{ padding-top:88px; padding-bottom:88px; }
+    .solutions{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap">
+    <a class="mark" href="#top">VLI <b>·</b> Mês do Cliente</a>
+    <div class="nav-links">
+      <ul>
+        <li><a href="#parceria">Parceria</a></li>
+        <li><a href="#historias">Histórias</a></li>
+        <li><a href="#ecossistema">Ecossistema</a></li>
+        <li><a href="#solucoes">Soluções</a></li>
+      </ul>
+      <a class="btn nav-cta" href="#cta">Fale com a VLI</a>
+    </div>
+  </div>
+</header>
+
+<!-- 1. HERO -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="hero-copy">
+        <span class="eyebrow accent">Mês do Cliente VLI</span>
+        <h1>Toda entrega começa com uma parceria.</h1>
+        <p>Cada desafio logístico é diferente. O que permanece igual é a forma como construímos soluções ao lado de quem movimenta o Brasil.</p>
+        <a class="btn" href="#solucoes">Conheça nossas soluções <span class="arrow">→</span></a>
+        <div class="hero-scroll">
+          <span class="line"></span>
+          <span>Role para explorar</span>
+        </div>
+      </div>
+      <div class="hero-photo photo-frame">
+        <span class="photo-label">Fotografia documental — operação ferroviária</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. O QUE SIGNIFICA PARCERIA -->
+<section class="bg-sand" id="parceria">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="section-head">
+        <h2>O que significa parceria</h2>
+        <p>Três princípios orientam cada solução que construímos junto aos nossos clientes.</p>
+      </div>
+      <div class="partner-cards">
+        <div class="partner-card">
+          <span class="num">01</span>
+          <div>
+            <h3>Escutamos antes de propor.</h3>
+            <p>Entendemos a operação, os prazos e as restrições reais de cada cliente antes de desenhar qualquer solução.</p>
+          </div>
+        </div>
+        <div class="partner-card">
+          <span class="num">02</span>
+          <div>
+            <h3>Cocriamos soluções.</h3>
+            <p>Construímos junto — engenharia, operação e cliente na mesma mesa, do primeiro esboço à execução.</p>
+          </div>
+        </div>
+        <div class="partner-card">
+          <span class="num">03</span>
+          <div>
+            <h3>Evoluímos continuamente.</h3>
+            <p>Acompanhamos resultados e ajustamos a operação ao longo do tempo, como parte contínua da parceria.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. HISTORIAS QUE MOVIMENTAM RESULTADOS -->
+<section class="bg-white" id="historias">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="section-head">
+        <h2>Histórias que movimentam resultados</h2>
+        <p>Casos reais de parceria entre a VLI e clientes que movimentam o Brasil.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-track">
+          <div class="case-card">
+            <span class="case-tag">Agronegócio</span>
+            <h3>Escoamento de grãos em janela crítica de safra</h3>
+            <div class="case-row">
+              <div class="k">Desafio</div>
+              <div class="v">Volume recorde de soja a escoar em prazo reduzido, com risco de perda de janela de exportação.</div>
+            </div>
+            <div class="case-row">
+              <div class="k">Solução</div>
+              <div class="v">Replanejamento conjunto de malha ferroviária e priorização de terminais em parceria com o cliente.</div>
+            </div>
+            <div class="case-row">
+              <div class="k">Impacto</div>
+              <div class="v"><span class="case-impact">+18%</span> de volume escoado dentro do prazo de safra.</div>
+            </div>
+          </div>
+          <div class="case-card">
+            <span class="case-tag">Mineração</span>
+            <h3>Integração de terminal privado à malha ferroviária</h3>
+            <div class="case-row">
+              <div class="k">Desafio</div>
+              <div class="v">Operação de minério dependente de múltiplos modais sem integração operacional direta.</div>
+            </div>
+            <div class="case-row">
+              <div class="k">Solução</div>
+              <div class="v">Desenho conjunto de fluxo intermodal, conectando terminal, ferrovia e porto em uma única operação.</div>
+            </div>
+            <div class="case-row">
+              <div class="k">Impacto</div>
+              <div class="v"><span class="case-impact">-12%</span> no tempo total de ciclo logístico.</div>
+            </div>
+          </div>
+          <div class="case-card">
+            <span class="case-tag">Indústria</span>
+            <h3>Inteligência logística para previsibilidade de estoque</h3>
+            <div class="case-row">
+              <div class="k">Desafio</div>
+              <div class="v">Falta de previsibilidade na chegada de insumos gerava rupturas ao longo da cadeia produtiva.</div>
+            </div>
+            <div class="case-row">
+              <div class="k">Solução</div>
+              <div class="v">Implantação de monitoramento e inteligência logística compartilhada entre as equipes.</div>
+            </div>
+            <div class="case-row">
+              <div class="k">Impacto</div>
+              <div class="v"><span class="case-impact">+94%</span> de previsibilidade nas entregas.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. ECOSSISTEMA VLI -->
+<section class="bg-green eco" id="ecossistema">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="eco-wrap">
+        <div class="eco-copy">
+          <span class="eyebrow accent on-dark">Ecossistema VLI</span>
+          <h2 style="margin-top:24px;">Um sistema logístico integrado, pensado como um todo.</h2>
+          <p>Ferrovia, rodovia, terminais e portos operando de forma conectada — para que cada etapa da cadeia funcione como parte de um mesmo movimento.</p>
+        </div>
+
+        <div class="eco-diagram">
+          <svg viewBox="0 0 920 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="460" y1="260" x2="140" y2="90" stroke="#3c554a" stroke-width="1"/>
+            <line x1="460" y1="260" x2="780" y2="90" stroke="#3c554a" stroke-width="1"/>
+            <line x1="460" y1="260" x2="140" y2="430" stroke="#3c554a" stroke-width="1"/>
+            <line x1="460" y1="260" x2="780" y2="430" stroke="#3c554a" stroke-width="1"/>
+          </svg>
+
+          <div class="eco-hub"><div class="ring">VLI</div></div>
+
+          <div class="eco-node" style="top:17%; left:15%;">
+            <div class="dot"></div><div class="lbl">Ferrovia</div>
+          </div>
+          <div class="eco-node" style="top:17%; left:85%;">
+            <div class="dot"></div><div class="lbl">Rodovia</div>
+          </div>
+          <div class="eco-node" style="top:83%; left:15%;">
+            <div class="dot"></div><div class="lbl">Terminais</div>
+          </div>
+          <div class="eco-node" style="top:83%; left:85%;">
+            <div class="dot"></div><div class="lbl">Portos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. SOLUÇÕES -->
+<section class="bg-white" id="solucoes">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="section-head">
+        <h2>Soluções</h2>
+        <p>Cinco frentes de atuação, uma única lógica de parceria.</p>
+      </div>
+      <div class="solutions">
+        <div class="solution-card">
+          <span class="idx">01</span>
+          <span class="mark"><svg viewBox="0 0 24 24"><path d="M4 18h16M4 6l16 0M8 6v12M16 6v12" stroke="currentColor" stroke-width="1.2"/></svg></span>
+          <h3>Ferrovia</h3>
+          <p>Malha ferroviária de longa distância para grandes volumes com previsibilidade.</p>
+        </div>
+        <div class="solution-card">
+          <span class="idx">02</span>
+          <span class="mark"><svg viewBox="0 0 24 24"><path d="M2 7h20M2 17h20M4 12h4M11 12h4M18 12h2" stroke="currentColor" stroke-width="1.2"/></svg></span>
+          <h3>Rodovia</h3>
+          <p>Complemento rodoviário integrado à malha para flexibilidade de última milha.</p>
+        </div>
+        <div class="solution-card">
+          <span class="idx">03</span>
+          <span class="mark"><svg viewBox="0 0 24 24"><path d="M4 4v16M20 4v16M4 12h16" stroke="currentColor" stroke-width="1.2"/></svg></span>
+          <h3>Portos</h3>
+          <p>Acesso portuário integrado para escoamento eficiente rumo à exportação.</p>
+        </div>
+        <div class="solution-card">
+          <span class="idx">04</span>
+          <span class="mark"><svg viewBox="0 0 24 24"><path d="M3 6h18v13H3V6zM3 12h18M9 6v13M15 6v13" stroke="currentColor" stroke-width="1.2"/></svg></span>
+          <h3>Terminais</h3>
+          <p>Rede de terminais que conecta origem e destino com eficiência operacional.</p>
+        </div>
+        <div class="solution-card">
+          <span class="idx">05</span>
+          <span class="mark"><svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 4 7-9" stroke="currentColor" stroke-width="1.2"/></svg></span>
+          <h3>Inteligência logística</h3>
+          <p>Dados e monitoramento contínuo para decisões mais rápidas e precisas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. DEPOIMENTOS -->
+<section class="bg-sand">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="section-head">
+        <h2>Depoimentos</h2>
+        <p>Na visão de quem constrói essas soluções ao nosso lado.</p>
+      </div>
+      <div class="testimonials">
+        <div class="testimonial">
+          <div class="who">
+            <div class="photo"></div>
+            <div>
+              <div class="who-name">Marina Cortez</div>
+              <div class="who-role">Diretora de Supply Chain</div>
+            </div>
+          </div>
+          <h3>O que mais valorizamos é…</h3>
+          <p>...a proximidade da equipe da VLI com a nossa operação. As decisões são tomadas junto, com os dois lados olhando para o mesmo problema.</p>
+        </div>
+        <div class="testimonial">
+          <div class="who">
+            <div class="photo"></div>
+            <div>
+              <div class="who-name">Ricardo Sena</div>
+              <div class="who-role">Gerente de Logística</div>
+            </div>
+          </div>
+          <h3>O que mais valorizamos é…</h3>
+          <p>...a transparência. Sabemos exatamente onde está a carga e o que esperar em cada etapa, o que muda completamente nosso planejamento.</p>
+        </div>
+        <div class="testimonial">
+          <div class="who">
+            <div class="photo"></div>
+            <div>
+              <div class="who-name">Luana Ferraz</div>
+              <div class="who-role">Head de Operações</div>
+            </div>
+          </div>
+          <h3>O que mais valorizamos é…</h3>
+          <p>...a disposição da VLI em evoluir a solução com a gente. O que começou como um contrato virou uma relação de longo prazo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. MANIFESTO -->
+<section class="bg-white">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="manifesto">
+        <span class="eyebrow" style="display:flex; justify-content:center;">Manifesto</span>
+        <h2>Mais do que transportar cargas, construímos relações capazes de gerar valor para toda a cadeia.</h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. CTA FINAL -->
+<section class="bg-green cta-final" id="cta">
+  <div class="wrap">
+    <div class="grid12">
+      <div class="cta-final-inner">
+        <span class="eyebrow on-dark" style="display:flex;">Mês do Cliente VLI</span>
+        <h2>Vamos construir a próxima solução juntos.</h2>
+        <a class="btn btn-accent" href="#top">Fale com a VLI</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-mark">VLI</div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Soluções</h4>
+          <a href="#solucoes">Ferrovia</a>
+          <a href="#solucoes">Rodovia</a>
+          <a href="#solucoes">Portos</a>
+          <a href="#solucoes">Terminais</a>
+        </div>
+        <div class="footer-col">
+          <h4>Empresa</h4>
+          <a href="#parceria">Parceria</a>
+          <a href="#historias">Histórias</a>
+          <a href="#ecossistema">Ecossistema</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contato</h4>
+          <a href="#cta">Fale com a VLI</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 VLI Logística. Todos os direitos reservados.</span>
+      <span>Campanha institucional — Mês do Cliente</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

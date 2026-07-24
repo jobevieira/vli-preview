@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLI Preview — Galeria de projetos</title>
+<meta name="description" content="Galeria de previews visuais dos projetos VLI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --white:#ffffff;
+    --sand:#f3eee4;
+    --green-deep:#0d2b22;
+    --graphite:#22262a;
+    --graphite-muted:#5b6168;
+    --line:#d8d2c4;
+    --yellow:#f2b705;
+    --serif:'IBM Plex Serif', Georgia, serif;
+    --sans:'IBM Plex Sans', -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:var(--white);
+    color:var(--graphite);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:1040px; margin:0 auto; padding:0 32px; }
+  header{ padding:96px 0 64px; border-bottom:1px solid var(--line); }
+  .eyebrow{
+    font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--graphite-muted); display:flex; align-items:center; gap:12px; margin-bottom:24px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background:var(--yellow); }
+  h1{ font-family:var(--serif); font-weight:400; font-size:clamp(32px,4.4vw,52px); line-height:1.15; margin:0 0 20px; }
+  header p{ font-size:17px; line-height:1.6; color:var(--graphite-muted); max-width:560px; margin:0; }
+
+  .list{ padding:64px 0 120px; display:flex; flex-direction:column; }
+  .item{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:32px 0; border-bottom:1px solid var(--line);
+    text-decoration:none; color:inherit;
+    transition:opacity .2s ease;
+  }
+  .item:hover{ opacity:.6; }
+  .item .name{ font-family:var(--serif); font-size:26px; }
+  .item .meta{ font-size:13px; color:var(--graphite-muted); letter-spacing:.04em; }
+  .item .arrow{ font-size:15px; color:var(--yellow); margin-left:16px; }
+
+  footer{ padding:40px 0 64px; font-size:13px; color:var(--graphite-muted); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="eyebrow">VLI — Previews</span>
+      <h1>Galeria de projetos visuais</h1>
+      <p>Visualizações ao vivo dos projetos em desenvolvimento. Este espaço é atualizado conforme novas versões são publicadas.</p>
+    </header>
+    <div class="list">
+      <a class="item" href="mes-do-cliente-2026/">
+        <span class="name">Mês do Cliente 2026 <span class="arrow">→</span></span>
+        <span class="meta">Landing page institucional</span>
+      </a>
+    </div>
+    <footer>Atualizado automaticamente via GitHub Pages.</footer>
+  </div>
+</body>
+</html>
