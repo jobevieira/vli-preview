@@ -31,6 +31,9 @@
     --max: 1440px;
     --gutter: 96px;
     --gap: 24px;
+    --ease: cubic-bezier(.19,1,.22,1);
+    --shadow-soft: 0 30px 60px -30px rgba(13,43,34,.22);
+    --slant: 56px;
   }
 
   *{ box-sizing:border-box; }
@@ -41,8 +44,10 @@
     color:var(--text-on-light);
     background:var(--white);
     -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
   }
   img,svg{ display:block; max-width:100%; }
+  h1,h2,h3{ text-wrap:balance; }
 
   .wrap{
     max-width:var(--max);
@@ -74,6 +79,9 @@
     background:var(--yellow);
     margin-right:12px;
     vertical-align:middle;
+    transform-origin:left center;
+    animation:growLine .8s var(--ease) both;
+    animation-delay:.15s;
   }
 
   h1,h2,h3{ font-family:var(--serif); font-weight:400; margin:0; color:inherit; }
@@ -93,9 +101,10 @@
     color:var(--white);
     text-decoration:none;
     cursor:pointer;
-    transition:background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+    transition:background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease;
   }
-  .btn:hover{ transform:translateY(-1px); }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 16px 30px -14px rgba(13,43,34,.4); }
+  .btn:active{ transform:translateY(0); }
   .btn .arrow{ transition:transform .2s ease; }
   .btn:hover .arrow{ transform:translateX(4px); }
 
@@ -111,13 +120,71 @@
     background:var(--yellow);
     color:var(--green-deep);
   }
-  .btn-accent:hover{ background:transparent; color:var(--yellow); }
+  .btn-accent:hover{ background:transparent; color:var(--yellow); box-shadow:0 16px 34px -14px rgba(242,183,5,.35); }
+
+  /* ---------- SCROLL PROGRESS ---------- */
+  .progress{
+    position:fixed; top:0; left:0; right:0; height:2px; z-index:60;
+    background:transparent; pointer-events:none;
+  }
+  .progress-bar{
+    height:100%; width:0%; background:var(--yellow);
+    transition:width .08s linear;
+  }
+
+  /* ---------- ROUTE LINE (fio condutor) ---------- */
+  .journey{ position:relative; }
+  .route{
+    position:absolute;
+    left:calc(var(--gutter) / 2 - 1px);
+    top:0; bottom:0; width:2px;
+    z-index:3; pointer-events:none;
+  }
+  .route-track{ position:absolute; inset:0; background:var(--line); opacity:.6; }
+  .route-fill{
+    position:absolute; left:0; top:0; width:100%; height:0%;
+    background:linear-gradient(var(--yellow), var(--yellow));
+    box-shadow:0 0 14px rgba(242,183,5,.55);
+  }
+  .route-stations{ position:absolute; inset:0; }
+  .route-station{
+    position:absolute; left:50%; top:0;
+    transform:translate(-50%,-50%);
+    width:9px; height:9px; border-radius:50%;
+    background:var(--white); border:1px solid var(--graphite-muted);
+    transition:background .35s ease, border-color .35s ease, box-shadow .35s ease;
+  }
+  .route-station.on-dark{ background:var(--green-deep-2); border-color:var(--line-on-dark); }
+  .route-station.reached{ background:var(--yellow); border-color:var(--yellow); box-shadow:0 0 0 6px rgba(242,183,5,.18); }
+  @media (max-width:1100px){ .route{ display:none; } }
+
+  /* ---------- TICKER ---------- */
+  .ticker{
+    background:var(--graphite);
+    overflow:hidden;
+    border-top:1px solid var(--line-on-dark);
+    border-bottom:1px solid var(--line-on-dark);
+    position:relative; z-index:2;
+  }
+  .ticker-track{
+    display:flex; align-items:center; gap:28px;
+    white-space:nowrap; width:max-content;
+    padding:16px 0;
+    animation:marquee 26s linear infinite;
+  }
+  .ticker-track span.label{
+    font-size:13px; letter-spacing:.12em; text-transform:uppercase; font-weight:500;
+    color:var(--text-on-dark);
+  }
+  .ticker-track span.dot{ color:var(--yellow); font-size:10px; }
+  @keyframes marquee{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+  @media (prefers-reduced-motion: reduce){ .ticker-track{ animation:none; } }
 
   /* ---------- NAV ---------- */
   .nav{
-    position:sticky; top:0; z-index:40;
-    background:rgba(255,255,255,.92);
-    backdrop-filter:saturate(180%) blur(8px);
+    position:sticky; top:0; z-index:50;
+    background:rgba(255,255,255,.86);
+    backdrop-filter:saturate(180%) blur(10px);
     border-bottom:1px solid var(--line);
   }
   .nav .wrap{
@@ -136,19 +203,44 @@
     list-style:none; display:flex; gap:40px; margin:0; padding:0;
   }
   .nav a{
-    color:var(--graphite);
+    position:relative;
+    color:var(--graphite-muted);
     text-decoration:none;
     font-size:15px;
     font-weight:400;
     border-bottom:1px solid transparent;
     padding-bottom:4px;
-    transition:border-color .2s ease, color .2s ease;
+    transition:border-color .25s ease, color .25s ease;
   }
-  .nav a:hover{ border-color:var(--yellow); }
+  .nav a:hover{ border-color:var(--line); color:var(--graphite); }
+  .nav a.active{ color:var(--graphite); border-color:var(--yellow); }
   .nav-links{ display:flex; align-items:center; gap:40px; }
   .nav-cta{
     padding:12px 22px; font-size:14px;
   }
+
+  /* ---------- REVEAL ON SCROLL ---------- */
+  .reveal{
+    opacity:0;
+    transform:translateY(34px);
+    transition:opacity .8s var(--ease), transform .8s var(--ease);
+    transition-delay:calc(var(--i,0) * 100ms);
+  }
+  .reveal.is-visible{ opacity:1; transform:translateY(0); }
+  .reveal-scale{
+    opacity:0; transform:scale(.94);
+    transition:opacity .9s var(--ease), transform .9s var(--ease);
+  }
+  .reveal-scale.is-visible{ opacity:1; transform:scale(1); }
+
+  @keyframes growLine{ from{ transform:scaleX(0);} to{ transform:scaleX(1);} }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(22px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes breathe{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.028);} }
+  @keyframes pulseDot{ 0%,100%{ box-shadow:0 0 0 0 rgba(242,183,5,.45);} 50%{ box-shadow:0 0 0 10px rgba(242,183,5,0);} }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  @keyframes drift{ 0%,100%{ background-position:0% 50%,100% 20%;} 50%{ background-position:8% 42%,92% 30%;} }
+
+  .load-in{ animation:fadeUp .9s var(--ease) both; animation-delay:calc(var(--i,0) * 110ms); }
 
   /* ---------- PHOTO PLACEHOLDER ---------- */
   .photo-frame{
@@ -189,8 +281,15 @@
   }
   .photo-frame.on-dark .photo-label{ left:auto; right:20px; bottom:auto; top:20px; }
 
-  /* ---------- SECTION SPACING ---------- */
-  section{ padding-top:140px; padding-bottom:140px; }
+  /* ---------- SECTION SPACING & SLANT ---------- */
+  section{ padding-top:140px; padding-bottom:140px; position:relative; }
+  .slant{
+    margin-top:calc(-1 * var(--slant));
+    padding-top:calc(140px + var(--slant));
+    clip-path:polygon(0 var(--slant), 100% 0, 100% 100%, 0 100%);
+  }
+  footer.slant{ padding-top:calc(64px + var(--slant)); }
+
   .section-head{
     grid-column:1/13;
     display:grid;
@@ -218,8 +317,6 @@
   .bg-white{ background:var(--white); }
   .bg-green{ background:var(--green-deep); color:var(--text-on-dark); }
 
-  .divider{ border:0; border-top:1px solid var(--line); margin:0; }
-
   /* ---------- HERO ---------- */
   .hero{
     min-height:100vh;
@@ -228,9 +325,10 @@
     padding-top:64px;
     padding-bottom:96px;
     background:var(--white);
+    overflow:hidden;
   }
   .hero .grid12{ width:100%; align-items:center; }
-  .hero-copy{ grid-column:1/6; }
+  .hero-copy{ grid-column:1/6; position:relative; z-index:2; }
   .hero-copy .eyebrow{ margin-bottom:28px; display:block; }
   .hero-copy h1{
     font-size:clamp(40px,4.6vw,68px);
@@ -246,12 +344,38 @@
     max-width:440px;
     margin:0 0 44px;
   }
+  .hero-photo-col{ grid-column:7/13; position:relative; }
   .hero-photo{
-    grid-column:7/13;
     aspect-ratio:4/5;
+    margin-right:calc(-1 * var(--gutter));
+    animation:breathe 9s ease-in-out infinite;
+    will-change:transform;
   }
+  .hero-line{
+    position:absolute;
+    left:-64px; top:38%;
+    width:120px; height:1px;
+    background:linear-gradient(90deg, transparent, var(--line-on-dark) 60%, var(--yellow));
+    z-index:1;
+    transform-origin:left center;
+    animation:growLine 1s var(--ease) both;
+    animation-delay:.9s;
+  }
+  .hero-tag{
+    position:absolute;
+    left:-44px; bottom:64px;
+    background:var(--white);
+    border:1px solid var(--line);
+    padding:20px 24px;
+    display:flex; align-items:center; gap:16px;
+    max-width:260px;
+    box-shadow:var(--shadow-soft);
+    z-index:2;
+  }
+  .hero-tag .n{ font-family:var(--serif); font-size:20px; color:var(--yellow); }
+  .hero-tag .t{ font-size:13px; line-height:1.5; color:var(--graphite-muted); }
   .hero-scroll{
-    margin-top:100px;
+    margin-top:88px;
     display:flex;
     align-items:center;
     gap:16px;
@@ -262,34 +386,66 @@
   }
 
   /* ---------- PARCERIA ---------- */
-  .partner-cards{ grid-column:1/13; display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); }
+  .partner-cards{
+    grid-column:1/13;
+    position:relative;
+    display:grid;
+    grid-template-columns:1.15fr .85fr 1fr;
+    gap:var(--gap);
+  }
+  .partner-connector{
+    position:absolute; left:0; top:-30px; width:100%; height:140px;
+    z-index:0; pointer-events:none; opacity:.6;
+  }
+  .connector-path{
+    fill:none; stroke:var(--graphite-muted); stroke-width:1;
+    stroke-dasharray:1600; stroke-dashoffset:1600;
+    transition:stroke-dashoffset 1.6s var(--ease);
+  }
+  .connector-reveal.is-visible .connector-path{ stroke-dashoffset:0; }
   .partner-card{
+    position:relative;
+    z-index:1;
     background:var(--white);
-    border:1px solid var(--line);
-    padding:56px 40px;
-    min-height:360px;
+    border-top:2px solid var(--graphite);
+    padding:48px 36px 44px;
+    min-height:340px;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
-    transition:border-color .2s ease;
+    overflow:hidden;
+    transition:transform .35s var(--ease), box-shadow .35s var(--ease), border-color .35s ease;
   }
-  .partner-card:hover{ border-color:var(--yellow); }
+  .partner-card:nth-child(2){ margin-top:52px; }
+  .partner-card:nth-child(3){ margin-top:20px; }
+  .partner-card:hover{ transform:translateY(-8px); box-shadow:var(--shadow-soft); border-color:var(--yellow); }
+  .partner-card .ghost-num{
+    position:absolute; top:-6px; right:12px;
+    font-family:var(--serif); font-size:140px; line-height:1;
+    color:var(--sand-deep);
+    z-index:0; user-select:none;
+    transition:transform .5s var(--ease);
+  }
+  .partner-card:hover .ghost-num{ transform:translateY(-6px) scale(1.03); }
   .partner-card .num{
+    position:relative; z-index:1;
     font-family:var(--serif);
-    font-size:15px;
+    font-size:14px;
     color:var(--text-muted-on-light);
   }
   .partner-card h3{
-    font-size:26px;
+    position:relative; z-index:1;
+    font-size:25px;
     line-height:1.3;
     color:var(--graphite);
-    margin-top:120px;
+    margin-top:100px;
   }
   .partner-card p{
+    position:relative; z-index:1;
     font-size:15px;
     line-height:1.7;
     color:var(--text-muted-on-light);
-    margin-top:20px;
+    margin-top:18px;
   }
 
   /* ---------- HISTORIAS / TIMELINE ---------- */
@@ -299,7 +455,7 @@
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:var(--gap);
-    padding-top:36px;
+    padding-top:40px;
   }
   .timeline-track::before{
     content:"";
@@ -307,8 +463,14 @@
     top:0; left:0; right:0;
     height:1px;
     background:var(--line);
+    transform-origin:left center;
+    transform:scaleX(0);
+    transition:transform 1.1s var(--ease);
   }
-  .case-card{ position:relative; padding-top:32px; }
+  .timeline-track.is-visible::before{ transform:scaleX(1); }
+  .case-card{ position:relative; padding-top:32px; padding-right:16px; }
+  .case-card:nth-child(2){ margin-top:44px; }
+  .case-card:nth-child(3){ margin-top:12px; }
   .case-card::before{
     content:"";
     position:absolute;
@@ -316,25 +478,37 @@
     width:9px; height:9px;
     border-radius:50%;
     background:var(--yellow);
+    animation:pulseDot 2.6s ease-in-out infinite;
   }
   .case-tag{
     font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
     color:var(--text-muted-on-light); margin-bottom:18px; display:block;
   }
   .case-card h3{
-    font-size:24px; color:var(--graphite); line-height:1.3; margin-bottom:24px;
+    font-size:23px; color:var(--graphite); line-height:1.32; margin-bottom:22px;
   }
-  .case-row{ padding:16px 0; border-top:1px solid var(--line); }
-  .case-row:last-child{ border-bottom:1px solid var(--line); }
-  .case-row .k{
-    font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
-    color:var(--text-muted-on-light); margin-bottom:6px;
+  .case-flow{ font-size:15px; line-height:1.75; color:var(--text-muted-on-light); }
+  .case-flow b{ font-weight:500; color:var(--text-on-light); }
+  .case-impact-row{
+    display:flex; align-items:baseline; gap:12px;
+    margin-top:28px; padding-top:20px; border-top:1px solid var(--line);
   }
-  .case-row .v{ font-size:15px; line-height:1.6; color:var(--text-on-light); }
-  .case-impact{ font-family:var(--serif); font-size:22px; color:var(--graphite); }
+  .case-impact{
+    font-family:var(--serif); font-size:34px; color:var(--graphite);
+    font-variant-numeric:tabular-nums;
+  }
+  .case-impact-label{ font-size:13px; color:var(--text-muted-on-light); line-height:1.5; max-width:150px; }
 
   /* ---------- ECOSSISTEMA ---------- */
-  .eco{ position:relative; }
+  .eco{ position:relative; overflow:hidden; }
+  .eco::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(600px 400px at 12% 15%, rgba(242,183,5,.06), transparent 60%),
+      radial-gradient(700px 500px at 90% 85%, rgba(243,238,228,.05), transparent 60%);
+    pointer-events:none;
+  }
   .eco-wrap{ grid-column:1/13; position:relative; }
   .eco-copy{ max-width:520px; margin-bottom:96px; }
   .eco-copy h2{ font-size:40px; color:var(--text-on-dark); line-height:1.25; }
@@ -346,17 +520,30 @@
     margin:0 auto;
     aspect-ratio:16/9;
   }
-  .eco-diagram svg{ width:100%; height:100%; }
+  .eco-diagram svg{ width:100%; height:100%; overflow:visible; }
+  .eco-line{
+    stroke-dasharray:363;
+    stroke-dashoffset:363;
+    transition:stroke-dashoffset 1.3s var(--ease);
+  }
+  .eco-diagram.is-visible .eco-line{ stroke-dashoffset:0; }
+  .eco-diagram.is-visible .eco-line:nth-of-type(2){ transition-delay:.12s; }
+  .eco-diagram.is-visible .eco-line:nth-of-type(3){ transition-delay:.24s; }
+  .eco-diagram.is-visible .eco-line:nth-of-type(4){ transition-delay:.36s; }
   .eco-node{
     position:absolute;
     transform:translate(-50%,-50%);
     text-align:center;
+    opacity:0;
+    transition:opacity .6s var(--ease), transform .6s var(--ease);
   }
+  .eco-diagram.is-visible .eco-node{ opacity:1; }
   .eco-node .dot{
     width:10px; height:10px; border-radius:50%;
     background:var(--sand);
     margin:0 auto 14px;
     border:1px solid var(--yellow);
+    animation:pulseDot 2.8s ease-in-out infinite;
   }
   .eco-node .lbl{
     font-family:var(--sans); font-size:14px; font-weight:500;
@@ -366,38 +553,56 @@
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
     text-align:center;
   }
+  .eco-hub .sweep{
+    position:absolute; inset:-20px; border-radius:50%;
+    border:1px dashed rgba(242,183,5,.32);
+    animation:spin 22s linear infinite;
+  }
   .eco-hub .ring{
+    position:relative; z-index:2;
     width:96px; height:96px; border-radius:50%;
     border:1px solid var(--yellow);
     display:flex; align-items:center; justify-content:center;
     font-family:var(--serif); font-size:20px; color:var(--yellow);
     margin:0 auto;
+    background:var(--green-deep);
   }
 
   /* ---------- SOLUÇÕES ---------- */
-  .solutions{ grid-column:1/13; display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+  .solutions{
+    grid-column:1/13;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:20px;
+  }
   .solution-card{
     background:var(--white);
-    padding:40px 28px;
-    min-height:420px;
+    border:1px solid var(--line);
+    padding:36px 26px;
+    min-height:400px;
     display:flex;
     flex-direction:column;
     justify-content:flex-end;
     position:relative;
     overflow:hidden;
-    transition:background .25s ease;
+    transition:background .3s ease, transform .35s var(--ease), box-shadow .35s var(--ease), border-color .3s ease;
   }
+  .solution-card:nth-child(even){ margin-top:36px; }
+  .solution-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-soft); border-color:var(--green-deep); }
   .solution-card .idx{
-    position:absolute; top:32px; left:28px;
+    position:absolute; top:30px; left:26px;
     font-family:var(--serif); font-size:14px; color:var(--text-muted-on-light);
+    font-variant-numeric:tabular-nums;
   }
   .solution-card .mark{
-    position:absolute; top:28px; right:24px;
+    position:absolute; top:26px; right:22px;
     width:26px; height:26px;
+    transition:transform .35s var(--ease);
   }
+  .solution-card:hover .mark{ transform:rotate(8deg) scale(1.05); }
   .solution-card .mark svg{ width:100%; height:100%; fill:none; }
   .solution-card h3{
-    font-size:21px; line-height:1.3; color:var(--graphite); margin-bottom:14px;
+    font-size:20px; line-height:1.3; color:var(--graphite); margin-bottom:14px;
   }
   .solution-card p{
     font-size:14px; line-height:1.6; color:var(--text-muted-on-light);
@@ -414,24 +619,48 @@
 
   /* ---------- DEPOIMENTOS ---------- */
   .testimonials{ grid-column:1/13; display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap); }
-  .testimonial{ border-top:1px solid var(--line); padding-top:36px; }
-  .testimonial .who{ display:flex; align-items:center; gap:14px; margin-bottom:32px; }
+  .testimonial{
+    position:relative;
+    background:var(--white);
+    border-top:1px solid var(--line);
+    padding:36px 8px 8px;
+    transition:transform .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .testimonial:nth-child(2){ margin-top:40px; }
+  .testimonial:nth-child(3){ margin-top:14px; }
+  .testimonial:hover{ transform:translateY(-6px); }
+  .testimonial .quote-mark{
+    position:absolute; top:-6px; right:0;
+    font-family:var(--serif); font-size:96px; line-height:1;
+    color:var(--sand-deep);
+    z-index:0; user-select:none;
+  }
+  .testimonial .who{ position:relative; z-index:1; display:flex; align-items:center; gap:14px; margin-bottom:32px; }
   .testimonial .photo{
     width:52px; height:52px; border-radius:50%;
     background:linear-gradient(160deg,var(--sand-deep),var(--sand));
     border:1px solid var(--line);
+    transition:transform .35s var(--ease);
   }
+  .testimonial:hover .photo{ transform:rotate(-6deg) scale(1.05); }
   .testimonial .who-name{ font-size:14px; font-weight:600; color:var(--graphite); }
   .testimonial .who-role{ font-size:13px; color:var(--text-muted-on-light); }
   .testimonial h3{
+    position:relative; z-index:1;
     font-size:22px; line-height:1.35; color:var(--graphite); margin-bottom:20px;
   }
-  .testimonial p{ font-size:15px; line-height:1.75; color:var(--text-muted-on-light); }
+  .testimonial p{ position:relative; z-index:1; font-size:15px; line-height:1.75; color:var(--text-muted-on-light); }
 
   /* ---------- MANIFESTO ---------- */
-  .manifesto{ grid-column:2/12; text-align:center; }
-  .manifesto .eyebrow{ display:block; margin-bottom:40px; justify-content:center; }
+  .manifesto{ grid-column:2/12; text-align:center; position:relative; }
+  .manifesto .quote-bg{
+    position:absolute; top:-64px; left:50%; transform:translateX(-50%);
+    font-family:var(--serif); font-size:220px; line-height:1;
+    color:var(--sand); z-index:0; user-select:none;
+  }
+  .manifesto .eyebrow{ position:relative; z-index:1; display:flex; margin-bottom:40px; justify-content:center; }
   .manifesto h2{
+    position:relative; z-index:1;
     font-size:clamp(28px,3.4vw,44px);
     line-height:1.4;
     color:var(--graphite);
@@ -439,7 +668,14 @@
   }
 
   /* ---------- CTA FINAL ---------- */
-  .cta-final{ text-align:center; }
+  .cta-final{
+    text-align:center;
+    background-image:
+      radial-gradient(480px 320px at 15% 20%, rgba(242,183,5,.10), transparent 60%),
+      radial-gradient(560px 380px at 85% 80%, rgba(243,238,228,.06), transparent 60%);
+    background-repeat:no-repeat;
+    animation:drift 14s ease-in-out infinite;
+  }
   .cta-final .grid12{ justify-items:center; }
   .cta-final-inner{ grid-column:3/11; }
   .cta-final .eyebrow{ justify-content:center; margin-bottom:32px; }
@@ -451,7 +687,7 @@
   }
 
   /* ---------- FOOTER ---------- */
-  footer{ background:var(--white); border-top:1px solid var(--line); padding:64px 0 40px; }
+  footer{ background:var(--white); padding:64px 0 40px; }
   .footer-top{
     display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:56px; gap:40px; flex-wrap:wrap;
   }
@@ -463,6 +699,7 @@
   }
   .footer-col a{
     display:block; color:var(--text-on-light); text-decoration:none; font-size:14px; line-height:2.1;
+    transition:color .2s ease;
   }
   .footer-col a:hover{ color:var(--yellow); }
   .footer-bottom{
@@ -470,27 +707,55 @@
     font-size:13px; color:var(--text-muted-on-light);
   }
 
+  /* ---------- REDUCED MOTION ---------- */
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .reveal, .reveal-scale{ opacity:1; transform:none; transition:none; }
+    .load-in, .hero-photo, .hero-line, .case-card::before, .eco-node .dot, .eco-hub .sweep, .cta-final, .eyebrow.accent::before{
+      animation:none;
+    }
+    .eco-line{ transition:none; stroke-dashoffset:0; }
+    .connector-path{ transition:none; stroke-dashoffset:0; }
+    .eco-diagram circle{ display:none; }
+    .route-fill{ transition:none; }
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width:1100px){
-    :root{ --gutter:48px; }
-    .hero-copy,.hero-photo{ grid-column:1/13; }
-    .hero-photo{ margin-top:56px; aspect-ratio:16/9; }
+    :root{ --gutter:48px; --slant:0px; }
+    .slant{ clip-path:none; margin-top:0; }
+    .hero-copy{ grid-column:1/13; }
+    .hero-photo-col{ grid-column:1/13; margin-top:72px; }
+    .hero-photo{ aspect-ratio:16/9; margin-right:0; }
+    .hero-line{ display:none; }
+    .hero-tag{ left:0; bottom:-32px; }
     .section-head h2, .section-head p{ grid-column:1/13; }
     .section-head p{ margin-top:16px; }
-    .partner-cards, .timeline-track, .testimonials{ grid-template-columns:1fr; }
+    .partner-cards{ grid-template-columns:1fr; }
+    .partner-card:nth-child(2), .partner-card:nth-child(3){ margin-top:0; }
+    .timeline-track{ grid-template-columns:1fr; gap:56px; }
+    .case-card:nth-child(2), .case-card:nth-child(3){ margin-top:0; }
+    .testimonials{ grid-template-columns:1fr; gap:48px; }
+    .testimonial:nth-child(2), .testimonial:nth-child(3){ margin-top:0; }
     .solutions{ grid-template-columns:repeat(2,1fr); }
+    .solution-card:nth-child(even){ margin-top:0; }
     .manifesto,.cta-final-inner{ grid-column:1/13; }
+    .manifesto .quote-bg{ font-size:140px; top:-40px; }
     .nav ul{ display:none; }
     .eco-diagram{ transform:scale(.82); }
   }
   @media (max-width:640px){
     :root{ --gutter:24px; }
     section{ padding-top:88px; padding-bottom:88px; }
+    .slant{ padding-top:88px; }
+    footer.slant{ padding-top:64px; }
     .solutions{ grid-template-columns:1fr; }
   }
 </style>
 </head>
 <body>
+
+<div class="progress"><div class="progress-bar"></div></div>
 
 <!-- NAV -->
 <header class="nav">
@@ -508,51 +773,86 @@
   </div>
 </header>
 
+<div class="journey">
+<div class="route" aria-hidden="true">
+  <div class="route-track"></div>
+  <div class="route-fill"></div>
+  <div class="route-stations"></div>
+</div>
+
 <!-- 1. HERO -->
 <section class="hero" id="top">
   <div class="wrap">
     <div class="grid12">
       <div class="hero-copy">
-        <span class="eyebrow accent">Mês do Cliente VLI</span>
-        <h1>Toda entrega começa com uma parceria.</h1>
-        <p>Cada desafio logístico é diferente. O que permanece igual é a forma como construímos soluções ao lado de quem movimenta o Brasil.</p>
-        <a class="btn" href="#solucoes">Conheça nossas soluções <span class="arrow">→</span></a>
-        <div class="hero-scroll">
+        <span class="eyebrow accent load-in" style="--i:0">Mês do Cliente VLI</span>
+        <h1 class="load-in" style="--i:1">Toda entrega começa com uma parceria.</h1>
+        <p class="load-in" style="--i:2">Cada desafio logístico é diferente. O que permanece igual é a forma como construímos soluções ao lado de quem movimenta o Brasil.</p>
+        <a class="btn load-in" style="--i:3" href="#solucoes">Conheça nossas soluções <span class="arrow">→</span></a>
+        <div class="hero-scroll load-in" style="--i:4">
           <span class="line"></span>
           <span>Role para explorar</span>
         </div>
       </div>
-      <div class="hero-photo photo-frame">
-        <span class="photo-label">Fotografia documental — operação ferroviária</span>
+      <div class="hero-photo-col">
+        <div class="hero-line"></div>
+        <div class="hero-photo photo-frame">
+          <span class="photo-label">Fotografia documental — operação ferroviária</span>
+        </div>
+        <div class="hero-tag">
+          <span class="n">01</span>
+          <span class="t">Operação em movimento contínuo, em parceria com quem depende dela</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="label">Ferrovia</span><span class="dot">•</span>
+    <span class="label">Rodovia</span><span class="dot">•</span>
+    <span class="label">Portos</span><span class="dot">•</span>
+    <span class="label">Terminais</span><span class="dot">•</span>
+    <span class="label">Inteligência logística</span><span class="dot">•</span>
+    <span class="label">Ferrovia</span><span class="dot">•</span>
+    <span class="label">Rodovia</span><span class="dot">•</span>
+    <span class="label">Portos</span><span class="dot">•</span>
+    <span class="label">Terminais</span><span class="dot">•</span>
+    <span class="label">Inteligência logística</span><span class="dot">•</span>
+  </div>
+</div>
+
 <!-- 2. O QUE SIGNIFICA PARCERIA -->
-<section class="bg-sand" id="parceria">
+<section class="bg-sand slant" id="parceria">
   <div class="wrap">
     <div class="grid12">
-      <div class="section-head">
+      <div class="section-head reveal">
         <h2>O que significa parceria</h2>
         <p>Três princípios orientam cada solução que construímos junto aos nossos clientes.</p>
       </div>
-      <div class="partner-cards">
-        <div class="partner-card">
+      <div class="partner-cards connector-reveal">
+        <svg class="partner-connector" viewBox="0 0 1200 140" preserveAspectRatio="none" aria-hidden="true">
+          <path class="connector-path" d="M60,30 C300,100 480,10 700,75 C880,120 1010,45 1150,60"/>
+        </svg>
+        <div class="partner-card reveal" style="--i:0">
+          <span class="ghost-num">01</span>
           <span class="num">01</span>
           <div>
             <h3>Escutamos antes de propor.</h3>
             <p>Entendemos a operação, os prazos e as restrições reais de cada cliente antes de desenhar qualquer solução.</p>
           </div>
         </div>
-        <div class="partner-card">
+        <div class="partner-card reveal" style="--i:1">
+          <span class="ghost-num">02</span>
           <span class="num">02</span>
           <div>
             <h3>Cocriamos soluções.</h3>
             <p>Construímos junto — engenharia, operação e cliente na mesma mesa, do primeiro esboço à execução.</p>
           </div>
         </div>
-        <div class="partner-card">
+        <div class="partner-card reveal" style="--i:2">
+          <span class="ghost-num">03</span>
           <span class="num">03</span>
           <div>
             <h3>Evoluímos continuamente.</h3>
@@ -565,61 +865,40 @@
 </section>
 
 <!-- 3. HISTORIAS QUE MOVIMENTAM RESULTADOS -->
-<section class="bg-white" id="historias">
+<section class="bg-white slant" id="historias">
   <div class="wrap">
     <div class="grid12">
-      <div class="section-head">
+      <div class="section-head reveal">
         <h2>Histórias que movimentam resultados</h2>
         <p>Casos reais de parceria entre a VLI e clientes que movimentam o Brasil.</p>
       </div>
       <div class="timeline">
-        <div class="timeline-track">
+        <div class="timeline-track reveal">
           <div class="case-card">
             <span class="case-tag">Agronegócio</span>
             <h3>Escoamento de grãos em janela crítica de safra</h3>
-            <div class="case-row">
-              <div class="k">Desafio</div>
-              <div class="v">Volume recorde de soja a escoar em prazo reduzido, com risco de perda de janela de exportação.</div>
-            </div>
-            <div class="case-row">
-              <div class="k">Solução</div>
-              <div class="v">Replanejamento conjunto de malha ferroviária e priorização de terminais em parceria com o cliente.</div>
-            </div>
-            <div class="case-row">
-              <div class="k">Impacto</div>
-              <div class="v"><span class="case-impact">+18%</span> de volume escoado dentro do prazo de safra.</div>
+            <p class="case-flow"><b>Desafio:</b> volume recorde de soja a escoar em prazo reduzido, com risco de perda de janela de exportação. <b>Solução:</b> replanejamento conjunto de malha ferroviária e priorização de terminais com o cliente.</p>
+            <div class="case-impact-row">
+              <span class="case-impact">+18%</span>
+              <span class="case-impact-label">de volume escoado dentro do prazo de safra</span>
             </div>
           </div>
           <div class="case-card">
             <span class="case-tag">Mineração</span>
             <h3>Integração de terminal privado à malha ferroviária</h3>
-            <div class="case-row">
-              <div class="k">Desafio</div>
-              <div class="v">Operação de minério dependente de múltiplos modais sem integração operacional direta.</div>
-            </div>
-            <div class="case-row">
-              <div class="k">Solução</div>
-              <div class="v">Desenho conjunto de fluxo intermodal, conectando terminal, ferrovia e porto em uma única operação.</div>
-            </div>
-            <div class="case-row">
-              <div class="k">Impacto</div>
-              <div class="v"><span class="case-impact">-12%</span> no tempo total de ciclo logístico.</div>
+            <p class="case-flow"><b>Desafio:</b> operação de minério dependente de múltiplos modais sem integração operacional direta. <b>Solução:</b> desenho conjunto de fluxo intermodal, conectando terminal, ferrovia e porto.</p>
+            <div class="case-impact-row">
+              <span class="case-impact">-12%</span>
+              <span class="case-impact-label">no tempo total de ciclo logístico</span>
             </div>
           </div>
           <div class="case-card">
             <span class="case-tag">Indústria</span>
             <h3>Inteligência logística para previsibilidade de estoque</h3>
-            <div class="case-row">
-              <div class="k">Desafio</div>
-              <div class="v">Falta de previsibilidade na chegada de insumos gerava rupturas ao longo da cadeia produtiva.</div>
-            </div>
-            <div class="case-row">
-              <div class="k">Solução</div>
-              <div class="v">Implantação de monitoramento e inteligência logística compartilhada entre as equipes.</div>
-            </div>
-            <div class="case-row">
-              <div class="k">Impacto</div>
-              <div class="v"><span class="case-impact">+94%</span> de previsibilidade nas entregas.</div>
+            <p class="case-flow"><b>Desafio:</b> falta de previsibilidade na chegada de insumos gerava rupturas na cadeia produtiva. <b>Solução:</b> monitoramento e inteligência logística compartilhada entre as equipes.</p>
+            <div class="case-impact-row">
+              <span class="case-impact">+94%</span>
+              <span class="case-impact-label">de previsibilidade nas entregas</span>
             </div>
           </div>
         </div>
@@ -629,25 +908,29 @@
 </section>
 
 <!-- 4. ECOSSISTEMA VLI -->
-<section class="bg-green eco" id="ecossistema">
+<section class="bg-green eco slant" id="ecossistema">
   <div class="wrap">
     <div class="grid12">
       <div class="eco-wrap">
-        <div class="eco-copy">
+        <div class="eco-copy reveal">
           <span class="eyebrow accent on-dark">Ecossistema VLI</span>
           <h2 style="margin-top:24px;">Um sistema logístico integrado, pensado como um todo.</h2>
           <p>Ferrovia, rodovia, terminais e portos operando de forma conectada — para que cada etapa da cadeia funcione como parte de um mesmo movimento.</p>
         </div>
 
-        <div class="eco-diagram">
+        <div class="eco-diagram reveal-scale">
           <svg viewBox="0 0 920 520" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="460" y1="260" x2="140" y2="90" stroke="#3c554a" stroke-width="1"/>
-            <line x1="460" y1="260" x2="780" y2="90" stroke="#3c554a" stroke-width="1"/>
-            <line x1="460" y1="260" x2="140" y2="430" stroke="#3c554a" stroke-width="1"/>
-            <line x1="460" y1="260" x2="780" y2="430" stroke="#3c554a" stroke-width="1"/>
+            <line class="eco-line" x1="460" y1="260" x2="140" y2="90" stroke="#3c554a" stroke-width="1"/>
+            <line class="eco-line" x1="460" y1="260" x2="780" y2="90" stroke="#3c554a" stroke-width="1"/>
+            <line class="eco-line" x1="460" y1="260" x2="140" y2="430" stroke="#3c554a" stroke-width="1"/>
+            <line class="eco-line" x1="460" y1="260" x2="780" y2="430" stroke="#3c554a" stroke-width="1"/>
+            <circle r="3.4" fill="#f2b705"><animateMotion dur="2.6s" begin="0s" repeatCount="indefinite" path="M460,260 L140,90"/></circle>
+            <circle r="3.4" fill="#f2b705"><animateMotion dur="2.6s" begin="0.5s" repeatCount="indefinite" path="M460,260 L780,90"/></circle>
+            <circle r="3.4" fill="#f2b705"><animateMotion dur="2.6s" begin="1s" repeatCount="indefinite" path="M460,260 L140,430"/></circle>
+            <circle r="3.4" fill="#f2b705"><animateMotion dur="2.6s" begin="1.5s" repeatCount="indefinite" path="M460,260 L780,430"/></circle>
           </svg>
 
-          <div class="eco-hub"><div class="ring">VLI</div></div>
+          <div class="eco-hub"><div class="sweep"></div><div class="ring">VLI</div></div>
 
           <div class="eco-node" style="top:17%; left:15%;">
             <div class="dot"></div><div class="lbl">Ferrovia</div>
@@ -668,39 +951,39 @@
 </section>
 
 <!-- 5. SOLUÇÕES -->
-<section class="bg-white" id="solucoes">
+<section class="bg-white slant" id="solucoes">
   <div class="wrap">
     <div class="grid12">
-      <div class="section-head">
+      <div class="section-head reveal">
         <h2>Soluções</h2>
         <p>Cinco frentes de atuação, uma única lógica de parceria.</p>
       </div>
       <div class="solutions">
-        <div class="solution-card">
+        <div class="solution-card reveal" style="--i:0">
           <span class="idx">01</span>
           <span class="mark"><svg viewBox="0 0 24 24"><path d="M4 18h16M4 6l16 0M8 6v12M16 6v12" stroke="currentColor" stroke-width="1.2"/></svg></span>
           <h3>Ferrovia</h3>
           <p>Malha ferroviária de longa distância para grandes volumes com previsibilidade.</p>
         </div>
-        <div class="solution-card">
+        <div class="solution-card reveal" style="--i:1">
           <span class="idx">02</span>
           <span class="mark"><svg viewBox="0 0 24 24"><path d="M2 7h20M2 17h20M4 12h4M11 12h4M18 12h2" stroke="currentColor" stroke-width="1.2"/></svg></span>
           <h3>Rodovia</h3>
           <p>Complemento rodoviário integrado à malha para flexibilidade de última milha.</p>
         </div>
-        <div class="solution-card">
+        <div class="solution-card reveal" style="--i:2">
           <span class="idx">03</span>
           <span class="mark"><svg viewBox="0 0 24 24"><path d="M4 4v16M20 4v16M4 12h16" stroke="currentColor" stroke-width="1.2"/></svg></span>
           <h3>Portos</h3>
           <p>Acesso portuário integrado para escoamento eficiente rumo à exportação.</p>
         </div>
-        <div class="solution-card">
+        <div class="solution-card reveal" style="--i:3">
           <span class="idx">04</span>
           <span class="mark"><svg viewBox="0 0 24 24"><path d="M3 6h18v13H3V6zM3 12h18M9 6v13M15 6v13" stroke="currentColor" stroke-width="1.2"/></svg></span>
           <h3>Terminais</h3>
           <p>Rede de terminais que conecta origem e destino com eficiência operacional.</p>
         </div>
-        <div class="solution-card">
+        <div class="solution-card reveal" style="--i:4">
           <span class="idx">05</span>
           <span class="mark"><svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 4 7-9" stroke="currentColor" stroke-width="1.2"/></svg></span>
           <h3>Inteligência logística</h3>
@@ -712,15 +995,16 @@
 </section>
 
 <!-- 6. DEPOIMENTOS -->
-<section class="bg-sand">
+<section class="bg-sand slant">
   <div class="wrap">
     <div class="grid12">
-      <div class="section-head">
+      <div class="section-head reveal">
         <h2>Depoimentos</h2>
         <p>Na visão de quem constrói essas soluções ao nosso lado.</p>
       </div>
       <div class="testimonials">
-        <div class="testimonial">
+        <div class="testimonial reveal" style="--i:0">
+          <span class="quote-mark">"</span>
           <div class="who">
             <div class="photo"></div>
             <div>
@@ -731,7 +1015,8 @@
           <h3>O que mais valorizamos é…</h3>
           <p>...a proximidade da equipe da VLI com a nossa operação. As decisões são tomadas junto, com os dois lados olhando para o mesmo problema.</p>
         </div>
-        <div class="testimonial">
+        <div class="testimonial reveal" style="--i:1">
+          <span class="quote-mark">"</span>
           <div class="who">
             <div class="photo"></div>
             <div>
@@ -742,7 +1027,8 @@
           <h3>O que mais valorizamos é…</h3>
           <p>...a transparência. Sabemos exatamente onde está a carga e o que esperar em cada etapa, o que muda completamente nosso planejamento.</p>
         </div>
-        <div class="testimonial">
+        <div class="testimonial reveal" style="--i:2">
+          <span class="quote-mark">"</span>
           <div class="who">
             <div class="photo"></div>
             <div>
@@ -759,11 +1045,12 @@
 </section>
 
 <!-- 7. MANIFESTO -->
-<section class="bg-white">
+<section class="bg-white slant">
   <div class="wrap">
     <div class="grid12">
-      <div class="manifesto">
-        <span class="eyebrow" style="display:flex; justify-content:center;">Manifesto</span>
+      <div class="manifesto reveal">
+        <span class="quote-bg">"</span>
+        <span class="eyebrow">Manifesto</span>
         <h2>Mais do que transportar cargas, construímos relações capazes de gerar valor para toda a cadeia.</h2>
       </div>
     </div>
@@ -771,10 +1058,10 @@
 </section>
 
 <!-- 8. CTA FINAL -->
-<section class="bg-green cta-final" id="cta">
+<section class="bg-green cta-final slant" id="cta">
   <div class="wrap">
     <div class="grid12">
-      <div class="cta-final-inner">
+      <div class="cta-final-inner reveal">
         <span class="eyebrow on-dark" style="display:flex;">Mês do Cliente VLI</span>
         <h2>Vamos construir a próxima solução juntos.</h2>
         <a class="btn btn-accent" href="#top">Fale com a VLI</a>
@@ -783,7 +1070,7 @@
   </div>
 </section>
 
-<footer>
+<footer class="slant">
   <div class="wrap">
     <div class="footer-top">
       <div class="footer-mark">VLI</div>
@@ -813,6 +1100,114 @@
     </div>
   </div>
 </footer>
+</div>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Scroll progress bar
+  var bar = document.querySelector('.progress-bar');
+  function onScroll(){
+    var el = document.documentElement;
+    var max = el.scrollHeight - el.clientHeight;
+    var pct = max > 0 ? (el.scrollTop / max) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  document.addEventListener('scroll', onScroll, { passive:true });
+  onScroll();
+
+  // Route line: grows with scroll progress through the content, with lit "stations"
+  var journey = document.querySelector('.journey');
+  var routeFill = document.querySelector('.route-fill');
+  var routeStations = document.querySelector('.route-stations');
+  var stationDefs = [
+    { id:'parceria', dark:false },
+    { id:'historias', dark:false },
+    { id:'ecossistema', dark:true },
+    { id:'solucoes', dark:false },
+    { id:'cta', dark:true }
+  ];
+  var stationEls = [];
+  if(journey && routeFill && routeStations){
+    var jTop = journey.getBoundingClientRect().top + window.scrollY;
+    var jHeight = journey.offsetHeight;
+    stationDefs.forEach(function(def){
+      var target = document.getElementById(def.id);
+      if(!target) return;
+      var top = (target.getBoundingClientRect().top + window.scrollY) - jTop;
+      var pctTop = jHeight > 0 ? (top / jHeight) * 100 : 0;
+      var dot = document.createElement('div');
+      dot.className = 'route-station' + (def.dark ? ' on-dark' : '');
+      dot.style.top = pctTop + '%';
+      routeStations.appendChild(dot);
+      stationEls.push({ el:dot, pct:pctTop });
+    });
+  }
+  function updateRoute(){
+    if(!journey || !routeFill) return;
+    var rect = journey.getBoundingClientRect();
+    var vh = window.innerHeight;
+    var total = rect.height - vh;
+    var passed = -rect.top;
+    var pct = total > 0 ? Math.min(1, Math.max(0, passed / total)) : 0;
+    routeFill.style.height = (pct * 100) + '%';
+    stationEls.forEach(function(s){
+      if(pct * 100 >= s.pct) s.el.classList.add('reached');
+    });
+  }
+  document.addEventListener('scroll', updateRoute, { passive:true });
+  window.addEventListener('resize', updateRoute);
+  updateRoute();
+
+  // Reveal on scroll
+  var revealEls = document.querySelectorAll('.reveal, .reveal-scale, .timeline-track, .connector-reveal');
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold:.15, rootMargin:'0px 0px -60px 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('is-visible'); });
+  }
+
+  // Nav active link
+  var sections = document.querySelectorAll('section[id]');
+  var navLinks = document.querySelectorAll('.nav a[href^="#"]');
+  if('IntersectionObserver' in window && sections.length){
+    var navIo = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(!entry.isIntersecting) return;
+        var id = entry.target.getAttribute('id');
+        navLinks.forEach(function(l){ l.classList.remove('active'); });
+        var link = document.querySelector('.nav a[href="#' + id + '"]');
+        if(link) link.classList.add('active');
+      });
+    }, { rootMargin:'-40% 0px -50% 0px' });
+    sections.forEach(function(s){ navIo.observe(s); });
+  }
+
+  // Hero parallax
+  var hero = document.querySelector('.hero');
+  var heroPhoto = document.querySelector('.hero-photo');
+  if(hero && heroPhoto && !reduceMotion && window.matchMedia('(hover:hover)').matches){
+    hero.addEventListener('mousemove', function(e){
+      var r = hero.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - .5;
+      var y = (e.clientY - r.top) / r.height - .5;
+      heroPhoto.style.transform = 'translate3d(' + (x * -16) + 'px,' + (y * -12) + 'px,0)';
+    });
+    hero.addEventListener('mouseleave', function(){
+      heroPhoto.style.transform = '';
+    });
+  }
+})();
+</script>
 
 </body>
 </html>
