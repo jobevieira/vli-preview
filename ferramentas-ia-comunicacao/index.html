@@ -176,6 +176,26 @@
   .specialist-row .sp-name{ font-family:var(--serif); font-size:16px; color:var(--graphite); min-width:160px; }
   .specialist-row .sp-why{ font-size:13.5px; color:var(--text-on-light); line-height:1.6; flex:1; min-width:260px; }
 
+  /* ---------- TRADEOFF (perda de qualidade honesta) ---------- */
+  .tradeoff{ border:1px solid var(--line); background:var(--white); padding:20px 24px; margin-top:16px; max-width:820px; }
+  .tradeoff .tlbl{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--graphite-muted); margin-bottom:10px; display:block; }
+  .tradeoff p{ font-size:13.5px; line-height:1.65; color:var(--text-on-light); }
+  .tradeoff p + p{ margin-top:8px; }
+  .tradeoff a{ color:var(--green-deep); text-decoration:underline; }
+  .tradeoff a:hover{ color:var(--yellow); }
+
+  /* ---------- FLUXO DE TRABALHO ---------- */
+  .workflow{ border:1px solid var(--line); background:var(--white); margin-bottom:1px; }
+  .workflow-head{ padding:22px 28px; border-bottom:1px solid var(--line); background:var(--sand); }
+  .workflow-head h4{ font-family:var(--serif); font-size:19px; color:var(--graphite); }
+  .workflow-head p{ font-size:13px; color:var(--text-muted-on-light); margin-top:8px; line-height:1.6; }
+  .wf-step{ display:grid; grid-template-columns:36px 180px 1fr; gap:18px; padding:16px 28px; border-top:1px solid var(--line); align-items:baseline; }
+  .wf-step:first-child{ border-top:none; }
+  .wf-step .wf-n{ font-family:var(--serif); font-size:19px; color:#a5560f; }
+  .wf-step .wf-tool{ font-size:13px; font-weight:600; color:var(--graphite); }
+  .wf-step .wf-desc{ font-size:13.5px; color:var(--text-on-light); line-height:1.6; }
+  @media (max-width:700px){ .wf-step{ grid-template-columns:24px 1fr; } .wf-step .wf-tool{ grid-column:2; } .wf-step .wf-desc{ grid-column:2; } }
+
   .verdict-cards{ display:flex; flex-direction:column; }
   .verdict-card{ padding:26px var(--gutter); border-top:1px solid var(--line); display:grid; grid-template-columns:250px 1fr; gap:36px; }
   .v-head{ display:flex; flex-direction:column; gap:10px; }
@@ -299,6 +319,7 @@
       <a href="#plataforma">Claude 360°</a>
       <a href="#analise">Análise</a>
       <a href="#plataformas">Plataformas</a>
+      <a href="#fluxos">Fluxos</a>
       <a href="#demonstracao">Demonstração</a>
       <a href="#seguranca">Segurança</a>
       <a href="#investimento">Investimento</a>
@@ -374,6 +395,7 @@
           <h5>Decisão</h5>
           <ul>
             <li><a href="#plataformas">Plataformas, não ferramentas isoladas</a></li>
+            <li><a href="#fluxos">Fluxos de trabalho</a></li>
             <li><a href="#demonstracao">Demonstração prática</a></li>
             <li><a href="#uso">Casos de uso e ganho de tempo</a></li>
             <li><a href="#seguranca">Segurança e governança (TI)</a></li>
@@ -452,7 +474,7 @@
       </div>
       <div class="transform">
         <div class="transform-side now"><span class="lbl">Hoje</span><p>Uma landing page de campanha depende de agência ou desenvolvedor, com prazo de dias a semanas e um orçamento à parte para qualquer ajuste depois de publicada.</p></div>
-        <div class="transform-side change"><span class="lbl">Com Claude Code</span><p>O time constrói e publica a LP diretamente, como esta página e a do Mês do Cliente provam, e ajusta sozinho depois sem abrir um novo chamado.</p></div>
+        <div class="transform-side change"><span class="lbl">Com Claude Code</span><p>O time constrói e publica a LP diretamente, e ajusta sozinho depois sem abrir um novo chamado.</p></div>
       </div>
       <div class="transform">
         <div class="transform-side now"><span class="lbl">Hoje</span><p>Um vídeo institucional exige orçamento de produtora, roteiro, diária de gravação e semanas de pós-produção, mesmo para uma peça pequena.</p></div>
@@ -474,8 +496,8 @@
 <section class="platform" id="plataforma">
   <div class="wrap">
     <span class="eyebrow on-dark">Mais do que redação</span>
-    <h2>Claude é mais que uma ferramenta de redação: é uma plataforma. Este documento é a prova.</h2>
-    <p class="lead">É comum reduzir o Claude a um assistente de "textos longos com tom de marca consistente". Isso está certo, mas incompleto. A mesma ferramenta constrói e mantém sites inteiros: a landing page da campanha "Mês do Cliente 2026" da VLI e este próprio documento HTML foram gerados por Claude, sem um desenvolvedor envolvido em nenhuma etapa. Existem três formas de acessar essa capacidade, com barreiras de entrada bem diferentes.</p>
+    <h2>Claude é mais que uma ferramenta de redação: é uma plataforma completa de produção</h2>
+    <p class="lead">É comum reduzir o Claude a um assistente de "textos longos com tom de marca consistente". Isso está certo, mas incompleto. A mesma ferramenta constrói e mantém sites inteiros: profissionais de marketing sem formação técnica já usam o Claude Code para levantar landing pages completas, do briefing à publicação em domínio próprio, sem depender de um desenvolvedor em nenhuma etapa. Existem três formas de acessar essa capacidade, com barreiras de entrada bem diferentes.</p>
 
     <div class="surface-grid">
       <div class="surface">
@@ -489,15 +511,15 @@
         <p>App gráfico (desktop e, desde julho de 2026, web) desenhado para quem não programa. Opera sobre pastas de material bruto, integra Gmail, Drive e Chrome, e constrói páginas completas sem terminal. É o mais recente da lista e ainda tem pouco histórico de uso documentado por times de comunicação.</p>
       </div>
       <div class="surface">
-        <span class="tag">Mais poderoso: o que construiu este documento</span>
+        <span class="tag">Mais poderoso: publica sites de produção</span>
         <h4>Claude Code</h4>
-        <p>Agente que escreve projetos completos, versiona em Git e publica sites reais (Cloudflare, Netlify, Vercel). Foi o que construiu este documento e a landing page do Mês do Cliente, mas pressupõe algum conforto com terminal e Git, uma barreira real para quem nunca programou.</p>
+        <p>Agente que escreve projetos completos, versiona em Git e publica sites reais (Cloudflare, Netlify, Vercel). É a opção mais comprovada para quem precisa de um site funcionando de verdade, mas pressupõe algum conforto com terminal e Git, uma barreira real para quem nunca programou.</p>
       </div>
     </div>
 
     <div class="proof-box">
       <span class="dot"></span>
-      <p><b>Prova, não promessa:</b> a landing page do Mês do Cliente 2026 e este documento de análise são exemplos reais e já publicados, gerados inteiramente por essa tecnologia. Estão disponíveis para visualização em <a href="https://jobevieira.github.io/vli-preview/" target="_blank" rel="noopener" style="color:var(--yellow); text-decoration:underline;">vli-preview</a>. Não é um caso de uso hipotético de fornecedor. É o que já aconteceu neste projeto.</p>
+      <p><b>Não é hipotético:</b> guias voltados a profissionais de marketing sem formação técnica documentam o fluxo completo, do briefing à publicação em domínio próprio, em menos de 30 minutos depois de dominado o básico, sem precisar de um desenvolvedor em nenhuma etapa.</p>
     </div>
 
     <div class="proof-box">
@@ -578,7 +600,7 @@
         <div class="verdict-card">
           <div class="v-head"><span class="pill p1" style="align-self:flex-start;">Recomendado</span><h4>Claude Team</h4><span class="v-price">US$ 20-25/mês · mínimo 5 assentos</span></div>
           <div class="v-body">
-            <p>Estrutura melhor documentos longos, mantém tom institucional ao longo de um relatório inteiro e segue briefings de marca com mais fidelidade. É a mesma ferramenta usada para redigir este documento.</p>
+            <p>Estrutura melhor documentos longos, mantém tom institucional ao longo de um relatório inteiro e segue briefings de marca com mais fidelidade que os concorrentes, segundo comparações independentes de 2026.</p>
             <ul>
               <li>Redação e revisão de relatórios, propostas e comunicados longos</li>
               <li>Leitura e síntese de documentos extensos (atas, relatórios de sustentabilidade)</li>
@@ -599,8 +621,8 @@
       <div class="cat-head">
         <span class="k">Desenvolvimento de sites e landing pages</span>
         <h3>O que resolve, e o que não é para o time de Comunicação</h3>
-        <p>Não existe um único vencedor. Existe uma escolha de barreira de entrada. Claude Code é o mais comprovado, porque construiu este documento, mas pressupõe terminal e Git. Lovable e Framer têm posicionamento explícito para times de marketing sem apoio técnico. GitHub Copilot e Cursor, por outro lado, são claramente ferramentas de desenvolvedor: a pesquisa não encontrou nenhuma evidência de adoção por times de comunicação.</p>
-        <div class="decision"><span class="tag">A decisão</span><p>Dê Claude Pro a uma ou duas pessoas do time que vão construir e manter as próximas LPs de campanha. É a mesma ferramenta que já construiu esta página e a do Mês do Cliente: não é uma aposta, é a continuação de algo que já funcionou.</p></div>
+        <p>Não existe um único vencedor. Existe uma escolha de barreira de entrada. Claude Code é o mais poderoso, com relatos documentados de profissionais de marketing sem formação técnica construindo sites completos, mas pressupõe terminal e Git. Lovable e Framer têm posicionamento explícito para times de marketing sem apoio técnico. GitHub Copilot e Cursor, por outro lado, são claramente ferramentas de desenvolvedor: a pesquisa não encontrou nenhuma evidência de adoção por times de comunicação.</p>
+        <div class="decision"><span class="tag">A decisão</span><p>Dê Claude Pro a uma ou duas pessoas do time que vão construir e manter as próximas LPs de campanha. A curva de aprendizado é de minutos, não de meses, segundo os próprios relatos de quem já usa sem formação técnica.</p></div>
       </div>
       <div class="verdict-cards">
         <div class="verdict-card">
@@ -631,12 +653,15 @@
         <span class="k">Design e identidade visual</span>
         <h3>Figma e Adobe para o que representa a marca. Canva só para o que não representa</h3>
         <p>Reviews de 2026 do Canva Magic Studio são consistentes: o resultado tende a ser genérico, o oposto do padrão de visual premium, sem aparência genérica, já definido para os materiais da VLI.</p>
-        <div class="decision"><span class="tag">A decisão</span><p>Figma para manter a marca, Adobe Firefly para qualquer peça que saia para o público externo. Canva não entra em nada que leve o nome da VLI fora da comunicação interna.</p></div>
+        <div class="decision"><span class="tag">A decisão</span><p>Adobe Firefly para qualquer peça que saia para o público externo, sem exceção. Figma só se alguém do time assumir a manutenção da biblioteca de componentes de marca. Canva não entra em nada que leve o nome da VLI fora da comunicação interna.</p></div>
       </div>
       <div class="verdict-cards">
         <div class="verdict-card">
-          <div class="v-head"><span class="pill p1" style="align-self:flex-start;">Recomendado</span><h4>Figma (IA)</h4><span class="v-price">US$ 16/mês</span></div>
-          <div class="v-body"><p>Mantém um sistema de marca vivo, com cores, tipografia e componentes reutilizáveis, em vez de peças isoladas. É a continuidade natural do design system já iniciado neste projeto.</p></div>
+          <div class="v-head"><span class="pill p2" style="align-self:flex-start;">Recomendado com ressalva</span><h4>Figma (IA)</h4><span class="v-price">US$ 16/mês</span></div>
+          <div class="v-body">
+            <p>Na prática, Figma é onde fica guardado um arquivo com os elementos visuais da marca já prontos: a cor exata, a fonte, o estilo de botão, o formato de card. Em vez de cada campanha nova recriar isso do zero, quem monta a peça abre o arquivo, copia o componente já aprovado e ajusta o texto. É o equivalente visual de um glossário de marca, mas editável.</p>
+            <p><b>A ressalva:</b> Claude Code já constrói e publica uma página funcionando direto do briefing em texto, sem passar por um mockup no Figma antes. Se ninguém no time faz design visual como etapa separada de programar a página, o Figma vira um passo a mais, não um ganho. Ele só compensa se houver alguém dedicado a manter essa biblioteca de componentes e repassar para quem publica.</p>
+          </div>
         </div>
         <div class="verdict-card">
           <div class="v-head"><span class="pill p1" style="align-self:flex-start;">Recomendado p/ peças de risco</span><h4>Adobe Firefly / Creative Cloud</h4><span class="v-price">US$ 9,99-69,99/mês</span></div>
@@ -658,10 +683,15 @@
         <h3>Adobe Firefly. Não porque é a melhor imagem, mas porque é a única sem risco jurídico</h3>
         <p>Comparações de 2026 são unânimes num ponto: Midjourney v7 gera a imagem com mais qualidade artística do mercado, mas nenhuma seguradora e nenhum contrato cobre o que acontece se essa imagem infringir direito de terceiro, porque o modelo foi treinado sobre um acervo de origem não totalmente rastreável. Adobe Firefly é a única ferramenta do mercado com indenização comercial completa: se uma imagem gerada por ela gerar uma disputa de propriedade intelectual em uso comercial, a Adobe assume a defesa. Para uma empresa que assina o nome em cada peça publicada, essa é a diferença que decide, não a estética.</p>
         <div class="decision"><span class="tag">A decisão</span><p>Use Adobe Firefly para toda imagem gerada que vá ao público externo. Reserve Midjourney, se algum dia for usado, só para exploração interna e nunca para uma peça publicada com o nome da VLI.</p></div>
+        <div class="tradeoff">
+          <span class="tlbl">A perda real de qualidade, sem maquiagem</span>
+          <p>No ranking por voto cego mais citado do mercado (Artificial Analysis), o líder de qualidade em 2026 é o GPT Image 2, com folga de mais de 70 pontos de Elo sobre o segundo colocado. O Firefly nem participa desse ranking, e reviews independentes registram que ele "fica atrás" dos modelos líderes em composições fotorrealistas complexas. Isso é uma perda real, não hipotética: para uma imagem simples (produto, ícone, fundo), a diferença dificilmente aparece. Para uma composição fotorrealista complexa (várias pessoas, cena elaborada, iluminação específica), o Firefly tende a exigir mais tentativas e ajuste manual para chegar ao mesmo resultado que Midjourney ou GPT Image entregam de primeira.</p>
+          <p>Ver com os próprios olhos: <a href="https://artificialanalysis.ai/image/leaderboard/text-to-image" target="_blank" rel="noopener">ranking ao vivo por voto cego (Artificial Analysis)</a> e <a href="https://www.midjourney.com/showcase" target="_blank" rel="noopener">galeria pública do Midjourney</a>.</p>
+        </div>
       </div>
       <div class="strip-wrap">
         <div class="strip"><span class="s-name">Midjourney v7</span><span class="s-price">US$ 10-120/mês</span><span class="s-note">Melhor qualidade artística do mercado, mas sem indenização comercial. Risco jurídico real para uso institucional publicado.</span></div>
-        <div class="strip"><span class="s-name">DALL-E 3 / GPT Image</span><span class="s-price">Incluso em ChatGPT Plus/Business</span><span class="s-note">Melhor para seguir um prompt complexo à risca e renderizar texto dentro da imagem. Sem o mesmo nível de proteção comercial do Firefly.</span></div>
+        <div class="strip"><span class="s-name">GPT Image 2</span><span class="s-price">Incluso em ChatGPT Plus/Business</span><span class="s-note">Líder do ranking por voto cego em 2026, com a melhor renderização de texto dentro da imagem. Sem o mesmo nível de proteção comercial do Firefly. DALL-E, o antecessor, é descontinuado em 12/mai/2026.</span></div>
         <div class="strip"><span class="s-name">Ideogram</span><span class="s-price">US$ 8-96/mês</span><span class="s-note">Único que renderiza texto de forma confiável dentro da imagem gerada. Nicho específico, não substitui Firefly como escolha principal.</span></div>
       </div>
     </div>
@@ -722,6 +752,11 @@
         <h3>Runway Gen-4.5, de dentro do Adobe Firefly. Não é mais uma escolha entre dois vendors</h3>
         <p>Diferente de editar um vídeo já gravado (a frente do Descript), gerar vídeo do zero a partir de texto ou de uma imagem é uma categoria mais nova e menos estável. Comparações de produção comercial de 2026 seguem apontando Runway como o modelo mais confiável para esse trabalho, à frente de Kling, Luma e Sora, e o Sora, da OpenAI, nem entra mais na disputa: a própria OpenAI já anunciou o encerramento do produto, com desligamento da versão web/app em abril de 2026 e da API em setembro de 2026. O ponto que muda a decisão é outro: desde dezembro de 2025, a Adobe formalizou uma parceria que embute o Runway Gen-4.5 dentro do próprio Firefly Pro. Quem já assina Adobe Firefly Pro gera vídeo com qualidade Runway sem abrir um contrato novo, sem uma segunda revisão de segurança e sem uma segunda fatura.</p>
         <div class="decision"><span class="tag">A decisão</span><p>Não contrate Runway separado. Se a VLI já assina Adobe Firefly Pro para imagem, a geração de vídeo já vem dentro do mesmo plano. Assinar Runway isoladamente só valeria a pena para quem precisa de clipes de até 10 segundos em proporção customizada, um caso de uso mais avançado do que a comunicação institucional exige hoje.</p></div>
+        <div class="tradeoff">
+          <span class="tlbl">A perda real de qualidade, sem maquiagem</span>
+          <p>No ranking por voto cego da Artificial Analysis, quem lidera hoje não é o Runway: é o Kling 3.0, com controle fino de câmera e resultado mais consistente segundo os votos de quem comparou lado a lado. O Runway aparece à frente só num recorte específico do ranking (vídeo sem áudio). A escolha por Runway aqui não é "o de maior nota", é o mais confiável para produção comercial com controle de edição, segundo avaliações de uso profissional, e o que já vem embutido sem custo extra em quem assina Firefly Pro. Se a prioridade for pura qualidade de imagem em movimento e não controle de produção, Kling contratado à parte pode entregar resultado superior por um custo baixo (~US$ 0,07/segundo).</p>
+          <p>Ver com os próprios olhos: <a href="https://artificialanalysis.ai/video/leaderboard/text-to-video" target="_blank" rel="noopener">ranking ao vivo por voto cego (Artificial Analysis)</a>.</p>
+        </div>
       </div>
       <div class="verdict-cards">
         <div class="verdict-card">
@@ -984,11 +1019,58 @@
       <span class="sub">Estes ficam de fora das plataformas de propósito, porque a evidência mostra que nenhuma das duas alternativas bundladas chega perto da qualidade do especialista.</span>
     </div>
     <div style="border:1px solid var(--line); background:var(--white); padding:8px 28px;">
-      <div class="specialist-row"><span class="sp-name">Claude</span><span class="sp-why">Nem o Copilot nem o Firefly constroem e mantêm um site como o Claude Code já provou fazer neste projeto, e nenhum dos dois iguala a qualidade de redação institucional de longo formato do Claude.</span></div>
+      <div class="specialist-row"><span class="sp-name">Claude</span><span class="sp-why">Nem o Copilot nem o Firefly constroem e publicam um site funcionando a partir de um briefing em texto, e nenhum dos dois iguala a qualidade de redação institucional de longo formato do Claude.</span></div>
       <div class="specialist-row"><span class="sp-name">DeepL</span><span class="sp-why">A evidência de qualidade de tradução (94% de vitória em teste cego) é forte demais para trocar por um recurso de tradução genérico embutido em outra plataforma.</span></div>
       <div class="specialist-row"><span class="sp-name">Perplexity</span><span class="sp-why">Pesquisa com fonte citada em tempo real não é algo que o Word ou o Photoshop resolvem.</span></div>
       <div class="specialist-row"><span class="sp-name">Fireflies</span><span class="sp-why">Só continua fazendo sentido para reuniões fora do Teams. Se todas as reuniões relevantes já acontecem no Teams, o Copilot cobre o essencial e o Fireflies pode ser cortado.</span></div>
       <div class="specialist-row"><span class="sp-name">Descript</span><span class="sp-why">Edição de vídeo por transcrição é um nicho específico que nem o Premiere nem o Copilot cobrem com a mesma agilidade.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FLUXOS DE TRABALHO -->
+<section id="fluxos">
+  <div class="wrap">
+    <div class="section-title section-gap">
+      <h2>Fluxos de trabalho, não ferramentas soltas</h2>
+      <span class="sub">Como o núcleo recomendado se encaixa na prática, do início ao fim de uma tarefa real. Revisão humana em cada fluxo antes de qualquer publicação externa.</span>
+    </div>
+
+    <div class="workflow">
+      <div class="workflow-head">
+        <h4>Fluxo 1: de um fato para uma campanha publicada</h4>
+        <p>Da apuração de um dado até a peça no ar em múltiplos canais.</p>
+      </div>
+      <div class="wf-step"><span class="wf-n">1</span><span class="wf-tool">Perplexity</span><span class="wf-desc">Pesquisa e confirma o dado ou fonte que embasa a campanha, com citação verificável.</span></div>
+      <div class="wf-step"><span class="wf-n">2</span><span class="wf-tool">Claude</span><span class="wf-desc">Redige o release ou briefing institucional, usando um Projeto com o tom de marca já configurado.</span></div>
+      <div class="wf-step"><span class="wf-n">3</span><span class="wf-tool">Adobe Firefly</span><span class="wf-desc">Gera a imagem principal da campanha, com indenização comercial completa.</span></div>
+      <div class="wf-step"><span class="wf-n">4</span><span class="wf-tool">Claude Code</span><span class="wf-desc">Monta e publica a landing page com o texto e a imagem já aprovados.</span></div>
+      <div class="wf-step"><span class="wf-n">5</span><span class="wf-tool">Claude (mesmo Projeto)</span><span class="wf-desc">Desdobra o texto original em post de LinkedIn, legenda de Instagram e trecho de newsletter.</span></div>
+      <div class="wf-step"><span class="wf-n">6</span><span class="wf-tool">DeepL</span><span class="wf-desc">Traduz para inglês ou espanhol quando há público internacional envolvido.</span></div>
+      <div class="wf-step"><span class="wf-n">7</span><span class="wf-tool">Buffer</span><span class="wf-desc">Agenda a publicação nas redes sociais, com revisão humana antes de cada peça sair do ar.</span></div>
+    </div>
+
+    <div class="workflow">
+      <div class="workflow-head">
+        <h4>Fluxo 2: de uma gravação em campo para vídeo institucional pronto</h4>
+        <p>Da entrevista gravada num pátio ou terminal até o vídeo publicável.</p>
+      </div>
+      <div class="wf-step"><span class="wf-n">1</span><span class="wf-tool">Gravação em campo</span><span class="wf-desc">Entrevista ou depoimento gravado em ambiente operacional, geralmente com áudio ruim.</span></div>
+      <div class="wf-step"><span class="wf-n">2</span><span class="wf-tool">Adobe Podcast</span><span class="wf-desc">Limpa o áudio, removendo ruído de fundo e eco, em minutos.</span></div>
+      <div class="wf-step"><span class="wf-n">3</span><span class="wf-tool">Descript</span><span class="wf-desc">Edita pela transcrição: corta pausas, vícios de fala e trechos descartados direto no texto.</span></div>
+      <div class="wf-step"><span class="wf-n">4</span><span class="wf-tool">Adobe Firefly (Runway embutido)</span><span class="wf-desc">Gera cenas complementares só se faltar material bruto para cobrir algum trecho.</span></div>
+      <div class="wf-step"><span class="wf-n">5</span><span class="wf-tool">Revisão humana</span><span class="wf-desc">Aprovação obrigatória do corte final antes de qualquer publicação.</span></div>
+    </div>
+
+    <div class="workflow">
+      <div class="workflow-head">
+        <h4>Fluxo 3: de uma reunião com agência a uma decisão registrada</h4>
+        <p>Da chamada de alinhamento ao briefing formal que vai para quem executa.</p>
+      </div>
+      <div class="wf-step"><span class="wf-n">1</span><span class="wf-tool">Fireflies</span><span class="wf-desc">Grava, transcreve e participa da reunião automaticamente, em Teams, Zoom ou Meet.</span></div>
+      <div class="wf-step"><span class="wf-n">2</span><span class="wf-tool">Fireflies</span><span class="wf-desc">Gera resumo e itens de ação assim que a reunião termina.</span></div>
+      <div class="wf-step"><span class="wf-n">3</span><span class="wf-tool">Claude</span><span class="wf-desc">Organiza os itens de ação num briefing formal, no formato e tom que a agência espera.</span></div>
+      <div class="wf-step"><span class="wf-n">4</span><span class="wf-tool">Revisão humana</span><span class="wf-desc">O time revisa e aprova antes de repassar para a agência ou fornecedor.</span></div>
     </div>
   </div>
 </section>
