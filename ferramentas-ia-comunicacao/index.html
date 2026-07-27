@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IA para Comunicação VLI | Decisão e piloto</title>
-<meta name="description" content="Proposta executiva para adoção controlada de ferramentas de IA no time de Comunicação da VLI, com piloto de 90 dias, critérios de TI e business case.">
+<title>IA para Comunicação VLI | Ferramentas, plataformas e fluxos</title>
+<meta name="description" content="Análise 360 de ferramentas, plataformas e fluxos de IA para o time de Comunicação da VLI.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,125 +12,108 @@
   :root{
     --white:#fff;
     --sand:#f1f4f7;
-    --sand-deep:#dfe7ed;
     --blue:#0e74ba;
-    --blue-deep:#0a4e79;
+    --blue-dark:#0a4e79;
     --ink:#1c2429;
     --muted:#5a6672;
     --line:#d4dce2;
     --orange:#ef7a1d;
-    --red:#9f342b;
     --green:#1d7a54;
-    --soft-red:rgba(159,52,43,.1);
+    --red:#9f342b;
     --soft-green:rgba(29,122,84,.1);
+    --soft-orange:rgba(239,122,29,.14);
+    --soft-red:rgba(159,52,43,.1);
     --serif:'IBM Plex Serif', Georgia, serif;
     --sans:'IBM Plex Sans', -apple-system, Segoe UI, Roboto, sans-serif;
     --mono:'IBM Plex Mono', monospace;
-    --max:1200px;
+    --max:1220px;
     --gutter:72px;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth;overflow-x:hidden}
-  body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body{margin:0;background:var(--white);color:var(--ink);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
   a{color:inherit}
   h1,h2,h3,h4{font-family:var(--serif);font-weight:400;margin:0;text-wrap:balance}
   p{margin:0}
   .wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gutter)}
-  .nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  .nav-inner{max-width:var(--max);margin:0 auto;padding:0 var(--gutter);height:62px;display:flex;align-items:center;justify-content:space-between;gap:28px}
-  .mark{font-family:var(--serif);font-size:16px;text-decoration:none;color:var(--ink);white-space:nowrap}
+  .nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-inner{max-width:var(--max);margin:0 auto;padding:0 var(--gutter);height:62px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .mark{font-family:var(--serif);font-size:16px;text-decoration:none;white-space:nowrap}
   .nav-links{display:flex;gap:17px;overflow-x:auto;scrollbar-width:none}
   .nav-links::-webkit-scrollbar{display:none}
-  .nav-links a{font-size:12px;text-decoration:none;color:var(--muted);white-space:nowrap;padding-bottom:3px;border-bottom:1px solid transparent}
+  .nav-links a{font-size:12px;text-decoration:none;color:var(--muted);white-space:nowrap;border-bottom:1px solid transparent;padding-bottom:3px}
   .nav-links a:hover{color:var(--ink);border-color:var(--orange)}
   section{padding:68px 0}
-  .hero{padding:76px 0 52px;background:linear-gradient(180deg,var(--sand),var(--white))}
+  .hero{background:linear-gradient(180deg,var(--sand),#fff);padding:78px 0 54px}
   .eyebrow{display:flex;align-items:center;gap:12px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
   .eyebrow:before{content:"";width:22px;height:1px;background:var(--orange)}
-  h1{font-size:clamp(32px,5vw,58px);line-height:1.08;max-width:880px;color:var(--ink)}
-  .lead{font-size:18px;line-height:1.65;color:var(--muted);max-width:820px;margin-top:22px}
-  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:stretch;margin-top:42px}
-  .decision-panel{background:var(--blue-deep);color:#eff7fb;padding:30px;border-radius:2px;display:flex;flex-direction:column;gap:22px}
-  .decision-panel h2{font-size:24px;color:#fff}
-  .decision-list{display:grid;gap:14px}
-  .decision-item{border-top:1px solid rgba(255,255,255,.2);padding-top:14px}
-  .decision-item b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#b8d7e8;margin-bottom:6px}
-  .decision-item span{font-size:15px;line-height:1.55}
-  .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+  h1{font-size:clamp(34px,5vw,60px);line-height:1.08;max-width:940px}
+  .lead{font-size:18px;line-height:1.65;color:var(--muted);max-width:860px;margin-top:22px}
+  .hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:32px;margin-top:42px;align-items:stretch}
+  .panel{background:var(--blue-dark);color:#eef7fc;padding:30px;border-radius:2px}
+  .panel h2{font-size:24px;color:#fff;margin-bottom:18px}
+  .panel-row{border-top:1px solid rgba(255,255,255,.2);padding-top:14px;margin-top:14px}
+  .panel-row b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#b8d7e8;margin-bottom:6px}
+  .panel-row span{font-size:15px;line-height:1.55}
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
   .kpi{background:#fff;padding:22px}
-  .kpi b{display:block;font-family:var(--serif);font-size:28px;line-height:1.1;color:var(--blue-deep)}
-  .kpi span{display:block;font-size:12px;line-height:1.5;color:var(--muted);margin-top:8px}
-  .notice{border-left:3px solid var(--orange);background:#fff;padding:18px 22px;margin-top:32px;font-size:14px;line-height:1.65;color:var(--ink)}
+  .kpi b{display:block;font-family:var(--serif);font-size:28px;color:var(--blue-dark);line-height:1.1}
+  .kpi span{display:block;font-size:12.5px;line-height:1.5;color:var(--muted);margin-top:8px}
+  .notice{border-left:3px solid var(--orange);background:#fff;padding:18px 22px;margin-top:28px;font-size:14px;line-height:1.65}
   .bg{background:var(--sand)}
   .section-title{margin-bottom:30px}
-  .section-title h2{font-size:30px;color:var(--ink)}
-  .section-title .sub{display:block;font-size:15px;line-height:1.65;color:var(--muted);max-width:760px;margin-top:10px}
+  .section-title h2{font-size:31px}
+  .section-title .sub{display:block;font-size:15px;line-height:1.65;color:var(--muted);max-width:820px;margin-top:10px}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-  .cards>*,.layer-grid>*,.split>*,.timeline>*,.workflow-grid>*{min-width:0}
-  .card{background:#fff;padding:24px;min-height:170px}
-  .card h3{font-size:20px;margin-bottom:12px;color:var(--ink)}
+  .card{background:#fff;padding:24px;min-width:0}
+  .card h3{font-size:21px;margin-bottom:12px}
   .card p,.card li{font-size:14px;line-height:1.62;color:var(--muted)}
   .card ul{margin:12px 0 0;padding-left:18px}
   .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:2px;margin-bottom:12px}
-  .tag.approve{background:var(--soft-green);color:var(--green)}
-  .tag.pilot{background:rgba(239,122,29,.14);color:#a4510e}
-  .tag.hold{background:rgba(90,102,114,.12);color:var(--muted)}
-  .tag.stop{background:var(--soft-red);color:var(--red)}
-  .layer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-  .layer{background:#fff;padding:24px}
-  .layer .n{font-family:var(--mono);font-size:12px;color:var(--orange)}
-  .layer h3{font-size:20px;margin:10px 0 12px}
-  .layer p{font-size:13.5px;line-height:1.65;color:var(--muted)}
-  .split{display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:start}
-  .callout{background:#fff;border:1px solid var(--line);padding:24px}
-  .callout h3{font-size:22px;margin-bottom:12px}
-  .callout p,.callout li{font-size:14px;line-height:1.65;color:var(--muted)}
-  .callout ul{margin:12px 0 0;padding-left:18px}
+  .tag.core{background:var(--soft-green);color:var(--green)}
+  .tag.premium{background:var(--soft-orange);color:#a4510e}
+  .tag.future{background:rgba(90,102,114,.12);color:var(--muted)}
+  .tag.no{background:var(--soft-red);color:var(--red)}
   .table-wrap{overflow-x:auto;border:1px solid var(--line);background:#fff;max-width:100%}
   table{width:100%;border-collapse:collapse;min-width:900px;font-size:13px}
   th{padding:13px 15px;text-align:left;background:var(--sand);border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
   td{padding:14px 15px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.5}
   tr:last-child td{border-bottom:none}
-  .tool{font-family:var(--serif);font-size:15px;color:var(--ink)}
+  .tool{font-family:var(--serif);font-size:15.5px;color:var(--ink)}
   .small{font-size:12.5px;color:var(--muted)}
   .price{font-family:var(--mono);white-space:nowrap}
-  .ok{color:var(--green);font-weight:600}
-  .risk{color:var(--red);font-weight:600}
-  .unknown{color:var(--muted);font-style:italic}
-  .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-  .phase{background:#fff;padding:26px}
-  .phase b{display:block;font-family:var(--mono);font-size:12px;color:var(--orange);margin-bottom:12px}
-  .phase h3{font-size:21px;margin-bottom:12px}
-  .phase ul{margin:0;padding-left:18px}
-  .phase li{font-size:13.5px;line-height:1.6;color:var(--muted);margin-bottom:7px}
-  .workflow-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .flow{border:1px solid var(--line);background:#fff;padding:24px}
-  .flow h3{font-size:21px;margin-bottom:14px}
-  .flow dl{display:grid;grid-template-columns:128px 1fr;gap:10px 16px;margin:0}
+  .platform-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .platform{background:#fff;border:1px solid var(--line);padding:26px;min-width:0}
+  .platform h3{font-size:24px;margin-bottom:12px}
+  .platform p{font-size:14px;line-height:1.65;color:var(--muted)}
+  .platform .fit{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+  .platform .fit b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--orange);margin-bottom:8px}
+  .flow-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .flow{background:#fff;border:1px solid var(--line);padding:24px;min-width:0}
+  .flow h3{font-size:21px;margin-bottom:12px}
+  .flow dl{display:grid;grid-template-columns:118px 1fr;gap:9px 16px;margin:0}
   .flow dt{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
   .flow dd{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink)}
   details{border:1px solid var(--line);background:#fff;margin-bottom:12px;overflow:hidden}
-  summary{cursor:pointer;padding:20px 24px;font-family:var(--serif);font-size:20px;color:var(--ink)}
+  summary{cursor:pointer;padding:20px 24px;font-family:var(--serif);font-size:20px}
   .detail-body{padding:0 24px 24px}
-  .detail-body.table-wrap{display:block;margin:0 24px 24px;padding:0;width:auto;max-width:calc(100% - 48px);overflow-x:auto}
-  .source-list{columns:2;gap:28px}
-  .source-list a{display:block;font-size:12px;line-height:1.45;color:var(--muted);text-decoration:none;margin:0 0 9px;break-inside:avoid}
-  .source-list a:hover{color:var(--orange)}
-  .method{font-size:13px;line-height:1.7;color:var(--muted);max-width:900px}
+  .sources{columns:2;gap:28px}
+  .sources a{display:block;font-size:12px;line-height:1.45;color:var(--muted);text-decoration:none;margin-bottom:9px;break-inside:avoid}
+  .sources a:hover{color:var(--orange)}
   footer{padding:42px 0;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
   @media (max-width:980px){
     :root{--gutter:32px}
-    .hero-grid,.split,.workflow-grid{grid-template-columns:1fr}
-    .cards,.layer-grid,.timeline{grid-template-columns:1fr 1fr}
+    .hero-grid,.platform-grid,.flow-grid{grid-template-columns:1fr}
+    .cards{grid-template-columns:1fr 1fr}
   }
   @media (max-width:640px){
     :root{--gutter:20px}
     section{padding:48px 0}
     .nav-inner{height:auto;min-height:58px;padding-top:12px;padding-bottom:12px;align-items:flex-start;flex-direction:column;gap:10px}
-    .cards,.layer-grid,.timeline,.kpi-grid{grid-template-columns:1fr}
-    .decision-panel,.card,.layer,.phase,.flow,.callout{padding:20px}
+    .cards,.kpis{grid-template-columns:1fr}
+    .panel,.card,.platform,.flow{padding:20px}
     .flow dl{grid-template-columns:1fr;gap:5px}
-    .source-list{columns:1}
+    .sources{columns:1}
     table{min-width:760px}
   }
 </style>
@@ -140,221 +123,119 @@
   <div class="nav-inner">
     <a class="mark" href="#top">VLI · IA para Comunicação</a>
     <nav class="nav-links" aria-label="Navegação principal">
-      <a href="#decisao">Decisão</a>
-      <a href="#arquitetura">Arquitetura</a>
-      <a href="#piloto">Piloto</a>
-      <a href="#governanca">Governança</a>
-      <a href="#business-case">Business case</a>
+      <a href="#recomendacao">Recomendação</a>
+      <a href="#stack">Stack</a>
+      <a href="#plataformas">Plataformas</a>
+      <a href="#custos">Custos</a>
       <a href="#fluxos">Fluxos</a>
-      <a href="#anexo">Anexo</a>
+      <a href="#governanca">Governança</a>
+      <a href="#anexo">Fontes</a>
     </nav>
   </div>
 </header>
 
 <main id="top">
-  <section class="hero" id="decisao">
+  <section class="hero" id="recomendacao">
     <div class="wrap">
-      <span class="eyebrow">Decisão executiva</span>
-      <h1>Adotar IA em Comunicação com um piloto controlado, não com uma lista ampla de ferramentas.</h1>
-      <p class="lead">O estudo deixa de ser um ranking de softwares e passa a responder uma pergunta de liderança: quais capacidades a Comunicação da VLI deve validar nos próximos 90 dias, com quais controles, antes de assumir contratos permanentes.</p>
+      <span class="eyebrow">Recomendação executiva</span>
+      <h1>Se a VLI for adotar IA agora em Comunicação, a recomendação é uma stack enxuta com três plataformas e ferramentas especialistas bem escolhidas.</h1>
+      <p class="lead">A decisão não é “comprar IA”. A decisão é montar uma arquitetura que cubra texto, pesquisa, criação visual, vídeo, áudio, tradução, reuniões, landing pages e automações sem pagar duas vezes pela mesma capacidade.</p>
 
       <div class="hero-grid">
-        <div class="decision-panel">
-          <h2>O que a liderança precisa decidir</h2>
-          <div class="decision-list">
-            <div class="decision-item"><b>Problema</b><span>O time precisa produzir, revisar, adaptar e publicar mais formatos, sem transformar IA em risco de marca, dados ou custo recorrente sem prova.</span></div>
-            <div class="decision-item"><b>Aprovar agora</b><span>Um piloto de 90 dias com ambiente principal de IA, pesquisa com fontes, tradução, áudio, vídeo e um trilho criativo seguro.</span></div>
-            <div class="decision-item"><b>Entrar apenas em piloto</b><span>Claude Team com assentos específicos para construção de landing pages, Perplexity, DeepL, Fireflies, Descript, Adobe Podcast, ElevenLabs e Adobe Creative Cloud ou Firefly conforme validação jurídica.</span></div>
-            <div class="decision-item"><b>Não contratar agora</b><span>SEO dedicado, monitoramento enterprise caro, automações de publicação, agentes autônomos, Canva/Gamma como saída final e Microsoft 365 Copilot sem decisão conjunta com TI.</span></div>
-            <div class="decision-item"><b>Decisão esperada</b><span>Autorizar o piloto, indicar responsáveis de Comunicação, TI e Jurídico, e exigir relatório de 30, 60 e 90 dias antes de expansão.</span></div>
-          </div>
+        <div class="panel">
+          <h2>O que eu recomendaria para a liderança</h2>
+          <div class="panel-row"><b>Base principal</b><span>Claude como ambiente de pensamento, redação, revisão, síntese, briefing, desdobramento de conteúdo e construção de páginas simples.</span></div>
+          <div class="panel-row"><b>Plataforma que mais cobre o ecossistema corporativo</b><span>Microsoft 365 Copilot, Copilot Studio e Power Automate são a aposta mais ampla para empresa que já vive em Word, PowerPoint, Outlook, Teams, SharePoint e OneDrive.</span></div>
+          <div class="panel-row"><b>Plataforma criativa premium</b><span>Adobe Creative Cloud Pro com Firefly para imagem, vídeo, edição, áudio e proteção comercial. É o melhor eixo criativo para peças externas de marca.</span></div>
+          <div class="panel-row"><b>Especialistas que valem entrar</b><span>Perplexity para pesquisa com fontes, DeepL para tradução, Fireflies para atas fora do ecossistema Microsoft, Descript para edição por transcrição, Adobe Podcast para áudio ruim e ElevenLabs para voz quando permitido.</span></div>
+          <div class="panel-row"><b>O que não recomendaria como prioridade</b><span>Jasper, Gamma como entrega final, Canva para peças externas premium, SEO dedicado, monitoramento enterprise caro, avatares sintéticos e agentes autônomos publicando sem revisão.</span></div>
         </div>
         <div>
-          <div class="kpi-grid">
-            <div class="kpi"><b>90 dias</b><span>Duração proposta para provar uso real, adoção e controle de risco.</span></div>
-            <div class="kpi"><b>US$ 250 a 520</b><span>Faixa mensal estimada do piloto, antes de impostos, câmbio e negociação. Não inclui Microsoft 365 Copilot.</span></div>
-            <div class="kpi"><b>5 a 8</b><span>Participantes iniciais: Comunicação, designer/editor, ponto focal de TI e Jurídico.</span></div>
-            <div class="kpi"><b>0</b><span>Publicações automáticas sem revisão humana. Esse é um critério fixo, não uma preferência.</span></div>
+          <div class="kpis">
+            <div class="kpi"><b>US$ 250 a 600</b><span>Stack enxuta mensal para começar, sem Microsoft 365 Copilot amplo e sem contratos enterprise.</span></div>
+            <div class="kpi"><b>US$ 30</b><span>Microsoft 365 Copilot por usuário/mês, além da licença Microsoft elegível. É decisão corporativa.</span></div>
+            <div class="kpi"><b>US$ 70+</b><span>Adobe Creative Cloud Pro individual como referência para a frente criativa premium. Business pode mudar.</span></div>
+            <div class="kpi"><b>0</b><span>Publicações automáticas sem revisão humana. IA acelera produção, não vira porta de saída direta da marca.</span></div>
           </div>
-          <div class="notice"><b>Correção central:</b> a versão anterior apresentava nove ferramentas como se todas tivessem a mesma prioridade. A recomendação agora separa aprovação, piloto, uso condicional e descarte. Preço vira faixa de referência e não promessa de orçamento.</div>
+          <div class="notice"><b>A frase para a chefia:</b> “A recomendação é adotar Claude como bancada principal de conteúdo, Adobe como plataforma criativa segura, avaliar Microsoft 365 Copilot como camada corporativa ampla e complementar com poucas ferramentas especialistas onde elas são claramente melhores.”</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="bg">
+  <section class="bg" id="stack">
     <div class="wrap">
       <div class="section-title">
-        <h2>O que aprovar, testar, segurar e descartar</h2>
-        <span class="sub">A decisão fica legível em uma tela. O anexo técnico mantém a comparação completa para quem precisar auditar a escolha.</span>
+        <h2>Stack recomendado</h2>
+        <span class="sub">Não são ferramentas equivalentes. Cada uma entra porque cobre uma parte diferente do trabalho de Comunicação.</span>
       </div>
       <div class="cards">
-        <div class="card">
-          <span class="tag approve">Aprovar</span>
-          <h3>Piloto de IA para Comunicação</h3>
-          <p>Autorizar 90 dias de uso com métricas, governança, revisão humana obrigatória e relatório de decisão ao final.</p>
+        <div class="card"><span class="tag core">Essencial</span><h3>Claude Team</h3><p>Melhor ponto de partida para redação institucional, revisão crítica, síntese de documentos, briefings, roteiros, desdobramento de conteúdo e construção de páginas com apoio de Claude Code.</p></div>
+        <div class="card"><span class="tag premium">Premium criativo</span><h3>Adobe Creative Cloud Pro + Firefly</h3><p>Frente mais defensável para imagem, vídeo e acabamento visual. Firefly tem abordagem mais segura para uso comercial e se integra ao fluxo Adobe já esperado por times criativos.</p></div>
+        <div class="card"><span class="tag premium">Plataforma ampla</span><h3>Microsoft 365 Copilot</h3><p>Maior potencial transversal se a VLI já usa Microsoft 365. Atua em Teams, Outlook, Word, PowerPoint, Excel e SharePoint. Pode reduzir necessidade de Fireflies, Gamma e automações separadas.</p></div>
+        <div class="card"><span class="tag core">Pesquisa</span><h3>Perplexity Enterprise Pro</h3><p>Entra para pesquisa com fonte citada e checagem rápida antes de releases, discursos, apresentações e planejamento de pauta.</p></div>
+        <div class="card"><span class="tag core">Tradução</span><h3>DeepL Pro</h3><p>Especialista em tradução e glossário. Melhor tratar tradução institucional como etapa própria, com revisão humana, em vez de deixar dentro do mesmo chatbot geral.</p></div>
+        <div class="card"><span class="tag core">Vídeo e áudio</span><h3>Descript, Adobe Podcast e ElevenLabs</h3><p>Descript para edição por texto, Adobe Podcast para recuperar áudio operacional ruim e ElevenLabs para narração ou versão de voz quando houver autorização e contexto claro.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="plataformas">
+    <div class="wrap">
+      <div class="section-title">
+        <h2>Plataformas que cobrem mais trabalho</h2>
+        <span class="sub">Aqui está a resposta para “existe uma plataforma que pega o máximo possível, cria fluxo e conecta coisas?”. Existe, mas nenhuma cobre tudo com a mesma qualidade.</span>
+      </div>
+      <div class="platform-grid">
+        <div class="platform">
+          <h3>Microsoft 365 Copilot + Copilot Studio + Power Automate</h3>
+          <p>É a plataforma mais ampla para uma empresa que já usa Microsoft. Cobre reuniões, e-mails, documentos, apresentações, dados em Excel, arquivos no SharePoint e fluxos com conectores. Copilot Studio cria agentes internos e Power Automate orquestra aprovações e integrações.</p>
+          <div class="fit"><b>Quando recomendar</b><p>Quando a decisão for corporativa, com TI. É o melhor caminho para escala, governança e integração com ambiente Microsoft. Não é a melhor ferramenta isolada para criação visual ou redação profunda.</p></div>
+          <div class="fit"><b>Custo</b><p>Microsoft 365 Copilot: US$ 30 por usuário/mês, além de licença Microsoft elegível. Copilot Studio: plano de US$ 200/mês por 25.000 mensagens ou consumo sob demanda, conforme modelo contratado.</p></div>
         </div>
-        <div class="card">
-          <span class="tag pilot">Testar no piloto</span>
-          <h3>Núcleo operacional</h3>
-          <p>Claude, Perplexity, DeepL, Fireflies, Descript, Adobe Podcast, ElevenLabs e Adobe/Firefly. ChatGPT entra só se houver demanda específica de imagem ou segunda bancada de comparação.</p>
+        <div class="platform">
+          <h3>Adobe Creative Cloud Pro + Firefly</h3>
+          <p>É a plataforma premium para a frente criativa: imagem, edição, vídeo, áudio, assets, acabamento e proteção comercial. Para Comunicação externa, é mais defensável que depender só de geradores visuais genéricos.</p>
+          <div class="fit"><b>Quando recomendar</b><p>Quando a peça carrega marca, imprensa, campanha externa, liderança ou material institucional de alta exposição.</p></div>
+          <div class="fit"><b>Custo</b><p>Referência pública: Creative Cloud Pro individual por volta de US$ 69,99/mês. Planos business e elegibilidade de indenização precisam ser confirmados em compras.</p></div>
         </div>
-        <div class="card">
-          <span class="tag hold">Segurar</span>
-          <h3>Decisões maiores</h3>
-          <p>Microsoft 365 Copilot, Copilot Studio, Make/Zapier e monitoramento enterprise dependem de TI, Jurídico, volume real e contratos existentes.</p>
+        <div class="platform">
+          <h3>Claude Team + Claude Code</h3>
+          <p>É a plataforma de produção intelectual: entende briefing, estrutura narrativa, revisa tom, gera variações, sintetiza documentos e ajuda a construir páginas estáticas. É a melhor base para Comunicação pensar e produzir.</p>
+          <div class="fit"><b>Quando recomendar</b><p>Como primeira adoção para o time de Comunicação, principalmente em texto, estratégia, relatórios, releases, roteiros, landing pages e desdobramento de conteúdo.</p></div>
+          <div class="fit"><b>Custo</b><p>Claude Team Standard: US$ 20 a 25 por usuário/mês, com mínimo de 5 assentos. Assentos individuais Pro custam cerca de US$ 17 a 20/mês quando fizer sentido para builders.</p></div>
         </div>
-        <div class="card">
-          <span class="tag stop">Não contratar</span>
-          <h3>Ferramentas sem hipótese validada</h3>
-          <p>Surfer SEO, Frase, Jasper, Gamma como entrega final, avatares de IA e social suites premium. Podem voltar ao radar se um dado interno justificar.</p>
-        </div>
-        <div class="card">
-          <span class="tag approve">Investimento</span>
-          <h3>Faixa defensável</h3>
-          <p>O piloto deve começar pequeno. A faixa mensal estimada é de US$ 250 a 520. O número final depende de assentos, câmbio, impostos, planos já existentes e política de compras.</p>
-        </div>
-        <div class="card">
-          <span class="tag pilot">Critério de saída</span>
-          <h3>Sem valor medido, sai</h3>
-          <p>Ferramenta que não reduzir retrabalho, não for usada pelos participantes ou não passar em TI/Jurídico deve sair ao fim do piloto.</p>
+        <div class="platform">
+          <h3>Make ou Power Automate para fluxos</h3>
+          <p>Para fluxos e conectores, a recomendação depende do ambiente. Se a VLI já está no Microsoft 365, Power Automate tende a ser mais natural. Se o fluxo for entre ferramentas externas e APIs de IA, Make costuma ser flexível e mais barato que Zapier em escala.</p>
+          <div class="fit"><b>Quando recomendar</b><p>Depois que o fluxo manual estiver claro: aprovar peça, gerar versões, registrar status, notificar responsáveis, arquivar material e publicar somente após aprovação humana.</p></div>
+          <div class="fit"><b>Custo</b><p>Power Automate depende do licenciamento Microsoft. Make varia por volume. Zapier é mais simples, mas geralmente mais caro em escala.</p></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="arquitetura">
+  <section class="bg" id="custos">
     <div class="wrap">
       <div class="section-title">
-        <h2>Arquitetura de adoção</h2>
-        <span class="sub">A arquitetura evita duplicação de licenças. Claude, ChatGPT, Adobe, Microsoft 365 e ferramentas especialistas têm papéis diferentes e não devem ser comprados como se todos resolvessem a mesma coisa.</span>
-      </div>
-      <div class="layer-grid">
-        <div class="layer">
-          <span class="n">01</span>
-          <h3>Ambiente principal de IA</h3>
-          <p><b>Claude Team</b> como bancada principal para redação, revisão, síntese, briefing, desdobramento de conteúdo e apoio a landing pages. Assentos Pro ou Max só para quem realmente construir páginas.</p>
-        </div>
-        <div class="layer">
-          <span class="n">02</span>
-          <h3>Ecossistema criativo</h3>
-          <p><b>Adobe Creative Cloud ou Firefly</b> para imagem, vídeo, edição e segurança comercial. Figma só entra se houver manutenção de biblioteca visual. Canva não deve ser saída final externa.</p>
-        </div>
-        <div class="layer">
-          <span class="n">03</span>
-          <h3>Ferramentas especialistas</h3>
-          <p><b>Perplexity</b> para pesquisa com fonte, <b>DeepL</b> para tradução, <b>Fireflies</b> para atas, <b>Descript</b> para edição por transcrição, <b>Adobe Podcast</b> para recuperação de áudio e <b>ElevenLabs</b> para voz quando houver necessidade.</p>
-        </div>
-        <div class="layer">
-          <span class="n">04</span>
-          <h3>Condicionais ou futuras</h3>
-          <p><b>Microsoft 365 Copilot</b>, Copilot Studio, Make, Zapier, monitoramento enterprise e SEO dedicado só devem avançar com dado interno, avaliação de TI e caso de uso mensurável.</p>
-        </div>
-      </div>
-      <div class="notice"><b>Fronteiras importantes:</b> Claude não substitui Adobe em risco comercial de imagem. Adobe não substitui Claude em texto e raciocínio editorial. ChatGPT não deve duplicar Claude sem demanda clara. Microsoft 365 Copilot pode substituir parte de Fireflies, Gamma e tarefas de Office, mas é decisão corporativa, não uma compra isolada da Comunicação.</div>
-    </div>
-  </section>
-
-  <section class="bg" id="piloto">
-    <div class="wrap">
-      <div class="section-title">
-        <h2>Piloto de 90 dias</h2>
-        <span class="sub">O piloto deve medir uso real e risco operacional. Não basta demonstrar que as ferramentas funcionam em exemplos isolados.</span>
-      </div>
-      <div class="split">
-        <div class="callout">
-          <h3>Participantes e responsabilidades</h3>
-          <ul>
-            <li><b>Sponsor:</b> liderança de Comunicação.</li>
-            <li><b>Operação:</b> 3 a 5 pessoas do time que escrevem, revisam, publicam ou coordenam fornecedores.</li>
-            <li><b>Criativo:</b> 1 pessoa de design/vídeo ou fornecedor acompanhado.</li>
-            <li><b>TI:</b> valida acesso, SSO, dados, logs, retenção e integrações.</li>
-            <li><b>Jurídico/Compliance:</b> valida DPA, LGPD, propriedade intelectual e uso de imagem/voz.</li>
-          </ul>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Elemento</th><th>Definição do piloto</th></tr></thead>
-            <tbody>
-              <tr><td class="tool">Casos de uso</td><td>Redação e revisão institucional; desdobramento de conteúdo; landing page; imagem; vídeo; áudio; pesquisa com fontes; tradução; atas.</td></tr>
-              <tr><td class="tool">Métricas</td><td>Tempo até primeiro rascunho; retrabalho; aderência ao tom de marca; uso semanal por participante; número de peças revisadas; incidentes de qualidade; economia de dependências externas.</td></tr>
-              <tr><td class="tool">Sucesso</td><td>Pelo menos 6 fluxos reais concluídos, aprovação de TI/Jurídico para ferramentas que permanecem, uso recorrente por 70% dos participantes e evidência de redução de retrabalho.</td></tr>
-              <tr><td class="tool">Interrupção</td><td>Uso de dados sensíveis fora do permitido, impossibilidade de DPA/LGPD, baixa adoção, outputs que exigem mais retrabalho que o fluxo atual ou risco de PI não mitigado.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="timeline" style="margin-top:28px">
-        <div class="phase">
-          <b>Dia 30</b>
-          <h3>Configurar e provar uso</h3>
-          <ul>
-            <li>Workspace, projetos de marca, glossário e prompts base.</li>
-            <li>Checklist de revisão humana.</li>
-            <li>Primeiros casos: release, ata, pesquisa e tradução.</li>
-          </ul>
-        </div>
-        <div class="phase">
-          <b>Dia 60</b>
-          <h3>Comparar fluxos reais</h3>
-          <ul>
-            <li>Landing page e campanha institucional.</li>
-            <li>Teste de vídeo, imagem e áudio com material real autorizado.</li>
-            <li>Relatório de custo, uso e riscos pendentes.</li>
-          </ul>
-        </div>
-        <div class="phase">
-          <b>Dia 90</b>
-          <h3>Decidir continuidade</h3>
-          <ul>
-            <li>Ferramentas que ficam, saem ou viram piloto separado.</li>
-            <li>Business case com dados internos levantados.</li>
-            <li>Plano de governança para expansão.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="governanca">
-    <div class="wrap">
-      <div class="section-title">
-        <h2>Critérios eliminatórios de TI, Segurança e Jurídico</h2>
-        <span class="sub">Uma ferramenta só pode ser chamada de recomendada depois de passar por requisitos mínimos. A comparação de qualidade vem depois desta matriz.</span>
+        <h2>Custos e prioridade de recomendação</h2>
+        <span class="sub">Preços são referências públicas ou estimativas de mercado em julho de 2026. Antes de contratar, confirmar plano, impostos, câmbio, requisitos enterprise e contratos já existentes.</span>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Critério</th><th>Requisito para continuar</th><th>Risco se não passar</th><th>Status inicial</th></tr></thead>
+          <thead><tr><th>Prioridade</th><th>Ferramenta ou plataforma</th><th>Custo de referência</th><th>Por que recomendar</th><th>Ressalva</th></tr></thead>
           <tbody>
-            <tr><td class="tool">Uso de dados para treinamento</td><td>Contrato deve excluir prompts, arquivos e outputs da VLI de treinamento por padrão.</td><td>Exposição de informação interna e perda de controle.</td><td class="small">Validar em DPA e termos do plano contratado.</td></tr>
-            <tr><td class="tool">Retenção e exclusão</td><td>Prazo de retenção documentado, exclusão sob solicitação e política para arquivos enviados.</td><td>Dados ficam disponíveis além do necessário.</td><td class="small">Dado a levantar por fornecedor.</td></tr>
-            <tr><td class="tool">SSO e administração</td><td>SSO, gestão central de usuários e remoção rápida de acesso quando houver troca de função.</td><td>Assentos ativos sem controle e acesso pós-desligamento.</td><td class="small">Claude Team, ChatGPT Business, M365 e Figma têm caminhos de administração. Especialistas variam por plano.</td></tr>
-            <tr><td class="tool">Logs e auditoria</td><td>Registro de uso, exportação ou evidência suficiente para incidentes.</td><td>Não rastrear quem enviou dado ou publicou material.</td><td class="small">Geralmente mais forte em planos Enterprise.</td></tr>
-            <tr><td class="tool">DPA e LGPD</td><td>DPA disponível, subprocessadores publicados e base para transferência internacional.</td><td>Risco jurídico e bloqueio de contratação.</td><td class="small">Dado a levantar antes da compra.</td></tr>
-            <tr><td class="tool">Propriedade intelectual</td><td>Termos claros sobre propriedade do output e limites de indenização.</td><td>Uso externo de imagem, voz ou vídeo com risco de disputa.</td><td class="small">Adobe tem proteção comercial explícita para Firefly em planos elegíveis. Outras ferramentas exigem validação.</td></tr>
-            <tr><td class="tool">Integração Microsoft 365</td><td>Conectores, permissões e escopo aprovados por TI.</td><td>Acesso excessivo a e-mail, documentos e reuniões.</td><td class="small">Copilot herda parte do perímetro Microsoft, mas precisa piloto próprio.</td></tr>
-            <tr><td class="tool">Continuidade do fornecedor</td><td>Fornecedor com operação estável, suporte e política clara de exportação.</td><td>Dependência de ferramenta imatura ou sem suporte.</td><td class="small">Tratar ferramentas novas de sites/agentes como experimentais até haver evidência.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="bg" id="business-case">
-    <div class="wrap">
-      <div class="section-title">
-        <h2>Business case</h2>
-        <span class="sub">O business case separa preço conhecido, estimativa externa e dado interno ainda necessário. Não há economia interna inventada.</span>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Categoria</th><th>O que já se sabe</th><th>Dado a levantar na VLI</th><th>Como entra na decisão</th></tr></thead>
-          <tbody>
-            <tr><td class="tool">Custos conhecidos</td><td>Claude Team Standard: US$ 20 a 25 por assento/mês. ChatGPT Business: US$ 20 a 25 por assento/mês, mínimo de 2. Perplexity Enterprise Pro: US$ 40 por assento/mês. Figma Professional full seat: US$ 16/mês. Microsoft 365 Copilot: US$ 30 por usuário/mês, além de licença qualificada.</td><td>Quantidade de assentos, impostos, câmbio, política de faturamento e contratos corporativos já vigentes.</td><td>Usar como teto inicial, não como orçamento final.</td></tr>
-            <tr><td class="tool">Custos estimados</td><td>Adobe, DeepL, Descript, ElevenLabs e ferramentas de áudio/vídeo variam por plano, região, volume e elegibilidade comercial.</td><td>Plano correto, necessidade de enterprise, dados de cobrança local e volume mensal de uso.</td><td>Entram no piloto com limite e revisão no dia 60.</td></tr>
-            <tr><td class="tool">Economia potencial</td><td>Benchmark externo sugere ganho em rascunho, edição e síntese, mas não mede a realidade da VLI.</td><td>Horas gastas hoje por release, landing page, ata, tradução, vídeo, edição de áudio e retrabalho com agência.</td><td>Só vira ROI depois de medição interna.</td></tr>
-            <tr><td class="tool">Dependências eliminadas</td><td>Possível redução de espera por rascunhos, versões de landing page, cortes simples de vídeo, limpeza de áudio e adaptações de formato.</td><td>Quais dependências existem hoje: agência, produtora, designer, TI, tradução externa, social media.</td><td>Capacidade nova pesa tanto quanto economia direta.</td></tr>
-            <tr><td class="tool">Sobreposição contratual</td><td>Microsoft 365 Copilot pode sobrepor Fireflies e parte de Gamma/PowerPoint. Adobe pode sobrepor ferramentas isoladas de imagem, vídeo e áudio.</td><td>Licenças Microsoft, Adobe, Canva, ferramentas de social e fornecedores já contratados.</td><td>Evitar pagar duas vezes pela mesma capacidade.</td></tr>
+            <tr><td><span class="tag core">1</span></td><td class="tool">Claude Team</td><td class="price">US$ 20 a 25/usuário/mês, mínimo 5</td><td>Base de texto, raciocínio, síntese, briefing, roteiro e desdobramento.</td><td class="small">Não substitui Adobe em risco visual nem Microsoft em integração corporativa.</td></tr>
+            <tr><td><span class="tag premium">2</span></td><td class="tool">Adobe Creative Cloud Pro + Firefly</td><td class="price">~US$ 69,99/mês individual; business a confirmar</td><td>Melhor frente premium para imagem, vídeo, acabamento e proteção comercial.</td><td class="small">Confirmar plano elegível para indenização e uso empresarial.</td></tr>
+            <tr><td><span class="tag premium">3</span></td><td class="tool">Microsoft 365 Copilot</td><td class="price">US$ 30/usuário/mês + licença elegível</td><td>Maior cobertura de Office, Teams, SharePoint, e-mail, apresentações e governança corporativa.</td><td class="small">Decisão de TI e organização, não só Comunicação.</td></tr>
+            <tr><td><span class="tag core">4</span></td><td class="tool">Perplexity Enterprise Pro</td><td class="price">US$ 40/usuário/mês ou US$ 400/ano</td><td>Pesquisa com fontes e verificação rápida para conteúdo institucional.</td><td class="small">Não substitui checagem editorial.</td></tr>
+            <tr><td><span class="tag core">5</span></td><td class="tool">DeepL Pro</td><td class="price">Varia por plano e região</td><td>Tradução, glossário e consistência terminológica.</td><td class="small">Revisão humana continua obrigatória.</td></tr>
+            <tr><td><span class="tag core">6</span></td><td class="tool">Fireflies</td><td class="price">Business US$ 19 anual ou US$ 29 mensal por assento</td><td>Atas e itens de ação em Teams, Zoom e Meet.</td><td class="small">Pode ser redundante se M365 Copilot/Teams Premium cobrir bem.</td></tr>
+            <tr><td><span class="tag core">7</span></td><td class="tool">Descript</td><td class="price">Faixa estimada, validar plano</td><td>Edição de vídeo por transcrição, cortes de entrevista e conteúdo social.</td><td class="small">Não substitui produtora em peças complexas.</td></tr>
+            <tr><td><span class="tag core">8</span></td><td class="tool">Adobe Podcast</td><td class="price">Baixo custo relativo, validar plano</td><td>Recuperação de áudio ruim de campo, reuniões e entrevistas.</td><td class="small">Não corrige conteúdo ruim, só melhora inteligibilidade.</td></tr>
+            <tr><td><span class="tag core">9</span></td><td class="tool">ElevenLabs</td><td class="price">Starter US$ 5, Creator US$ 22, Pro US$ 99/mês</td><td>Narração, versões de voz e produção audiovisual rápida.</td><td class="small">Uso de voz sintética precisa regra clara.</td></tr>
+            <tr><td><span class="tag future">Condicional</span></td><td class="tool">Make, Power Automate ou Zapier</td><td class="price">Variável</td><td>Conectores, aprovações, notificações e distribuição de conteúdo aprovado.</td><td class="small">Não automatizar publicação sem aprovação.</td></tr>
+            <tr><td><span class="tag no">Não priorizar</span></td><td class="tool">Jasper, Gamma, Surfer SEO, Brandwatch/Meltwater, avatares IA</td><td class="price">Variável, alguns caros</td><td>Casos estreitos ou redundantes com stack principal.</td><td class="small">Só reabrir se houver dado interno claro.</td></tr>
           </tbody>
         </table>
       </div>
@@ -364,197 +245,80 @@
   <section id="fluxos">
     <div class="wrap">
       <div class="section-title">
-        <h2>Fluxos de trabalho</h2>
-        <span class="sub">A análise principal passa a ser por trabalho real da Comunicação. Cada fluxo exige revisão humana antes de qualquer publicação externa.</span>
+        <h2>Fluxos de Comunicação que a stack viabiliza</h2>
+        <span class="sub">A recomendação fica mais forte quando vira fluxo de trabalho, não uma lista de assinaturas.</span>
       </div>
-      <div class="workflow-grid">
-        <div class="flow">
-          <h3>Campanha institucional</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Briefing, texto, arte, página e canais podem depender de vários fornecedores ou áreas.</dd>
-            <dt>Fluxo proposto</dt><dd>Perplexity pesquisa, Claude estrutura briefing e peças, Adobe gera imagem segura, Claude Code ou fornecedor monta LP, Buffer agenda.</dd>
-            <dt>Revisão</dt><dd>Comunicação aprova mensagem, Jurídico valida risco e liderança aprova peça final.</dd>
-            <dt>Métrica</dt><dd>Tempo até primeira versão, número de retrabalhos e dependências externas evitadas.</dd>
-          </dl>
-        </div>
-        <div class="flow">
-          <h3>Comunicado ou release</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Pesquisa, redação, revisão e adaptação costumam ocorrer em etapas manuais.</dd>
-            <dt>Fluxo proposto</dt><dd>Perplexity traz fontes, Claude redige e revisa, DeepL traduz quando necessário.</dd>
-            <dt>Risco</dt><dd>Dado externo incorreto ou tom institucional inconsistente.</dd>
-            <dt>Métrica</dt><dd>Tempo de rascunho, correções de factualidade e aderência ao tom de marca.</dd>
-          </dl>
-        </div>
-        <div class="flow">
-          <h3>Cobertura de evento</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Notas, falas e fotos se dispersam entre celular, reunião e fornecedor.</dd>
-            <dt>Fluxo proposto</dt><dd>Fireflies registra alinhamento, Claude organiza pauta, Adobe/Firefly apoia cards, Buffer agenda após aprovação.</dd>
-            <dt>Risco</dt><dd>Publicar fala sem validação ou usar imagem sem direito adequado.</dd>
-            <dt>Métrica</dt><dd>Tempo entre evento e pacote de comunicação aprovado.</dd>
-          </dl>
-        </div>
-        <div class="flow">
-          <h3>Landing page</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Ajustes simples podem depender de agenda de dev ou agência.</dd>
-            <dt>Fluxo proposto</dt><dd>Claude gera estrutura e texto, Claude Code monta página estática, humano revisa e publica em ambiente autorizado.</dd>
-            <dt>Risco</dt><dd>Erro visual, acessibilidade ruim ou conteúdo desatualizado.</dd>
-            <dt>Métrica</dt><dd>Tempo de página navegável, correções pós-revisão e autonomia do time.</dd>
-          </dl>
-        </div>
-        <div class="flow">
-          <h3>Vídeo institucional</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Edição e acabamento dependem de tempo de produtor ou fornecedor.</dd>
-            <dt>Fluxo proposto</dt><dd>Adobe Podcast recupera áudio, Descript edita por transcrição, Adobe/Firefly apoia cenas complementares, revisão final humana.</dd>
-            <dt>Risco</dt><dd>Imagem ou voz sintética confundida com registro real.</dd>
-            <dt>Métrica</dt><dd>Tempo de corte inicial, qualidade percebida e volume de ajustes finais.</dd>
-          </dl>
-        </div>
-        <div class="flow">
-          <h3>Ambiente operacional</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Áudio de campo e material bruto podem ser descartados por ruído ou baixa clareza.</dd>
-            <dt>Fluxo proposto</dt><dd>Adobe Podcast limpa áudio, Claude resume depoimento, Descript prepara cortes curtos.</dd>
-            <dt>Risco</dt><dd>Remover contexto ou alterar sentido da fala.</dd>
-            <dt>Métrica</dt><dd>Quantidade de material recuperado e aprovado.</dd>
-          </dl>
-        </div>
-        <div class="flow">
-          <h3>Pesquisa e reputação</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Monitoramento pode ser manual e disperso.</dd>
-            <dt>Fluxo proposto</dt><dd>Perplexity para pesquisa com fontes e alertas simples antes de considerar monitoramento enterprise.</dd>
-            <dt>Risco</dt><dd>Superdimensionar ferramenta cara sem volume real de menções.</dd>
-            <dt>Métrica</dt><dd>Tempo de checagem, fontes úteis e incidentes identificados.</dd>
-          </dl>
-        </div>
-        <div class="flow">
-          <h3>Tradução e adaptação internacional</h3>
-          <dl>
-            <dt>Situação atual</dt><dd>Tradução pode depender de revisão externa ou ser feita sem consistência terminológica.</dd>
-            <dt>Fluxo proposto</dt><dd>Claude adapta contexto e DeepL traduz com glossário, sempre com revisão humana final.</dd>
-            <dt>Risco</dt><dd>Termo técnico, regulatório ou institucional traduzido de forma incorreta.</dd>
-            <dt>Métrica</dt><dd>Tempo de versão traduzida e número de correções por revisão.</dd>
-          </dl>
-        </div>
+      <div class="flow-grid">
+        <div class="flow"><h3>Campanha institucional</h3><dl><dt>Fluxo</dt><dd>Perplexity pesquisa, Claude estrutura conceito e peças, Adobe cria imagem/vídeo, Claude Code ou fornecedor monta landing page, Buffer ou Power Automate organiza publicação aprovada.</dd><dt>Ganho</dt><dd>Menos espera entre briefing, texto, peça visual e página.</dd><dt>Controle</dt><dd>Comunicação, Jurídico e liderança revisam antes de publicar.</dd></dl></div>
+        <div class="flow"><h3>Release ou comunicado</h3><dl><dt>Fluxo</dt><dd>Perplexity checa fontes, Claude redige e adapta, DeepL traduz quando necessário, revisão humana fecha versão final.</dd><dt>Ganho</dt><dd>Rascunho mais rápido e melhor lastreado.</dd><dt>Controle</dt><dd>Fonte externa precisa ser conferida, não apenas citada.</dd></dl></div>
+        <div class="flow"><h3>Landing page</h3><dl><dt>Fluxo</dt><dd>Claude gera estrutura, copy e componentes; Claude Code transforma em página; Adobe/Figma apoiam assets e padrões visuais.</dd><dt>Ganho</dt><dd>Autonomia para páginas simples e alterações rápidas.</dd><dt>Controle</dt><dd>Acessibilidade, marca e publicação precisam de revisão.</dd></dl></div>
+        <div class="flow"><h3>Vídeo institucional</h3><dl><dt>Fluxo</dt><dd>Adobe Podcast recupera áudio, Descript edita por texto, Adobe/Firefly apoia cenas e acabamento, ElevenLabs entra se houver narração sintética permitida.</dd><dt>Ganho</dt><dd>Mais aproveitamento de entrevistas e material operacional.</dd><dt>Controle</dt><dd>Evitar confundir imagem ou voz sintética com registro real.</dd></dl></div>
+        <div class="flow"><h3>Reunião com agência ou áreas internas</h3><dl><dt>Fluxo</dt><dd>Fireflies ou Copilot registra, resume e lista ações; Claude transforma em briefing ou ata executiva.</dd><dt>Ganho</dt><dd>Menos perda de decisão e menos retrabalho de alinhamento.</dd><dt>Controle</dt><dd>Participantes precisam saber que a reunião está sendo registrada.</dd></dl></div>
+        <div class="flow"><h3>Desdobramento de conteúdo</h3><dl><dt>Fluxo</dt><dd>Claude transforma release, relatório ou entrevista em post, newsletter, roteiro, legenda e versão internacional. Make ou Power Automate só distribui o que foi aprovado.</dd><dt>Ganho</dt><dd>Uma peça-fonte vira pacote multicanal.</dd><dt>Controle</dt><dd>Publicação automática não deve ser permitida.</dd></dl></div>
       </div>
     </div>
   </section>
 
-  <section class="bg" id="anexo">
+  <section class="bg" id="governanca">
     <div class="wrap">
       <div class="section-title">
-        <h2>Anexo técnico</h2>
-        <span class="sub">Esta parte guarda a comparação extensa, preços detalhados, alternativas descartadas e fontes. O corpo principal não depende dela para ser compreendido.</span>
+        <h2>Critérios de segurança antes da recomendação final</h2>
+        <span class="sub">A recomendação executiva pode apontar o stack, mas compra real precisa passar por TI, Segurança e Jurídico.</span>
       </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Critério</th><th>O que exigir</th><th>Impacto na recomendação</th></tr></thead>
+          <tbody>
+            <tr><td class="tool">Dados para treinamento</td><td>Não usar prompts, arquivos e outputs da VLI para treinar modelos por padrão.</td><td>Obrigatório para qualquer ferramenta com dado interno.</td></tr>
+            <tr><td class="tool">Retenção e exclusão</td><td>Prazo claro de retenção, exclusão e tratamento de arquivos enviados.</td><td>Bloqueia ferramenta se não for documentado.</td></tr>
+            <tr><td class="tool">SSO e administração</td><td>Gestão central de usuários, remoção de acesso e, idealmente, SSO.</td><td>Mais crítico para plataformas de uso amplo.</td></tr>
+            <tr><td class="tool">Logs e auditoria</td><td>Capacidade de rastrear uso, arquivos e ações relevantes.</td><td>Obrigatório para conectores e automações.</td></tr>
+            <tr><td class="tool">DPA, LGPD e subprocessadores</td><td>DPA disponível, subprocessadores listados e base para transferência internacional.</td><td>Jurídico deve validar antes de contratação.</td></tr>
+            <tr><td class="tool">Propriedade intelectual</td><td>Termos claros de propriedade do output e proteção comercial quando houver peça externa.</td><td>Favorece Adobe em imagem e vídeo de alta exposição.</td></tr>
+            <tr><td class="tool">Revisão humana</td><td>Nenhum fluxo publica sozinho. IA pode preparar, revisar, adaptar e distribuir para aprovação.</td><td>Critério fixo da governança de Comunicação.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
+  <section id="anexo">
+    <div class="wrap">
+      <div class="section-title">
+        <h2>Fontes e notas metodológicas</h2>
+        <span class="sub">Preços e claims mudam. Esta página usa fontes públicas e deve ser revisada antes de qualquer compra.</span>
+      </div>
       <details open>
-        <summary>Comparação resumida de ferramentas</summary>
-        <div class="detail-body table-wrap">
-          <table>
-            <thead><tr><th>Ferramenta</th><th>Camada</th><th>Preço de referência</th><th>Leitura executiva</th></tr></thead>
-            <tbody>
-              <tr><td class="tool">Claude Team / Pro</td><td>Ambiente principal</td><td class="price">Team Standard US$ 20 a 25 por assento/mês; Pro US$ 17 a 20 individual</td><td>Recomendado para piloto. Corrige a inconsistência anterior: Claude Code e Cowork estão incluídos em planos pagos, mas capacidade e governança variam por tipo de assento.</td></tr>
-              <tr><td class="tool">ChatGPT Business</td><td>Complementar</td><td class="price">US$ 20 a 25 por assento/mês, mínimo de 2 assentos</td><td>Não deve duplicar Claude no início. Avaliar só para imagem, comparação ou demandas específicas que Claude não cubra.</td></tr>
-              <tr><td class="tool">Adobe Creative Cloud Pro / Firefly</td><td>Ecossistema criativo</td><td class="price">Referência pública: Creative Cloud Pro individual US$ 69,99/mês; business pode ser maior</td><td>Recomendado para trilho criativo e risco comercial, condicionado ao plano elegível e validação de indenização.</td></tr>
-              <tr><td class="tool">Figma</td><td>Design system</td><td class="price">Professional full seat US$ 16/mês; Organization US$ 55/mês; Enterprise US$ 90/mês</td><td>Útil se a VLI mantiver biblioteca visual. Sem responsável, vira ferramenta a mais.</td></tr>
-              <tr><td class="tool">Perplexity Enterprise Pro</td><td>Especialista</td><td class="price">US$ 40 por assento/mês ou US$ 400/ano</td><td>Bom candidato para pesquisa com fonte, desde que TI aprove retenção, logs e uso de arquivos.</td></tr>
-              <tr><td class="tool">DeepL Pro</td><td>Especialista</td><td class="price">Plano e moeda variam por região</td><td>Tradução é caso real de Comunicação. Exigir glossário e revisão humana.</td></tr>
-              <tr><td class="tool">Fireflies</td><td>Especialista</td><td class="price">Business US$ 19 anual ou US$ 29 mensal por assento; Enterprise US$ 39 anual</td><td>Útil para atas em Teams, Zoom e Meet. Reavaliar se Microsoft 365 Copilot for adotado.</td></tr>
-              <tr><td class="tool">Descript</td><td>Especialista</td><td class="price">Faixa estimada, validar plano vigente</td><td>Entrar em piloto de vídeo. Não prometer substituição de produtora.</td></tr>
-              <tr><td class="tool">Adobe Podcast</td><td>Especialista</td><td class="price">Baixo custo relativo, validar plano vigente</td><td>Boa hipótese para recuperar áudio operacional.</td></tr>
-              <tr><td class="tool">ElevenLabs</td><td>Especialista</td><td class="price">Starter US$ 5/mês; Creator US$ 22/mês; Pro US$ 99/mês</td><td>Usar apenas quando voz sintética for permitida e aprovada. Não usar para simular depoimento real.</td></tr>
-              <tr><td class="tool">Microsoft 365 Copilot</td><td>Futura</td><td class="price">US$ 30 por usuário/mês, além de licença Microsoft qualificada</td><td>Decisão corporativa com TI. Pode substituir parte de atas, apresentações e produtividade de Office.</td></tr>
-              <tr><td class="tool">Copilot Studio</td><td>Futura</td><td class="price">Pacote de 25.000 créditos/mês a US$ 200 ou pay as you go</td><td>Somente para agentes internos de baixo risco, com logs e aprovação humana.</td></tr>
-              <tr><td class="tool">Make / Zapier</td><td>Condicional</td><td class="price">Variável por volume e tarefas</td><td>Só depois de medir volume de desdobramento. Automatizar distribuição de conteúdo aprovado, não publicação autônoma.</td></tr>
-              <tr><td class="tool">Brandwatch / Meltwater / Talkwalker</td><td>Descartada por ora</td><td class="price">Enterprise sob consulta, frequentemente alto</td><td>Não contratar sem dado de risco reputacional recorrente e volume que justifique.</td></tr>
-              <tr><td class="tool">Surfer SEO / Frase</td><td>Descartada por ora</td><td class="price">Variável</td><td>Não prioritário para B2B logística sem estratégia ativa de tráfego orgânico.</td></tr>
-              <tr><td class="tool">Canva / Gamma / Jasper</td><td>Uso restrito ou descarte</td><td class="price">Variável</td><td>Podem acelerar rascunho, mas não devem ser base de entrega final externa no piloto.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
-
-      <details>
-        <summary>Alternativas descartadas e ressalvas</summary>
-        <div class="detail-body">
-          <div class="cards">
-            <div class="card"><h3>Agentes autônomos</h3><p>Não publicar nada sem revisão humana. A categoria é promissora, mas ainda exige governança, logs, escopo reversível e aprovação explícita.</p></div>
-            <div class="card"><h3>Monitoramento enterprise</h3><p>Não há dado interno no estudo atual que prove volume suficiente para justificar suítes caras de reputação. Levantar incidentes, menções e demandas de clipping.</p></div>
-            <div class="card"><h3>SEO dedicado</h3><p>Ferramentas de SEO só fazem sentido se Comunicação escolher tráfego orgânico como canal estratégico. Não é premissa do piloto.</p></div>
-            <div class="card"><h3>Avatares e voz sintética</h3><p>Uso externo exige cuidado. Voz sintética não deve simular pessoa real sem autorização e contexto claro.</p></div>
-            <div class="card"><h3>Imagem de alta exposição</h3><p>Qualidade visual e proteção jurídica nem sempre apontam para a mesma ferramenta. Peças externas relevantes devem passar por trilho jurídico.</p></div>
-            <div class="card"><h3>Benchmarks externos</h3><p>Rankings e reviews ajudam a formular hipóteses, mas não substituem piloto com tarefas, marca, dados e restrições da VLI.</p></div>
-          </div>
-        </div>
-      </details>
-
-      <details>
-        <summary>Metodologia e fontes</summary>
-        <div class="detail-body">
-          <p class="method">A pesquisa original foi reorganizada em quatro níveis de evidência: fato verificável em documentação do fornecedor; benchmark externo ou review independente; hipótese sobre operação da VLI; recomendação de piloto. Onde faltam dados internos, o texto marca explicitamente “dado a levantar”. Preços são referências públicas em julho de 2026 e devem ser confirmados por Compras antes de contratação. Nenhuma estimativa de economia interna foi tratada como fato.</p>
-          <div class="source-list" style="margin-top:24px">
-            <a href="https://claude.com/pricing" target="_blank" rel="noopener">Anthropic: Claude Pricing</a>
-            <a href="https://support.claude.com/en/articles/8325606-what-is-the-pro-plan" target="_blank" rel="noopener">Anthropic Help: Claude Pro</a>
-            <a href="https://help.openai.com/en/articles/8792828-what-is-chatgpt-team/" target="_blank" rel="noopener">OpenAI Help: ChatGPT Business</a>
-            <a href="https://www.microsoft.com/en-us/microsoft-365/copilot/pricing/enterprise" target="_blank" rel="noopener">Microsoft: Microsoft 365 Copilot Pricing</a>
-            <a href="https://www.microsoft.com/en-us/microsoft-365-copilot/pricing/copilot-studio" target="_blank" rel="noopener">Microsoft: Copilot Studio Pricing</a>
-            <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management" target="_blank" rel="noopener">Microsoft Learn: Copilot Studio Billing Rates</a>
-            <a href="https://www.adobe.com/creativecloud/pricing.html" target="_blank" rel="noopener">Adobe: Creative Cloud Pricing</a>
-            <a href="https://business.adobe.com/products/creativecloud-business/pricing.html" target="_blank" rel="noopener">Adobe Business: Creative Cloud for Business Pricing</a>
-            <a href="https://www.adobe.com/ai/overview/firefly/gen-ai-approach.html" target="_blank" rel="noopener">Adobe: Firefly Generative AI Approach</a>
-            <a href="https://helpx.adobe.com/in/legal/product-descriptions/adobe-firefly.html" target="_blank" rel="noopener">Adobe Legal: Firefly Product Description</a>
-            <a href="https://www.figma.com/pricing/" target="_blank" rel="noopener">Figma: Plans and Pricing</a>
-            <a href="https://www.figma.com/security/" target="_blank" rel="noopener">Figma: Security</a>
-            <a href="https://www.perplexity.ai/help-center/en/articles/10352986-enterprise-pricing-and-billing-frequently-asked-questions" target="_blank" rel="noopener">Perplexity: Enterprise Pricing FAQ</a>
-            <a href="https://www.perplexity.ai/hub/blog/how-perplexity-enterprise-pro-keeps-your-data-secure" target="_blank" rel="noopener">Perplexity: Enterprise Pro Security</a>
-            <a href="https://support.deepl.com/hc/en-us/articles/360019924499-About-DeepL-plans" target="_blank" rel="noopener">DeepL: About DeepL Plans</a>
-            <a href="https://www.deepl.com/en/blog/soc2-type2-report-overview" target="_blank" rel="noopener">DeepL: SOC 2 Type II Report</a>
-            <a href="https://fireflies.ai/pricing" target="_blank" rel="noopener">Fireflies: Pricing</a>
-            <a href="https://fireflies.ai/blog/fireflies-pricing-which-plan-is-right-for-you/" target="_blank" rel="noopener">Fireflies: Pricing Guide 2026</a>
-            <a href="https://elevenlabs.io/pricing" target="_blank" rel="noopener">ElevenLabs: Pricing</a>
-            <a href="https://help.elevenlabs.io/hc/en-us/articles/24351324241937-What-is-the-price-for-usage-based-billing" target="_blank" rel="noopener">ElevenLabs: Usage Based Billing</a>
-            <a href="https://code.claude.com/docs/en/security" target="_blank" rel="noopener">Claude Code Docs: Security</a>
-            <a href="https://code.claude.com/docs/en/agent-sdk/overview" target="_blank" rel="noopener">Claude Agent SDK: Overview</a>
-            <a href="https://www.layer3labs.io/comparisons/chatgpt-vs-claude-for-business" target="_blank" rel="noopener">Layer3 Labs: Claude vs ChatGPT for Business</a>
-            <a href="https://stacktr.ee/blog/what-is-chatgpt-sites" target="_blank" rel="noopener">Stacktree: What is ChatGPT Sites?</a>
-            <a href="https://www.g2.com/products/lovable/reviews" target="_blank" rel="noopener">G2: Lovable Reviews</a>
-            <a href="https://particula.tech/blog/lovable-vs-bolt-vs-v0-ai-app-builders" target="_blank" rel="noopener">Particula: Lovable vs Bolt vs v0</a>
-            <a href="https://www.framer.com/legal/security" target="_blank" rel="noopener">Framer: Security</a>
-            <a href="https://trust.webflow.com/" target="_blank" rel="noopener">Webflow: Trust Center</a>
-            <a href="https://www.eesel.ai/blog/canva-ai-reviews" target="_blank" rel="noopener">eesel AI: Canva AI Reviews</a>
-            <a href="https://costbench.com/software/ai-image-generators/adobe-firefly/" target="_blank" rel="noopener">Costbench: Adobe Firefly Pricing</a>
-            <a href="https://getalai.com/blog/gamma-alternatives" target="_blank" rel="noopener">Alai: Gamma Review e Alternativas</a>
-            <a href="https://intlpull.com/blog/machine-translation-accuracy-2026-benchmark" target="_blank" rel="noopener">IntlPull: Machine Translation Benchmark</a>
-            <a href="https://fireflies.ai/blog/fireflies-vs-otter/" target="_blank" rel="noopener">Fireflies: Fireflies vs Otter</a>
-            <a href="https://aizest.net/synthesia-review/" target="_blank" rel="noopener">AI Zest: Synthesia Review 2026</a>
-            <a href="https://aibuzz.blog/midjourney-vs-dall-e-vs-adobe-firefly/" target="_blank" rel="noopener">AI Buzz: Midjourney vs DALL-E vs Firefly</a>
-            <a href="https://www.revoyant.com/blog/best-ai-image-generators" target="_blank" rel="noopener">Revoyant: Best AI Image Generators 2026</a>
-            <a href="https://resource.digen.ai/adobe-firefly-vs-runway-ml-2026-comparison/" target="_blank" rel="noopener">Digen: Adobe Firefly vs Runway ML</a>
-            <a href="https://try.wideframe.com/blog/adobe-firefly-vs-runway-ml-video-generation/" target="_blank" rel="noopener">Wideframe: Firefly vs Runway Video</a>
-            <a href="https://mstudio.ai/insights/best-ai-video-generator-2026" target="_blank" rel="noopener">Mstudio: Best AI Video Generator 2026</a>
-            <a href="https://www.eesel.ai/blog/runway-ai-pricing" target="_blank" rel="noopener">eesel AI: Runway Pricing</a>
-            <a href="https://www.colossyan.com/posts/heygen-vs-synthesia/" target="_blank" rel="noopener">Colossyan: HeyGen vs Synthesia</a>
-            <a href="https://builtwithclaude.io/descript-review-ai-video-editor/" target="_blank" rel="noopener">Built with Claude: Descript Review</a>
-            <a href="https://bigvu.tv/blog/elevenlabs-pricing-2026-plans-credits-commercial-rights-api-costs/" target="_blank" rel="noopener">BIGVU: ElevenLabs Pricing 2026</a>
-            <a href="https://comparedge.com/tools/adobe-podcast/pricing" target="_blank" rel="noopener">Comparedge: Adobe Podcast Pricing</a>
-            <a href="https://www.eesel.ai/blog/surfer-seo-pricing" target="_blank" rel="noopener">eesel AI: Surfer SEO Pricing</a>
-            <a href="https://archive.com/blog/brandwatch-pricing" target="_blank" rel="noopener">Archive: Brandwatch Pricing</a>
-            <a href="https://stilingue.com.br/" target="_blank" rel="noopener">Stilingue</a>
-            <a href="https://www.blotato.com/blog/buffer-pricing" target="_blank" rel="noopener">Blotato: Buffer Pricing 2026</a>
-            <a href="https://socialrails.com/blog/jasper-pricing" target="_blank" rel="noopener">SocialRails: Jasper Pricing</a>
-            <a href="https://www.lindy.ai/blog/make-com-pricing" target="_blank" rel="noopener">Lindy: Make.com Pricing</a>
-            <a href="https://bestautomationtools.ai/reviews/zapier-review/" target="_blank" rel="noopener">Best Automation Tools: Zapier Review</a>
-            <a href="https://www.rcrwireless.com/20250627/business/agentic-ai-gartner" target="_blank" rel="noopener">RCR Wireless: Gartner on Agentic AI</a>
-            <a href="https://www.deloitte.com/us/en/insights/topics/emerging-technologies/ai-agents-scaling-faster.html" target="_blank" rel="noopener">Deloitte: AI Agents and Guardrails</a>
-            <a href="https://www.envive.ai/post/case-study-of-air-canadas-chatbot" target="_blank" rel="noopener">Envive: Air Canada Chatbot Case</a>
-            <a href="https://www.fastcompany.com/91147959/worst-brand-mistakes-of-the-ai-era-so-far" target="_blank" rel="noopener">Fast Company: Brand Mistakes of the AI Era</a>
-            <a href="https://www.kiteworks.com/cybersecurity-risk-management/meta-rogue-ai-agent-data-exposure-governance/" target="_blank" rel="noopener">Kiteworks: Meta Rogue AI Agent Incident</a>
-            <a href="https://atlan.com/know/ai-agent-risks-guardrails/" target="_blank" rel="noopener">Atlan: AI Agent Risks and Guardrails</a>
-          </div>
+        <summary>Fontes usadas</summary>
+        <div class="detail-body sources">
+          <a href="https://claude.com/pricing" target="_blank" rel="noopener">Anthropic: Claude Pricing</a>
+          <a href="https://support.claude.com/en/articles/8325606-what-is-the-pro-plan" target="_blank" rel="noopener">Anthropic Help: Claude Pro</a>
+          <a href="https://help.openai.com/en/articles/8792828-what-is-chatgpt-team/" target="_blank" rel="noopener">OpenAI Help: ChatGPT Business</a>
+          <a href="https://www.microsoft.com/en-us/microsoft-365/copilot/pricing/enterprise" target="_blank" rel="noopener">Microsoft: Microsoft 365 Copilot Pricing</a>
+          <a href="https://www.microsoft.com/en-us/microsoft-365-copilot/pricing/copilot-studio" target="_blank" rel="noopener">Microsoft: Copilot Studio Pricing</a>
+          <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management" target="_blank" rel="noopener">Microsoft Learn: Copilot Studio Billing Rates</a>
+          <a href="https://www.adobe.com/creativecloud/pricing.html" target="_blank" rel="noopener">Adobe: Creative Cloud Pricing</a>
+          <a href="https://business.adobe.com/products/creativecloud-business/pricing.html" target="_blank" rel="noopener">Adobe Business: Creative Cloud Pricing</a>
+          <a href="https://www.adobe.com/ai/overview/firefly/gen-ai-approach.html" target="_blank" rel="noopener">Adobe: Firefly Generative AI Approach</a>
+          <a href="https://helpx.adobe.com/legal/product-descriptions/adobe-firefly.html" target="_blank" rel="noopener">Adobe Legal: Firefly Product Description</a>
+          <a href="https://www.figma.com/pricing/" target="_blank" rel="noopener">Figma: Plans and Pricing</a>
+          <a href="https://www.figma.com/security/" target="_blank" rel="noopener">Figma: Security</a>
+          <a href="https://www.perplexity.ai/help-center/en/articles/10352986-enterprise-pricing-and-billing-frequently-asked-questions" target="_blank" rel="noopener">Perplexity: Enterprise Pricing FAQ</a>
+          <a href="https://www.perplexity.ai/hub/blog/how-perplexity-enterprise-pro-keeps-your-data-secure" target="_blank" rel="noopener">Perplexity: Enterprise Pro Security</a>
+          <a href="https://support.deepl.com/hc/en-us/articles/360019924499-About-DeepL-plans" target="_blank" rel="noopener">DeepL: About DeepL Plans</a>
+          <a href="https://www.deepl.com/en/blog/soc2-type2-report-overview" target="_blank" rel="noopener">DeepL: SOC 2 Type II Report</a>
+          <a href="https://fireflies.ai/pricing" target="_blank" rel="noopener">Fireflies: Pricing</a>
+          <a href="https://elevenlabs.io/pricing" target="_blank" rel="noopener">ElevenLabs: Pricing</a>
+          <a href="https://code.claude.com/docs/en/security" target="_blank" rel="noopener">Claude Code Docs: Security</a>
+          <a href="https://code.claude.com/docs/en/agent-sdk/overview" target="_blank" rel="noopener">Claude Agent SDK: Overview</a>
+          <a href="https://www.layer3labs.io/comparisons/chatgpt-vs-claude-for-business" target="_blank" rel="noopener">Layer3 Labs: Claude vs ChatGPT for Business</a>
+          <a href="https://www.g2.com/products/lovable/reviews" target="_blank" rel="noopener">G2: Lovable Reviews</a>
+          <a href="https://particula.tech/blog/lovable-vs-bolt-vs-v0-ai-app-builders" target="_blank" rel="noopener">Particula: Lovable vs Bolt vs v0</a>
+          <a href="https://trust.webflow.com/" target="_blank" rel="noopener">Webflow: Trust Center</a>
+          <a href="https://www.eesel.ai/blog/canva-ai-reviews" target="_blank" rel="noopener">eesel AI: Canva AI Reviews</a>
+          <a href="https://intlpull.com/blog/machine-translation-accuracy-2026-benchmark" target="_blank" rel="noopener">IntlPull: Machine Translation Benchmark</a>
+          <a href="https://www.rcrwireless.com/20250627/business/agentic-ai-gartner" target="_blank" rel="noopener">RCR Wireless: Gartner on Agentic AI</a>
+          <a href="https://www.deloitte.com/us/en/insights/topics/emerging-technologies/ai-agents-scaling-faster.html" target="_blank" rel="noopener">Deloitte: AI Agents and Guardrails</a>
         </div>
       </details>
     </div>
@@ -562,7 +326,7 @@
 </main>
 
 <footer>
-  <div class="wrap">VLI Preview · Estudo reestruturado para decisão executiva, piloto controlado e validação de TI/Jurídico. Publicação externa sempre depende de revisão humana.</div>
+  <div class="wrap">VLI Preview · Análise 360 de ferramentas, plataformas, custos e fluxos de IA para Comunicação.</div>
 </footer>
 </body>
 </html>
