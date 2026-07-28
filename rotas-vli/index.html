@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rotas VLI — Mapa Estratégico da Comunicação Externa</title>
+<style>
+  :root{
+    --paper:#EAF1F6;
+    --paper-deep:#D6E4EC;
+    --paper-line:#0F3A5C;
+    --ink:#0F3A5C;
+    --ink-soft:#3C6482;
+    --ink-faint:#6F8FA6;
+    --card:#FFFFFF;
+    --card-border:#C7D9E4;
+    --accent:#C97A22;
+    --accent-ink:#1B1000;
+    --line-sudeste:#1E9E77;
+    --line-leste:#C97A22;
+    --line-norte:#C0433B;
+    --line-comp:#7C93A6;
+    --focus:#0F3A5C;
+    --shadow: 0 1px 2px rgba(15,58,92,.08), 0 8px 24px rgba(15,58,92,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#0B2A44;
+      --paper-deep:#082238;
+      --paper-line:#BFDCEF;
+      --ink:#E7F1F8;
+      --ink-soft:#AFC9DC;
+      --ink-faint:#7FA0BB;
+      --card:#0E3350;
+      --card-border:#1E4C6E;
+      --accent:#F2B33D;
+      --accent-ink:#1B1000;
+      --line-sudeste:#3FD6A6;
+      --line-leste:#F2B33D;
+      --line-norte:#FF7A6E;
+      --line-comp:#5E7C97;
+      --focus:#F2B33D;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0B2A44; --paper-deep:#082238; --paper-line:#BFDCEF;
+    --ink:#E7F1F8; --ink-soft:#AFC9DC; --ink-faint:#7FA0BB;
+    --card:#0E3350; --card-border:#1E4C6E;
+    --accent:#F2B33D; --accent-ink:#1B1000;
+    --line-sudeste:#3FD6A6; --line-leste:#F2B33D; --line-norte:#FF7A6E; --line-comp:#5E7C97;
+    --focus:#F2B33D;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#EAF1F6; --paper-deep:#D6E4EC; --paper-line:#0F3A5C;
+    --ink:#0F3A5C; --ink-soft:#3C6482; --ink-faint:#6F8FA6;
+    --card:#FFFFFF; --card-border:#C7D9E4;
+    --accent:#C97A22; --accent-ink:#1B1000;
+    --line-sudeste:#1E9E77; --line-leste:#C97A22; --line-norte:#C0433B; --line-comp:#7C93A6;
+    --focus:#0F3A5C;
+    --shadow: 0 1px 2px rgba(15,58,92,.08), 0 8px 24px rgba(15,58,92,.08);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--paper), var(--paper)),
+      repeating-linear-gradient(0deg, transparent, transparent 27px, color-mix(in srgb, var(--paper-line) 10%, transparent) 28px),
+      repeating-linear-gradient(90deg, transparent, transparent 27px, color-mix(in srgb, var(--paper-line) 10%, transparent) 28px);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .mono{
+    font-family:ui-monospace,"SFMono-Regular","JetBrains Mono","Courier New",monospace;
+    font-variant-numeric:tabular-nums;
+  }
+  .display{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-stretch:condensed;
+    font-weight:800;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+  }
+  .eyebrow{
+    font-family:ui-monospace,"SFMono-Regular","JetBrains Mono","Courier New",monospace;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.72rem;
+    color:var(--ink-faint);
+  }
+  a{color:inherit;}
+  button{font:inherit;}
+  :focus-visible{outline:2.5px solid var(--focus); outline-offset:2px; border-radius:2px;}
+
+  .sheet{
+    max-width:1320px;
+    margin:0 auto;
+    padding:28px clamp(16px,4vw,48px) 80px;
+  }
+
+  /* ---------- Title block ---------- */
+  .titleblock{
+    border:1.5px solid var(--card-border);
+    border-radius:4px;
+    background:color-mix(in srgb, var(--card) 70%, transparent);
+    box-shadow:var(--shadow);
+    padding:20px 24px;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:16px;
+    align-items:start;
+  }
+  .titleblock h1{
+    margin:0 0 4px;
+    font-size:clamp(1.7rem,3.6vw,2.5rem);
+    line-height:1.05;
+    text-transform:uppercase;
+  }
+  .titleblock .sub{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:1rem;
+    max-width:62ch;
+  }
+  .meta-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(90px,1fr));
+    gap:2px 22px;
+    font-size:.78rem;
+  }
+  .meta-grid dt{color:var(--ink-faint); text-transform:uppercase; letter-spacing:.08em; font-size:.66rem;}
+  .meta-grid dd{margin:0 0 8px; font-family:ui-monospace,"SFMono-Regular",monospace;}
+
+  .pitch{
+    margin-top:18px;
+    padding-top:18px;
+    border-top:1px dashed var(--card-border);
+    font-size:1.02rem;
+    max-width:80ch;
+    color:var(--ink-soft);
+  }
+  .pitch strong{color:var(--ink); font-weight:700;}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    margin-top:28px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    align-items:flex-end;
+    justify-content:space-between;
+  }
+  .filter-group{display:flex; flex-direction:column; gap:8px;}
+  .filter-group .label{ }
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{
+    border:1.5px solid var(--card-border);
+    background:var(--card);
+    color:var(--ink-soft);
+    border-radius:100px;
+    padding:6px 13px;
+    font-size:.78rem;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s, transform .1s;
+    white-space:nowrap;
+  }
+  .chip:hover{border-color:var(--accent);}
+  .chip.active{
+    background:var(--accent);
+    color:var(--accent-ink);
+    border-color:var(--accent);
+    font-weight:700;
+  }
+  .toggle-comp{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:1.5px solid var(--card-border);
+    border-radius:100px;
+    padding:6px 6px 6px 13px;
+    background:var(--card);
+    font-size:.78rem;
+    cursor:pointer;
+    user-select:none;
+  }
+  .toggle-comp .dot{
+    width:34px;height:19px;border-radius:100px;background:var(--paper-deep);
+    position:relative; border:1.5px solid var(--card-border); transition:background .15s;
+  }
+  .toggle-comp .dot::after{
+    content:"";position:absolute; top:1px; left:1px; width:14px;height:14px;border-radius:50%;
+    background:var(--ink-faint); transition:transform .15s, background .15s;
+  }
+  .toggle-comp.on .dot{background:color-mix(in srgb, var(--line-comp) 35%, var(--paper-deep));}
+  .toggle-comp.on .dot::after{transform:translateX(15px); background:var(--line-comp);}
+
+  /* ---------- Map + dossier layout ---------- */
+  .stage{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:minmax(0,1.62fr) minmax(300px,1fr);
+    gap:18px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    .stage{grid-template-columns:1fr;}
+  }
+  .map-frame{
+    border:1.5px solid var(--card-border);
+    border-radius:4px;
+    background:color-mix(in srgb, var(--card) 55%, transparent);
+    box-shadow:var(--shadow);
+    padding:10px;
+    position:relative;
+  }
+  .map-frame .corner{
+    position:absolute; width:16px; height:16px; opacity:.55;
+    border-color:var(--ink-faint);
+  }
+  .map-frame .corner.tl{top:6px;left:6px;border-top:2px solid;border-left:2px solid;}
+  .map-frame .corner.tr{top:6px;right:6px;border-top:2px solid;border-right:2px solid;}
+  .map-frame .corner.bl{bottom:6px;left:6px;border-bottom:2px solid;border-left:2px solid;}
+  .map-frame .corner.br{bottom:6px;right:6px;border-bottom:2px solid;border-right:2px solid;}
+
+  svg#map{width:100%; height:auto; display:block;}
+  .compass{font-family:ui-monospace,monospace; font-size:11px; fill:var(--ink-faint);}
+  .scale-note{font-family:ui-monospace,monospace; font-size:10.5px; fill:var(--ink-faint);}
+
+  .corridor-path{
+    fill:none; stroke-width:6; stroke-linecap:round; stroke-linejoin:round;
+    cursor:pointer;
+    transition:opacity .25s, stroke-width .15s;
+  }
+  .corridor-hit{fill:none; stroke:transparent; stroke-width:22; cursor:pointer;}
+  .corridor-path.dim{opacity:.16;}
+  .corridor-path.selected{stroke-width:9;}
+  .branch-path{fill:none; stroke-width:3; stroke-dasharray:1 7; stroke-linecap:round; opacity:.85;}
+  .comp-path{fill:none; stroke:var(--line-comp); stroke-width:2.4; stroke-dasharray:6 5; opacity:0; transition:opacity .3s; pointer-events:none;}
+  .comp-path.show{opacity:.85;}
+  .comp-label{font-family:ui-monospace,monospace; font-size:9.6px; fill:var(--line-comp); opacity:0; transition:opacity .3s; pointer-events:none;}
+  .comp-label.show{opacity:.95;}
+
+  .station{fill:var(--paper); stroke:var(--ink); stroke-width:2.2; transition:opacity .25s;}
+  .station.hub{r:8; stroke-width:2.8;}
+  .station.dim{opacity:.25;}
+  .station-label{
+    font-family:ui-monospace,"SFMono-Regular",monospace;
+    font-size:11px;
+    fill:var(--ink);
+    pointer-events:none;
+    transition:opacity .25s;
+  }
+  .station-sub{font-size:8.6px; fill:var(--ink-faint);}
+  .station-label.dim, .station-sub.dim{opacity:.3;}
+
+  .legend{
+    display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; padding:0 6px;
+  }
+  .legend button.leg-item{
+    display:flex; align-items:center; gap:7px;
+    background:none; border:none; cursor:pointer;
+    padding:5px 8px; border-radius:5px;
+    color:var(--ink-soft); font-size:.82rem;
+    transition:background .15s, color .15s;
+  }
+  .legend button.leg-item:hover{background:color-mix(in srgb, var(--card) 60%, transparent);}
+  .legend button.leg-item.selected{color:var(--ink); font-weight:700; background:color-mix(in srgb, var(--card) 80%, transparent);}
+  .leg-swatch{width:22px; height:5px; border-radius:3px; flex:none;}
+
+  /* ---------- Dossier panel ---------- */
+  .dossier{
+    border:1.5px solid var(--card-border);
+    border-radius:4px;
+    background:var(--card);
+    box-shadow:var(--shadow);
+    padding:20px 22px 22px;
+    position:sticky;
+    top:16px;
+    max-height:calc(100vh - 32px);
+    overflow-y:auto;
+  }
+  .dossier h2{
+    margin:2px 0 2px;
+    font-size:1.35rem;
+    text-transform:uppercase;
+    line-height:1.1;
+  }
+  .dossier .code{color:var(--ink-faint); font-size:.75rem; margin-bottom:14px; display:block;}
+  .dossier .lead{color:var(--ink-soft); font-size:.95rem; margin:0 0 16px;}
+  .dossier section{margin-bottom:16px;}
+  .dossier section:last-child{margin-bottom:0;}
+  .dossier h3{
+    font-size:.68rem; text-transform:uppercase; letter-spacing:.1em;
+    color:var(--ink-faint); margin:0 0 6px;
+    font-family:ui-monospace,monospace;
+  }
+  .dossier .tags{display:flex; flex-wrap:wrap; gap:5px;}
+  .dossier .tag{
+    background:var(--paper-deep); color:var(--ink-soft);
+    border-radius:4px; padding:3px 8px; font-size:.74rem;
+    border:1px solid var(--card-border);
+  }
+  .dossier .quote{
+    font-size:1rem; font-weight:600; margin:0; color:var(--ink);
+    border-left:3px solid var(--accent); padding-left:12px;
+  }
+  .dossier .stat-row{display:flex; gap:18px; flex-wrap:wrap;}
+  .dossier .stat{min-width:80px;}
+  .dossier .stat b{display:block; font-size:1.2rem; font-family:ui-monospace,monospace;}
+  .dossier .stat span{font-size:.68rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em;}
+  .dossier .players li{margin-bottom:5px; font-size:.86rem;}
+  .dossier ul{margin:0; padding-left:1.05em;}
+  .dossier .intro-hint{
+    font-size:.86rem; color:var(--ink-faint); margin-top:14px;
+    padding-top:14px; border-top:1px dashed var(--card-border);
+  }
+
+  /* ---------- Sections below ---------- */
+  .section{margin-top:56px;}
+  .section-head{max-width:70ch; margin-bottom:22px;}
+  .section-head h2{
+    font-size:clamp(1.3rem,2.6vw,1.8rem);
+    text-transform:uppercase; margin:6px 0 8px;
+  }
+  .section-head p{color:var(--ink-soft); margin:0;}
+
+  .callouts{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px;
+  }
+  .callout{
+    border:1.5px solid var(--card-border); background:var(--card); border-radius:4px;
+    padding:16px 18px; box-shadow:var(--shadow);
+  }
+  .callout .tag-rev{
+    display:inline-block; font-family:ui-monospace,monospace; font-size:.68rem;
+    color:var(--accent); border:1px solid var(--accent); border-radius:3px;
+    padding:1px 6px; margin-bottom:8px;
+  }
+  .callout h3{margin:0 0 6px; font-size:1.02rem;}
+  .callout p{margin:0; color:var(--ink-soft); font-size:.9rem;}
+
+  table.matrix{
+    width:100%; border-collapse:collapse; font-size:.86rem;
+  }
+  .table-wrap{overflow-x:auto; border:1.5px solid var(--card-border); border-radius:4px; box-shadow:var(--shadow);}
+  table.matrix th, table.matrix td{
+    text-align:left; padding:10px 14px; border-bottom:1px solid var(--card-border);
+    vertical-align:top;
+  }
+  table.matrix thead th{
+    background:var(--paper-deep); text-transform:uppercase; font-size:.66rem; letter-spacing:.08em;
+    color:var(--ink-faint); font-family:ui-monospace,monospace; font-weight:600;
+    position:sticky; top:0;
+  }
+  table.matrix tbody tr:last-child td{border-bottom:none;}
+  table.matrix td strong{color:var(--ink);}
+  .swatch-cell{display:flex; align-items:center; gap:8px; font-weight:700;}
+  .swatch-cell .dotc{width:10px;height:10px;border-radius:50%; flex:none;}
+
+  .roadmap{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px;}
+  .rm-card{border:1.5px solid var(--card-border); border-radius:4px; padding:16px 18px; background:var(--card); box-shadow:var(--shadow);}
+  .rm-card .v{font-family:ui-monospace,monospace; color:var(--accent); font-weight:700; font-size:.85rem;}
+  .rm-card h3{margin:6px 0 6px; font-size:1.05rem;}
+  .rm-card p{margin:0; color:var(--ink-soft); font-size:.88rem;}
+
+  footer.sheet-footer{
+    margin-top:60px; padding-top:18px; border-top:1px dashed var(--card-border);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-size:.74rem; color:var(--ink-faint); font-family:ui-monospace,monospace;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="titleblock">
+    <div>
+      <div class="eyebrow">VLI · Estratégia × Comercial</div>
+      <h1 class="display">Rotas VLI</h1>
+      <p class="sub">Mapa estratégico da comunicação externa — produtos, corredores, players e tom de voz reunidos numa única fonte visual.</p>
+    </div>
+    <dl class="meta-grid">
+      <dt>Revisão</dt><dd>v0.1 — protótipo</dd>
+      <dt>Escala</dt><dd>esquemático</dd>
+      <dt>Base</dt><dd>fontes públicas</dd>
+      <dt>Uso</dt><dd>interno</dd>
+    </dl>
+    <p class="pitch">
+      <strong>A ideia:</strong> hoje as informações de rota, produto, público-alvo e posicionamento vivem espalhadas entre o time de
+      Estratégia e o time Comercial — em slides, planilhas e na cabeça de quem já viajou o corredor. Este protótipo propõe um
+      <strong>mapa vivo</strong>: cada linha é uma rota real da VLI, cada estação carrega os produtos que passam por ali, quem
+      compete naquele território e como a marca deveria falar com cada público. Clique numa linha do mapa para abrir o dossiê do corredor.
+    </p>
+  </div>
+
+  <div class="controls">
+    <div class="filter-group">
+      <span class="eyebrow">Filtrar por produto</span>
+      <div class="chips" id="chips-product"></div>
+    </div>
+    <div class="filter-group">
+      <span class="eyebrow">Filtrar por público-alvo</span>
+      <div class="chips" id="chips-audience"></div>
+    </div>
+    <button class="toggle-comp" id="toggle-comp" aria-pressed="false">
+      <span class="dot"></span> Ver players &amp; concorrentes
+    </button>
+  </div>
+
+  <div class="stage">
+    <div class="map-frame">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <svg id="map" viewBox="0 0 1000 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa esquemático dos corredores logísticos da VLI">
+        <text x="24" y="30" class="compass">N ↑</text>
+        <text x="24" y="878" class="scale-note">mapa esquemático · fora de escala</text>
+        <text x="700" y="878" class="scale-note" text-anchor="end">MATOPIBA → Baixada Santista → Grande Vitória</text>
+
+        <!-- competitor / partner overlay (drawn first, sits under corridors) -->
+        <g id="comp-layer"></g>
+
+        <!-- corridor lines -->
+        <g id="corridor-layer"></g>
+
+        <!-- branch stub -->
+        <g id="branch-layer"></g>
+
+        <!-- stations -->
+        <g id="station-layer"></g>
+      </svg>
+    </div>
+
+    <aside class="dossier" id="dossier" aria-live="polite">
+      <!-- populated by JS -->
+    </aside>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="eyebrow">O framework</span>
+      <h2 class="display">De planilha dispersa a fonte única</h2>
+      <p>A proposta não é só um mapa bonito — é um protocolo para alinhar Estratégia e Comercial antes de qualquer mensagem sair para fora da VLI.</p>
+    </div>
+    <div class="callouts">
+      <div class="callout">
+        <span class="tag-rev">Problema</span>
+        <h3>Comunicação sem mapa</h3>
+        <p>Imprensa, ESG, relações com investidores e comercial falam de "corredores" diferentes, com dados diferentes, sem um lugar comum que diga o que é verdade sobre cada rota.</p>
+      </div>
+      <div class="callout">
+        <span class="tag-rev">Solução</span>
+        <h3>Um dossiê por corredor</h3>
+        <p>Cada linha do mapa vira uma ficha viva: produtos, portos, concorrência, público prioritário, mensagem-chave e tom de voz — validada em conjunto por Estratégia e Comercial.</p>
+      </div>
+      <div class="callout">
+        <span class="tag-rev">Diferencial</span>
+        <h3>Concorrência no mesmo mapa</h3>
+        <p>Rumo, MRS, Vale, Ferrogrão e Hidrovias do Brasil aparecem como camada opcional — a VLI passa a comunicar <em>relativo</em> ao território, não no vácuo.</p>
+      </div>
+      <div class="callout">
+        <span class="tag-rev">Ganho</span>
+        <h3>Briefing em um clique</h3>
+        <p>Assessoria de imprensa, marketing de contas (ABM) e RI usam o mesmo painel para preparar qualquer material — sem reconstruir o contexto do zero a cada pedido.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="eyebrow">Especificações</span>
+      <h2 class="display">Posicionamento e tom de voz por corredor</h2>
+      <p>Ponto de partida para a validação com Estratégia — a mensagem central muda conforme a rota e quem ela precisa convencer.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Corredor</th>
+            <th>Território</th>
+            <th>Público prioritário</th>
+            <th>Mensagem central</th>
+            <th>Tom de voz</th>
+          </tr>
+        </thead>
+        <tbody id="matrix-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="eyebrow">Pilares da marca</span>
+      <h2 class="display">O que amarra as três rotas</h2>
+      <p>Independente do corredor, toda peça de comunicação externa deveria carregar esta espinha dorsal.</p>
+    </div>
+    <div class="callouts">
+      <div class="callout">
+        <span class="tag-rev">Propósito</span>
+        <h3>"Conexões que geram valor"</h3>
+        <p>Transformar a logística do país com responsabilidade — para pessoas, negócios e o planeta. É o filtro para qualquer mensagem, em qualquer corredor.</p>
+      </div>
+      <div class="callout">
+        <span class="tag-rev">Estratégia</span>
+        <h3>Conexão 2030</h3>
+        <p>Plano de longo prazo que reformulou visão e valores da companhia — referência obrigatória para qualquer discurso institucional ou de investidores.</p>
+      </div>
+      <div class="callout">
+        <span class="tag-rev">Regra de ouro modal</span>
+        <h3>Rodovia · Ferrovia · Hidrovia</h3>
+        <p>Até 300&nbsp;km, rodovia compete bem; entre 300 e 1.500&nbsp;km, a ferrovia vence; acima disso, hidrovia. Argumento pronto para justificar por que cada corredor existe.</p>
+      </div>
+      <div class="callout">
+        <span class="tag-rev">Contexto societário</span>
+        <h3>Quem está na mesa</h3>
+        <p>Brookfield, Vale, FI-FGTS, Mitsui e BNDESPar — acionistas com agendas próprias de ESG e retorno. Todo discurso de RI precisa refletir esse equilíbrio.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <span class="eyebrow">Próximos passos</span>
+      <h2 class="display">De protótipo a ferramenta viva</h2>
+      <p>Este arquivo é só a prova de conceito. Para virar jogo mudado de verdade, o mapa precisa parar de ser estático.</p>
+    </div>
+    <div class="roadmap">
+      <div class="rm-card">
+        <span class="v">v0.1 — hoje</span>
+        <h3>Protótipo de conceito</h3>
+        <p>Dados públicos, mapa esquemático, dossiês editáveis à mão. Serve para validar a ideia com Estratégia e Comercial.</p>
+      </div>
+      <div class="rm-card">
+        <span class="v">v0.2</span>
+        <h3>Dados reais dos times</h3>
+        <p>Estratégia valida território e narrativa; Comercial injeta volumes, contas-chave e concorrência real por corredor — com camada de acesso para dados sensíveis.</p>
+      </div>
+      <div class="rm-card">
+        <span class="v">v0.5</span>
+        <h3>Ferramenta de briefing</h3>
+        <p>Comunicação e RI puxam o dossiê do corredor direto para press release, resposta a imprensa ou material de investidor — sempre atualizado, sempre coerente.</p>
+      </div>
+      <div class="rm-card">
+        <span class="v">v1.0</span>
+        <h3>Marketing baseado em contas</h3>
+        <p>Comercial marca contas e leads reais em cada rota; o mapa vira painel de priorização conjunta entre vendas e comunicação externa.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="sheet-footer">
+    <span>ROTAS VLI · protótipo não oficial · uso interno</span>
+    <span>Fontes: vli-logistica.com.br, imprensa especializada em logística e agronegócio (jul/2026)</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------------------------------------------------------------
+  // Data model
+  // ---------------------------------------------------------------
+  var stations = [
+    {id:"stluis",  x:660, y:70,  name:"São Luís",             sub:"Porto de Itaqui · MA", hub:true},
+    {id:"acail",   x:575, y:150, name:"Açailândia",           sub:"MA · junção Carajás",  hub:true},
+    {id:"pfranco", x:530, y:228, name:"Porto Franco / Balsas",sub:"MA · MATOPIBA"},
+    {id:"ptnac",   x:462, y:315, name:"Porto Nacional",       sub:"TO"},
+    {id:"palmas",  x:430, y:378, name:"Palmas",               sub:"TO"},
+    {id:"gurupi",  x:400, y:462, name:"Gurupi",               sub:"TO"},
+    {id:"anapo",   x:330, y:534, name:"Anápolis / Goiânia",   sub:"GO"},
+    {id:"rondo",   x:196, y:566, name:"Rondonópolis",         sub:"MT"},
+    {id:"estrela", x:520, y:672, name:"Estrela d'Oeste",      sub:"SP · fim do tramo norte"},
+    {id:"aragu",   x:454, y:610, name:"Araguari / Uberlândia",sub:"MG · Triângulo Mineiro", hub:true},
+    {id:"uberaba", x:452, y:648, name:"Uberaba",               sub:"MG"},
+    {id:"santos",  x:474, y:800, name:"Santos",               sub:"Porto · SP", hub:true},
+    {id:"govval",  x:592, y:598, name:"Gov. Valadares",        sub:"MG"},
+    {id:"vitoria", x:706, y:642, name:"Vitória",               sub:"Porto · ES", hub:true}
+  ];
+
+  var corridors = [
+    {
+      id:"norte", name:"Corredor Norte", color:"var(--line-norte)",
+      path:["stluis","acail","pfranco","ptnac","palmas","gurupi","anapo","estrela"],
+      states:["MA","TO","PI","GO","SP"],
+      products:["graos","combustiveis","minerio"],
+      audiences:["agro","governo","investidores"],
+      network:"Ferrovia Norte-Sul, tramo norte · ~2.184 km (Açailândia–Estrela d'Oeste)",
+      ports:["Porto de Itaqui / São Luís (TPSL)"],
+      players:[
+        "Ferrogrão — projeto em estudo (parceria VLI + Hidrovias do Brasil), Sinop-MT → Miritituba-PA",
+        "Hidrovias do Brasil — hidrovia Tapajós/Madeira, parceira em estudos do Arco Norte",
+        "Rodovias BR-153/222 — concorrência em trechos curtos"
+      ],
+      quote:"A porta de saída da nova fronteira agrícola do Brasil para o mundo.",
+      positioning:"Corredor da fronteira agrícola (MATOPIBA) rumo ao Arco Norte — menos distância até o porto, menor pegada de carbono que o desvio para o Sudeste.",
+      tone:"Aspiracional e pioneiro — narrativa de crescimento, growth story do agro que ainda está nascendo.",
+      audienceLabel:"Novos produtores do MATOPIBA, tradings exportadoras via Arco Norte, distribuidoras regionais de combustível"
+    },
+    {
+      id:"sudeste", name:"Corredor Sudeste", color:"var(--line-sudeste)",
+      path:["rondo","anapo","aragu","uberaba","santos"],
+      states:["MT","GO","MS","SP"],
+      products:["graos","acucar","fertilizantes","conteineres"],
+      audiences:["agro","imprensa","comunidades"],
+      network:"Ferrovia Centro-Atlântica (malha paulista/oeste) · principal eixo de integração Sudeste–Centro-Oeste",
+      ports:["Porto de Santos (terminais açucareiros / TIPLAM)"],
+      players:[
+        "Rumo — maior operadora ferroviária do país, disputa direta em MT/GO/SP rumo a Santos e Paranaguá",
+        "Transportadoras rodoviárias de longa distância — concorrência em trechos acima de 1.500 km, onde a ferrovia deveria vencer"
+      ],
+      quote:"O caminho mais direto entre a safra recorde e o mundo.",
+      positioning:"Eficiência e capilaridade agro — reduzir o Custo Brasil da soja, milho e açúcar até o porto mais movimentado da América Latina.",
+      tone:"Técnico-comercial, orientado a resultado — custo por tonelada, previsibilidade de safra, parceria de longo prazo.",
+      audienceLabel:"Tradings de grãos, usinas de açúcar e etanol, cooperativas agrícolas, importadores de fertilizantes"
+    },
+    {
+      id:"leste", name:"Corredor Leste", color:"var(--line-leste)",
+      path:["aragu","govval","vitoria"],
+      states:["MG","ES"],
+      products:["minerio","siderurgia","florestal"],
+      audiences:["industria","investidores"],
+      network:"Ferrovia Centro-Atlântica, integrada à Estrada de Ferro Vitória a Minas · ramais menores seguem para BA/SE (fertilizantes e combustíveis)",
+      ports:["Vitória / Vila Velha (ES)"],
+      players:[
+        "Vale — Estrada de Ferro Vitória a Minas (EFVM) e Carajás (EFC), integração e concorrência no minério",
+        "MRS Logística — fronteira sul de Minas Gerais, minério/siderurgia/contêineres (MG–RJ–SP)"
+      ],
+      quote:"Do minério ao aço, sem perder tempo nem competitividade.",
+      positioning:"Solução integrada para a indústria pesada — do minério bruto ao aço plano, com confiabilidade operacional como diferencial.",
+      tone:"Institucional-técnico — robustez, segurança operacional, parceria industrial de longo ciclo.",
+      audienceLabel:"Siderúrgicas, montadoras, indústria de alumínio e cimenteiras"
+    }
+  ];
+
+  var branches = [
+    {from:"govval", dx:70, dy:-46, label:"→ BA / SE · fertilizantes e combustíveis"}
+  ];
+
+  var competitors = [
+    {id:"rumo", color:"var(--line-comp)", path:[[196,566],[300,640],[380,720],[474,800]], label:"Rumo — malha paulista/norte (MT/GO → Santos-Paranaguá)"},
+    {id:"mrs", color:"var(--line-comp)", path:[[520,660],[600,690],[660,650]], label:"MRS — minério, siderurgia e contêineres (MG–RJ–SP)"},
+    {id:"vale-efc", color:"var(--line-comp)", path:[[575,150],[560,260],[545,360]], label:"Vale — Carajás (EFC), minério"},
+    {id:"vale-efvm", color:"var(--line-comp)", path:[[592,598],[706,642]], label:"Vale — Vitória a Minas (EFVM)"},
+    {id:"ferrograo", color:"var(--line-norte)", dash:"3 6", path:[[430,378],[300,340],[190,300]], label:"Ferrogrão — estudo (Sinop-MT → Miritituba-PA)"},
+    {id:"hidrovias", color:"var(--line-comp)", path:[[400,462],[260,430],[150,380]], label:"Hidrovias do Brasil — Tapajós/Madeira"}
+  ];
+
+  var productDefs = [
+    {id:"graos", label:"Grãos & farelo"},
+    {id:"acucar", label:"Açúcar"},
+    {id:"combustiveis", label:"Combustíveis"},
+    {id:"minerio", label:"Minério & siderurgia"},
+    {id:"florestal", label:"Florestal / celulose"},
+    {id:"fertilizantes", label:"Fertilizantes"},
+    {id:"conteineres", label:"Contêineres"}
+  ];
+  var audienceDefs = [
+    {id:"agro", label:"Clientes agro"},
+    {id:"industria", label:"Indústria pesada"},
+    {id:"imprensa", label:"Imprensa"},
+    {id:"governo", label:"Governo & reguladores"},
+    {id:"comunidades", label:"Comunidades & ESG"},
+    {id:"investidores", label:"Investidores"}
+  ];
+
+  var stationById = {};
+  stations.forEach(function(s){ stationById[s.id] = s; });
+
+  // ---------------------------------------------------------------
+  // Render: corridor + branch + competitor + station layers
+  // ---------------------------------------------------------------
+  var svgNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var n = document.createElementNS(svgNS, tag);
+    for(var k in attrs){ n.setAttribute(k, attrs[k]); }
+    return n;
+  }
+  function pointsToPath(ids){
+    return ids.map(function(id, i){
+      var s = stationById[id];
+      return (i === 0 ? "M" : "L") + s.x + "," + s.y;
+    }).join(" ");
+  }
+  function coordsToPath(coords){
+    return coords.map(function(p,i){ return (i===0?"M":"L") + p[0] + "," + p[1]; }).join(" ");
+  }
+
+  var corridorLayer = document.getElementById("corridor-layer");
+  var branchLayer = document.getElementById("branch-layer");
+  var compLayer = document.getElementById("comp-layer");
+  var stationLayer = document.getElementById("station-layer");
+
+  corridors.forEach(function(c){
+    var d = pointsToPath(c.path);
+    var g = el("g", {"data-corridor": c.id});
+    var hit = el("path", {d:d, class:"corridor-hit"});
+    var line = el("path", {d:d, class:"corridor-path", stroke:c.color, "data-corridor": c.id});
+    g.appendChild(line);
+    g.appendChild(hit);
+    g.setAttribute("tabindex","0");
+    g.setAttribute("role","button");
+    g.setAttribute("aria-label", c.name);
+    corridorLayer.appendChild(g);
+    c._el = line;
+    c._group = g;
+    function activate(){ selectCorridor(c.id); }
+    g.addEventListener("click", activate);
+    g.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); activate(); } });
+  });
+
+  branches.forEach(function(b){
+    var s = stationById[b.from];
+    var x2 = s.x + b.dx, y2 = s.y + b.dy;
+    var p = el("path", {d:"M"+s.x+","+s.y+" L"+x2+","+y2, class:"branch-path", stroke:"var(--line-leste)"});
+    branchLayer.appendChild(p);
+    var t = el("text", {x:x2+6, y:y2, class:"station-sub", fill:"var(--ink-faint)"});
+    t.textContent = b.label;
+    branchLayer.appendChild(t);
+  });
+
+  competitors.forEach(function(cp){
+    var d = coordsToPath(cp.path);
+    var p = el("path", {d:d, class:"comp-path", stroke:cp.color, "data-comp": cp.id});
+    if(cp.dash) p.setAttribute("stroke-dasharray", cp.dash);
+    compLayer.appendChild(p);
+    var mid = cp.path[Math.floor(cp.path.length/2)];
+    var t = el("text", {x:mid[0]+6, y:mid[1]-6, class:"comp-label", "data-comp": cp.id});
+    t.textContent = cp.label;
+    compLayer.appendChild(t);
+    cp._path = p; cp._label = t;
+  });
+
+  stations.forEach(function(s){
+    var r = s.hub ? 8 : 5.5;
+    var c = el("circle", {cx:s.x, cy:s.y, r:r, class:"station" + (s.hub ? " hub" : ""), "data-station": s.id});
+    stationLayer.appendChild(c);
+    var anchor = s.x > 760 ? "end" : "start";
+    var tx = anchor === "end" ? s.x - 12 : s.x + 12;
+    var label = el("text", {x:tx, y:s.y - 6, class:"station-label", "data-station": s.id, "text-anchor": anchor});
+    label.textContent = s.name;
+    stationLayer.appendChild(label);
+    var sub = el("text", {x:tx, y:s.y + 8, class:"station-label station-sub", "data-station": s.id, "text-anchor": anchor});
+    sub.textContent = s.sub;
+    stationLayer.appendChild(sub);
+    s._nodes = [c, label, sub];
+  });
+
+  // ---------------------------------------------------------------
+  // Legend
+  // ---------------------------------------------------------------
+  var legend = document.getElementById("legend");
+  corridors.forEach(function(c){
+    var b = document.createElement("button");
+    b.className = "leg-item";
+    b.setAttribute("data-corridor", c.id);
+    b.innerHTML = '<span class="leg-swatch" style="background:' + c.color + '"></span>' + c.name;
+    b.addEventListener("click", function(){ selectCorridor(c.id); });
+    legend.appendChild(b);
+  });
+
+  // ---------------------------------------------------------------
+  // Filters (product / audience) — chips
+  // ---------------------------------------------------------------
+  var activeFilters = {product:null, audience:null};
+
+  function buildChips(container, defs, kind){
+    defs.forEach(function(d){
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.textContent = d.label;
+      b.setAttribute("data-id", d.id);
+      b.addEventListener("click", function(){
+        var cur = activeFilters[kind];
+        activeFilters[kind] = (cur === d.id) ? null : d.id;
+        refreshChips();
+        applyFilters();
+      });
+      container.appendChild(b);
+    });
+  }
+  buildChips(document.getElementById("chips-product"), productDefs, "product");
+  buildChips(document.getElementById("chips-audience"), audienceDefs, "audience");
+
+  function refreshChips(){
+    document.querySelectorAll("#chips-product .chip").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-id") === activeFilters.product);
+    });
+    document.querySelectorAll("#chips-audience .chip").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-id") === activeFilters.audience);
+    });
+  }
+
+  function applyFilters(){
+    var matches = corridors.filter(function(c){
+      var okP = !activeFilters.product || c.products.indexOf(activeFilters.product) > -1;
+      var okA = !activeFilters.audience || c.audiences.indexOf(activeFilters.audience) > -1;
+      return okP && okA;
+    }).map(function(c){ return c.id; });
+
+    var anyFilter = !!(activeFilters.product || activeFilters.audience);
+
+    corridors.forEach(function(c){
+      var dim = anyFilter && matches.indexOf(c.id) === -1;
+      c._el.classList.toggle("dim", dim);
+    });
+    stations.forEach(function(s){
+      var involved = corridors.some(function(c){
+        return matches.indexOf(c.id) > -1 && c.path.indexOf(s.id) > -1;
+      });
+      var dim = anyFilter && !involved;
+      s._nodes.forEach(function(n){ n.classList.toggle("dim", dim); });
+    });
+
+    // auto-select if exactly one match and something is filtered
+    if(anyFilter && matches.length >= 1){
+      selectCorridor(matches[0], true);
+    } else if(!anyFilter){
+      // keep current or show overview
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Competitor overlay toggle
+  // ---------------------------------------------------------------
+  var toggleBtn = document.getElementById("toggle-comp");
+  var compOn = false;
+  toggleBtn.addEventListener("click", function(){
+    compOn = !compOn;
+    toggleBtn.classList.toggle("on", compOn);
+    toggleBtn.setAttribute("aria-pressed", String(compOn));
+    competitors.forEach(function(cp){
+      cp._path.classList.toggle("show", compOn);
+      cp._label.classList.toggle("show", compOn);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // Dossier rendering
+  // ---------------------------------------------------------------
+  var dossier = document.getElementById("dossier");
+  var selectedId = null;
+
+  function productLabel(id){ var d = productDefs.filter(function(x){return x.id===id;})[0]; return d ? d.label : id; }
+  function audienceLabelOf(id){ var d = audienceDefs.filter(function(x){return x.id===id;})[0]; return d ? d.label : id; }
+
+  function renderOverview(){
+    dossier.innerHTML =
+      '<span class="eyebrow">Visão geral</span>' +
+      '<h2>VLI em uma tela</h2>' +
+      '<span class="code">Valor da Logística Integrada · 15 anos em 2025</span>' +
+      '<p class="lead">Ferrovias, portos e terminais integrados ligando o Centro-Oeste, a nova fronteira agrícola (MATOPIBA), Minas Gerais e o Espírito Santo à costa brasileira.</p>' +
+      '<section><h3>Rede</h3><div class="stat-row">' +
+        '<div class="stat"><b>3</b><span>corredores</span></div>' +
+        '<div class="stat"><b>~10 mil km</b><span>ferrovias</span></div>' +
+        '<div class="stat"><b>7</b><span>segmentos de produto</span></div>' +
+      '</div></section>' +
+      '<section><h3>Acionistas</h3><div class="tags">' +
+        ['Brookfield 36,5%','Vale 29,6%','FI-FGTS 15,9%','Mitsui 10%','BNDESPar 8%'].map(function(t){return '<span class="tag">'+t+'</span>';}).join('') +
+      '</div></section>' +
+      '<section><h3>Propósito</h3><p class="quote">Conexões que geram valor para pessoas, negócios e o planeta.</p></section>' +
+      '<p class="intro-hint">Clique numa linha do mapa (ou na legenda abaixo dele) para abrir o dossiê de cada corredor.</p>';
+  }
+
+  function renderCorridor(c){
+    dossier.innerHTML =
+      '<span class="eyebrow" style="color:'+c.color+'">Corredor selecionado</span>' +
+      '<h2>'+c.name+'</h2>' +
+      '<span class="code">'+c.states.join(' · ')+'</span>' +
+      '<p class="quote">'+c.quote+'</p>' +
+      '<section><h3>Rede</h3><p class="lead" style="margin-bottom:0">'+c.network+'</p></section>' +
+      '<section><h3>Produtos</h3><div class="tags">'+c.products.map(function(p){return '<span class="tag">'+productLabel(p)+'</span>';}).join('')+'</div></section>' +
+      '<section><h3>Portos & terminais</h3><ul>'+c.ports.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul></section>' +
+      '<section><h3>Players no território</h3><ul class="players">'+c.players.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul></section>' +
+      '<section><h3>Público prioritário</h3><p class="lead" style="margin-bottom:0">'+c.audienceLabel+'</p></section>' +
+      '<section><h3>Posicionamento</h3><p class="lead" style="margin-bottom:0">'+c.positioning+'</p></section>' +
+      '<section><h3>Tom de voz</h3><p class="lead" style="margin-bottom:0">'+c.tone+'</p></section>';
+  }
+
+  function selectCorridor(id, silent){
+    selectedId = id;
+    var c = corridors.filter(function(x){return x.id===id;})[0];
+    corridors.forEach(function(o){ o._el.classList.toggle("selected", o.id === id); });
+    document.querySelectorAll(".leg-item").forEach(function(b){
+      b.classList.toggle("selected", b.getAttribute("data-corridor") === id);
+    });
+    renderCorridor(c);
+    if(!silent){
+      activeFilters.product = null;
+      activeFilters.audience = null;
+      refreshChips();
+      corridors.forEach(function(o){ o._el.classList.remove("dim"); });
+      stations.forEach(function(s){ s._nodes.forEach(function(n){ n.classList.remove("dim"); }); });
+    }
+  }
+
+  renderOverview();
+
+  // ---------------------------------------------------------------
+  // Positioning / tone matrix table
+  // ---------------------------------------------------------------
+  var tbody = document.getElementById("matrix-body");
+  corridors.forEach(function(c){
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td><div class="swatch-cell"><span class="dotc" style="background:'+c.color+'"></span>'+c.name+'</div></td>' +
+      '<td>'+c.states.join(', ')+'</td>' +
+      '<td>'+c.audienceLabel+'</td>' +
+      '<td><strong>'+c.quote+'</strong></td>' +
+      '<td>'+c.tone+'</td>';
+    tbody.appendChild(tr);
+  });
+
+})();
+</script>
+</body>
+</html>
