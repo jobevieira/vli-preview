@@ -150,6 +150,15 @@ button{font:inherit;color:inherit;}
 .chip svg{width:14px; height:14px; flex:none; stroke:currentColor;}
 .chip:hover{border-color:var(--accent);}
 .chip.active{ color:var(--ink); font-weight:600; background:var(--g3); border-left-color:var(--accent);}
+
+.corridor-switcher-group{margin-top:32px;}
+.corridor-switcher-group .chips{gap:8px;}
+.chip.corridor{
+  padding:7px 14px 7px 12px; font-size:.84rem; border-left-width:4px; border-radius:4px;
+}
+.chip.corridor .dot{width:8px; height:8px; border-radius:50%; flex:none; background:var(--chip-c, var(--ink-faint));}
+.chip.corridor.active{background:var(--g3); font-weight:700;}
+.chip.corridor.dim{opacity:.4;}
 .toggle-comp{
   display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none;
   font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--ink-soft);
@@ -419,6 +428,11 @@ footer.sheet-footer{
     </div>
   </header>
 
+  <div class="filter-group corridor-switcher-group">
+    <span class="fg-label">Ver corredor</span>
+    <div class="chips" id="chips-corridor"></div>
+  </div>
+
   <div class="controls-bar">
     <div class="filter-group">
       <span class="fg-label">Filtrar por produto</span>
@@ -572,26 +586,26 @@ footer.sheet-footer{
   //    lines shown purely as market context.
   // ---------------------------------------------------------------
   var stations = [
-    {id:"stluis",     x:709.8, y:217.4, type:"port", name:"São Luís",              sub:"Porto de Itaqui (TPSL) · MA", side:"right", valign:"below"},
+    {id:"stluis",     x:709.8, y:217.4, type:"port", name:"São Luís",              sub:"Porto de Itaqui (TPSL) · MA", side:"right", valign:"above"},
     {id:"acail",      x:643.0, y:269.4, type:"hub",  name:"Açailândia",            sub:"MA · interconexão com a EFC (Vale)", side:"right", valign:"above"},
     {id:"pfranco",    x:646.1, y:299.4, type:"stop", name:"Porto Franco",          sub:"MA · terminal TIPF",    side:"right", valign:"above"},
     {id:"palmeirante",x:634.0, y:332.2, type:"stop", name:"Palmeirante",           sub:"TO · terminal TIPA",    side:"right", valign:"below"},
-    {id:"ptnac",      x:624.0, y:393.5, type:"hub",  name:"Porto Nacional",        sub:"TO · terminal TIPN, fim do trecho VLI", side:"left", valign:"below"},
+    {id:"ptnac",      x:624.0, y:393.5, type:"hub",  name:"Porto Nacional",        sub:"TO · terminal TIPN", side:"left", valign:"below"},
     {id:"anapo",      x:609.7, y:518.2, type:"stop", name:"Anápolis / Goiânia",    sub:"GO",                    side:"right", valign:"above"},
     {id:"aragu",      x:628.1, y:567.7, type:"hub",  name:"Araguari / Uberlândia", sub:"MG · Triângulo Mineiro", side:"left", valign:"above"},
     {id:"uberaba",    x:634.1, y:588.1, type:"stop", name:"Uberaba",               sub:"MG",                    side:"right", valign:"below"},
-    {id:"campinas",   x:652.3, y:656.2, type:"stop", name:"Campinas",              sub:"SP · fim do trecho VLI (FCA)", side:"left", valign:"above"},
+    {id:"campinas",   x:652.3, y:656.2, type:"stop", name:"Campinas",              sub:"SP", side:"left", valign:"above"},
     {id:"santos",     x:667.5, y:678.8, type:"port", name:"Santos",                sub:"Porto · SP",             side:"left", valign:"below"},
     {id:"govval",     x:759.0, y:568.8, type:"stop", name:"Gov. Valadares",        sub:"MG",                    side:"right", valign:"above"},
     {id:"vitoria",    x:792.6, y:600.4, type:"port", name:"Vitória",               sub:"Porto · ES",             side:"right", valign:"below"},
     // context-only markers: other concessionaires' track, shown just with the competitor overlay
-    {id:"rondo",   x:494.2, y:517.6, type:"stop", name:"Rondonópolis",   sub:"MT · Rumo, Malha Norte", side:"left",  valign:"above", competitorOnly:true},
-    {id:"gurupi",  x:610.4, y:415.4, type:"stop", name:"Gurupi",         sub:"TO · Rumo, Malha Central", side:"left", valign:"below", competitorOnly:true},
-    {id:"estrela", x:582.6, y:599.9, type:"stop", name:"Estrela d'Oeste",sub:"SP · fim da Malha Central (Rumo)", side:"left", valign:"below", competitorOnly:true},
+    {id:"rondo",   x:494.2, y:517.6, type:"stop", name:"Rondonópolis",   sub:"MT", side:"left",  valign:"above", competitorOnly:true},
+    {id:"gurupi",  x:610.4, y:415.4, type:"stop", name:"Gurupi",         sub:"TO", side:"right", valign:"below", competitorOnly:true},
+    {id:"estrela", x:582.6, y:599.9, type:"stop", name:"Estrela d'Oeste",sub:"SP", side:"left", valign:"below", competitorOnly:true},
     // Corredor Minas-Bahia (em transição, ver corridors)
     {id:"corinto",  x:706.1, y:589.0, type:"stop", name:"Corinto",  sub:"MG",                          side:"right", valign:"below"},
-    {id:"salvador", x:830.9, y:442.3, type:"port", name:"Salvador", sub:"Porto · BA",                  side:"right", valign:"above"},
-    {id:"aracaju",  x:860.7, y:398.6, type:"port", name:"Aracaju",  sub:"Terminal TMIB · SE",          side:"right", valign:"below"}
+    {id:"salvador", x:830.9, y:442.3, type:"port", name:"Salvador", sub:"Porto · BA",                  side:"left", valign:"below"},
+    {id:"aracaju",  x:860.7, y:398.6, type:"port", name:"Aracaju",  sub:"Terminal TMIB · SE",          side:"right", valign:"above"}
   ];
 
   var corridors = [
@@ -678,8 +692,10 @@ footer.sheet-footer{
     {id:"rumo-malha-norte", color:"var(--comp)", path:[[494.2,517.6],[590,610],[652.3,656.2],[667.5,678.8]], label:"Rumo · Malha Norte",
       full:"Rumo, Malha Norte (Ferronorte): terminal de Rondonópolis-MT, o maior de grãos da América Latina, ligado à Malha Paulista até Santos."},
     {id:"rumo-malha-central", color:"var(--comp)", path:[[624.0,393.5],[610.4,415.4],[600,510],[582.6,599.9]], label:"Rumo · Malha Central",
+      labelAt:[518,462], anchor:"start",
       full:"Rumo, Malha Central: concessão própria ao sul de Porto Nacional até Estrela d'Oeste-SP (1.537 km, desde 2019)."},
     {id:"mrs", color:"var(--comp)", path:[[714.1,647.8],[717.4,591.8],[705.7,656.0]], label:"MRS Logística",
+      labelAt:[703,637], anchor:"start",
       full:"MRS Logística: minério, siderurgia e contêineres (MG, RJ, SP)."},
     {id:"ferrograo", color:"var(--norte)", dash:"3 5", path:[[476.0,418.3],[466.2,255.1]], label:"Ferrogrão (estudo)",
       full:"Ferrogrão: projeto em estudo, parceria VLI e Hidrovias do Brasil, Sinop-MT até Miritituba-PA."},
@@ -839,8 +855,10 @@ footer.sheet-footer{
     if(cp.dash) p.setAttribute("stroke-dasharray", cp.dash);
     if(cp.full) p.appendChild(el("title", {})).textContent = cp.full;
     compLayer.appendChild(p);
-    var mid = cp.path[Math.floor(cp.path.length/2)];
-    var t = el("text", {x:mid[0]+6, y:mid[1]-6, class:"comp-label", "data-comp": cp.id});
+    var mid = cp.labelAt || cp.path[Math.floor(cp.path.length/2)];
+    var lx = cp.labelAt ? mid[0] : mid[0] + 6;
+    var ly = cp.labelAt ? mid[1] : mid[1] - 6;
+    var t = el("text", {x:lx, y:ly, class:"comp-label", "data-comp": cp.id, "text-anchor": cp.anchor || "start"});
     t.textContent = cp.label;
     if(cp.full) t.appendChild(el("title", {})).textContent = cp.full;
     compLayer.appendChild(t);
@@ -971,6 +989,11 @@ footer.sheet-footer{
       var dim = anyFilter && !involved;
       s._nodes.forEach(function(n){ n.classList.toggle("dim", dim); });
     });
+    document.querySelectorAll(".chip.corridor").forEach(function(ch){
+      var cid = ch.getAttribute("data-corridor");
+      if(cid === "__overview__") return;
+      ch.classList.toggle("dim", anyFilter && matches.indexOf(cid) === -1);
+    });
 
     if(anyFilter && matches.length >= 1){
       selectCorridor(matches[0], true);
@@ -1041,12 +1064,21 @@ footer.sheet-footer{
       '</div>';
   }
 
-  function selectCorridor(id, silent){
-    var c = corridors.filter(function(x){return x.id===id;})[0];
+  var currentCorridorId = null;
+  function syncSelectionUI(id){
+    currentCorridorId = id;
     corridors.forEach(function(o){ o._el.classList.toggle("selected", o.id === id); });
     document.querySelectorAll(".legend-row").forEach(function(t){
       t.classList.toggle("selected", t.getAttribute("data-corridor") === id);
     });
+    document.querySelectorAll(".chip.corridor").forEach(function(ch){
+      ch.classList.toggle("active", ch.getAttribute("data-corridor") === (id || "__overview__"));
+    });
+  }
+
+  function selectCorridor(id, silent){
+    var c = corridors.filter(function(x){return x.id===id;})[0];
+    syncSelectionUI(id);
     renderCorridor(c);
     if(!silent){
       activeFilters.product = null;
@@ -1054,8 +1086,44 @@ footer.sheet-footer{
       refreshChips();
       corridors.forEach(function(o){ o._el.classList.remove("dim"); if(o._accessEl) o._accessEl.classList.remove("dim"); });
       stations.forEach(function(s){ s._nodes.forEach(function(n){ n.classList.remove("dim"); }); });
+      document.querySelectorAll(".chip.corridor").forEach(function(ch){ ch.classList.remove("dim"); });
     }
   }
+
+  function showOverview(){
+    syncSelectionUI(null);
+    renderOverview();
+    activeFilters.product = null;
+    activeFilters.audience = null;
+    refreshChips();
+    corridors.forEach(function(o){ o._el.classList.remove("dim"); if(o._accessEl) o._accessEl.classList.remove("dim"); });
+    stations.forEach(function(s){ s._nodes.forEach(function(n){ n.classList.remove("dim"); }); });
+    document.querySelectorAll(".chip.corridor").forEach(function(ch){ ch.classList.remove("dim"); });
+  }
+
+  // ---------------------------------------------------------------
+  // Corridor switcher: the explicit, always-visible way to see any
+  // corridor's dossier (as opposed to only clicking the map/legend).
+  // ---------------------------------------------------------------
+  (function(){
+    var box = document.getElementById("chips-corridor");
+    var overviewChip = document.createElement("button");
+    overviewChip.className = "chip corridor active";
+    overviewChip.setAttribute("data-corridor", "__overview__");
+    overviewChip.innerHTML = '<span class="dot" style="background:var(--ink-faint)"></span><span>Visão geral</span>';
+    overviewChip.addEventListener("click", showOverview);
+    box.appendChild(overviewChip);
+
+    corridors.forEach(function(c){
+      var b = document.createElement("button");
+      b.className = "chip corridor";
+      b.setAttribute("data-corridor", c.id);
+      b.style.setProperty("--chip-c", c.color);
+      b.innerHTML = '<span class="dot" style="background:'+c.color+'"></span><span>'+c.name+(c.transitional ? ' · em transição' : '')+'</span>';
+      b.addEventListener("click", function(){ selectCorridor(c.id); });
+      box.appendChild(b);
+    });
+  })();
 
   renderOverview();
 
@@ -1122,7 +1190,7 @@ footer.sheet-footer{
   // viewer sees is fresh or a stale cached copy.
   // ---------------------------------------------------------------
   var stamp = document.getElementById("build-stamp");
-  if(stamp) stamp.textContent = "2026-07-28.2";
+  if(stamp) stamp.textContent = "2026-07-28.3";
 
   // ---------------------------------------------------------------
   // Map zoom & pan: wheel to zoom (cursor-anchored), drag to pan,
