@@ -189,6 +189,12 @@ svg#map{width:100%; height:auto; display:block;}
 .comp-path.show{opacity:.85;}
 .comp-label{font-family:'IBM Plex Mono',monospace; font-size:9px; fill:var(--comp); opacity:0; transition:opacity .3s; pointer-events:none;}
 .comp-label.show{opacity:.95;}
+.comp-station{opacity:0; transition:opacity .3s; pointer-events:none;}
+.comp-station.show{opacity:1;}
+.access-path{fill:none; stroke-width:2.2; stroke-dasharray:2 5; stroke-linecap:round; opacity:.85; transition:opacity .25s;}
+.access-path.dim{opacity:.14;}
+.access-label{font-family:'IBM Plex Mono',monospace; font-size:9px; opacity:.85;}
+.legend-row-static{font-family:'IBM Plex Mono',monospace; font-size:9px; fill:var(--ink-faint);}
 
 .station-mark{fill:var(--g1); stroke:var(--ink); stroke-width:2; transition:opacity .25s;}
 .station-mark.dim{opacity:.22;}
@@ -410,23 +416,25 @@ footer.sheet-footer{
 
         <g id="comp-layer"></g>
         <g id="corridor-layer"></g>
+        <g id="access-layer"></g>
         <g id="branch-layer"></g>
         <g id="station-layer"></g>
 
         <!-- legend cartouche -->
-        <g id="legend-cartouche" transform="translate(24,796)">
-          <rect class="legend-box" x="0" y="0" width="238" height="176" rx="2"/>
+        <g id="legend-cartouche" transform="translate(24,748)">
+          <rect class="legend-box" x="0" y="0" width="280" height="230" rx="2"/>
           <text x="14" y="20" class="legend-title">LEGENDA</text>
-          <line x1="14" y1="28" x2="224" y2="28" stroke="var(--card-border)" stroke-width="1"/>
+          <line x1="14" y1="28" x2="266" y2="28" stroke="var(--card-border)" stroke-width="1"/>
           <g id="legend-corridor-rows"></g>
-          <line x1="14" y1="118" x2="224" y2="118" stroke="var(--card-border)" stroke-width="1"/>
-          <circle cx="20" cy="132" r="5" class="station-mark"/>
-          <text x="34" y="136" class="mark-key">parada</text>
-          <circle cx="20" cy="150" r="7" class="station-mark" stroke-width="2.4"/>
-          <circle cx="20" cy="150" r="3" fill="var(--ink-faint)" stroke="none"/>
-          <text x="34" y="154" class="mark-key">conexão entre corredores</text>
-          <rect x="15.5" y="163.5" width="9" height="9" transform="rotate(45 20 168)" class="station-mark"/>
-          <text x="34" y="171" class="mark-key">porto</text>
+          <g id="legend-style-rows"></g>
+          <line x1="14" y1="170" x2="266" y2="170" stroke="var(--card-border)" stroke-width="1"/>
+          <circle cx="20" cy="184" r="5" class="station-mark"/>
+          <text x="34" y="188" class="mark-key">parada</text>
+          <circle cx="20" cy="202" r="7" class="station-mark" stroke-width="2.4"/>
+          <circle cx="20" cy="202" r="3" fill="var(--ink-faint)" stroke="none"/>
+          <text x="34" y="206" class="mark-key">conexão entre corredores</text>
+          <rect x="15.5" y="215.5" width="9" height="9" transform="rotate(45 20 220)" class="station-mark"/>
+          <text x="34" y="223" class="mark-key">porto</text>
         </g>
         <text x="24" y="988" class="mark-key">fontes públicas · posições geográficas aproximadas</text>
       </svg>
@@ -518,74 +526,90 @@ footer.sheet-footer{
   // (equirectangular, cosine-corrected) onto the Brazil silhouette
   // drawn in the same viewBox, so positions read as geographically
   // correct, not just schematic.
+  //
+  // IMPORTANT DISTINCTION drawn on the map:
+  //  - "path" (solid line, corridor color): track VLI itself holds
+  //    the concession for (FCA, or the FNS tramo norte).
+  //  - "access" (dashed line, same corridor color): the final leg
+  //    into the port, which runs on another operator's track that
+  //    VLI reaches via interchange/trackage rights. Always visible,
+  //    never implied to be VLI's own concession.
+  //  - competitors (grey dashed, toggle-only): other concessionaires'
+  //    lines shown purely as market context.
   // ---------------------------------------------------------------
   var stations = [
-    {id:"stluis",  x:709.8, y:217.4, type:"port", name:"São Luís",              sub:"Porto de Itaqui · MA", side:"right", valign:"below"},
-    {id:"acail",   x:643.0, y:269.4, type:"hub",  name:"Açailândia",            sub:"MA · junção Carajás",  side:"right", valign:"above"},
-    {id:"pfranco", x:659.8, y:311.5, type:"stop", name:"Porto Franco / Balsas", sub:"MA · MATOPIBA",         side:"right", valign:"below"},
-    {id:"palmas",  x:636.0, y:360.0, type:"stop", name:"Palmas",                sub:"TO",                    side:"right", valign:"above"},
-    {id:"ptnac",   x:600.0, y:406.0, type:"stop", name:"Porto Nacional",        sub:"TO",                    side:"left",  valign:"above"},
-    {id:"gurupi",  x:604.0, y:440.0, type:"stop", name:"Gurupi",                sub:"TO",                    side:"left",  valign:"below"},
-    {id:"anapo",   x:609.7, y:518.2, type:"stop", name:"Anápolis / Goiânia",    sub:"GO",                    side:"right", valign:"above"},
-    {id:"rondo",   x:494.2, y:517.6, type:"stop", name:"Rondonópolis",         sub:"MT",                    side:"left",  valign:"above"},
-    {id:"estrela", x:582.6, y:599.9, type:"stop", name:"Estrela d'Oeste",       sub:"SP · fim do tramo norte", side:"left", valign:"below"},
-    {id:"aragu",   x:628.1, y:567.7, type:"hub",  name:"Araguari / Uberlândia", sub:"MG · Triângulo Mineiro", side:"left", valign:"above"},
-    {id:"uberaba", x:634.1, y:588.1, type:"stop", name:"Uberaba",               sub:"MG",                    side:"right", valign:"below"},
-    {id:"santos",  x:667.5, y:678.8, type:"port", name:"Santos",                sub:"Porto · SP",             side:"left", valign:"below"},
-    {id:"govval",  x:759.0, y:568.8, type:"stop", name:"Gov. Valadares",        sub:"MG",                    side:"right", valign:"above"},
-    {id:"vitoria", x:792.6, y:600.4, type:"port", name:"Vitória",               sub:"Porto · ES",             side:"right", valign:"below"}
+    {id:"stluis",     x:709.8, y:217.4, type:"port", name:"São Luís",              sub:"Porto de Itaqui (TPSL) · MA", side:"right", valign:"below"},
+    {id:"acail",      x:643.0, y:269.4, type:"hub",  name:"Açailândia",            sub:"MA · interconexão com a EFC (Vale)", side:"right", valign:"above"},
+    {id:"pfranco",    x:646.1, y:299.4, type:"stop", name:"Porto Franco",          sub:"MA · terminal TIPF",    side:"right", valign:"above"},
+    {id:"palmeirante",x:634.0, y:332.2, type:"stop", name:"Palmeirante",           sub:"TO · terminal TIPA",    side:"right", valign:"below"},
+    {id:"ptnac",      x:624.0, y:393.5, type:"hub",  name:"Porto Nacional",        sub:"TO · terminal TIPN, fim do trecho VLI", side:"left", valign:"below"},
+    {id:"anapo",      x:609.7, y:518.2, type:"stop", name:"Anápolis / Goiânia",    sub:"GO",                    side:"right", valign:"above"},
+    {id:"aragu",      x:628.1, y:567.7, type:"hub",  name:"Araguari / Uberlândia", sub:"MG · Triângulo Mineiro", side:"left", valign:"above"},
+    {id:"uberaba",    x:634.1, y:588.1, type:"stop", name:"Uberaba",               sub:"MG",                    side:"right", valign:"below"},
+    {id:"campinas",   x:652.3, y:656.2, type:"stop", name:"Campinas",              sub:"SP · fim do trecho VLI (FCA)", side:"left", valign:"above"},
+    {id:"santos",     x:667.5, y:678.8, type:"port", name:"Santos",                sub:"Porto · SP",             side:"left", valign:"below"},
+    {id:"govval",     x:759.0, y:568.8, type:"stop", name:"Gov. Valadares",        sub:"MG",                    side:"right", valign:"above"},
+    {id:"vitoria",    x:792.6, y:600.4, type:"port", name:"Vitória",               sub:"Porto · ES",             side:"right", valign:"below"},
+    // context-only markers: other concessionaires' track, shown just with the competitor overlay
+    {id:"rondo",   x:494.2, y:517.6, type:"stop", name:"Rondonópolis",   sub:"MT · Rumo, Malha Norte", side:"left",  valign:"above", competitorOnly:true},
+    {id:"gurupi",  x:610.4, y:415.4, type:"stop", name:"Gurupi",         sub:"TO · Rumo, Malha Central", side:"left", valign:"below", competitorOnly:true},
+    {id:"estrela", x:582.6, y:599.9, type:"stop", name:"Estrela d'Oeste",sub:"SP · fim da Malha Central (Rumo)", side:"left", valign:"below", competitorOnly:true}
   ];
 
   var corridors = [
     {
-      id:"norte", name:"Corredor Norte", color:"var(--norte)",
-      path:["stluis","acail","pfranco","palmas","ptnac","gurupi","anapo","estrela"],
-      states:["MA","TO","PI","GO","SP"],
+      id:"centro-norte", name:"Corredor Centro-Norte", color:"var(--norte)",
+      path:["ptnac","palmeirante","pfranco","acail"],
+      access:{path:["acail","stluis"], label:"Acesso ao Porto de Itaqui via EFC (Vale)", labelAt:[706,193], anchor:"end"},
+      states:["MA","TO"],
       products:["graos","combustiveis","minerio"],
       audiences:["agro","governo","investidores"],
-      network:"Ferrovia Norte-Sul, tramo norte, cerca de 2.184 km entre Açailândia e Estrela d'Oeste.",
-      ports:["Porto de Itaqui / São Luís (TPSL)"],
+      network:"Ferrovia Norte-Sul, tramo norte: 720 km entre Açailândia (MA) e Porto Nacional (TO), concessão própria da VLI (subsidiária Ferrovia Norte-Sul S/A). Ao norte de Açailândia, o acesso ao Porto de Itaqui usa a Estrada de Ferro Carajás, da Vale, por interconexão. Ao sul de Porto Nacional, a ferrovia segue sob concessão da Rumo (Malha Central), não da VLI.",
+      ports:["Porto de Itaqui / São Luís (TPSL), acesso final via interconexão com a EFC"],
       players:[
+        "Vale: Estrada de Ferro Carajás (EFC). Dá acesso da VLI ao Porto de Itaqui por interconexão em Açailândia; não é trecho operado pela VLI.",
+        "Rumo: Malha Central. Opera a continuação da FNS ao sul de Porto Nacional até Estrela d'Oeste-SP (1.537 km), concessão própria desde 2019.",
         "Ferrogrão: projeto em estudo (parceria VLI e Hidrovias do Brasil), Sinop-MT até Miritituba-PA.",
-        "Hidrovias do Brasil: hidrovia Tapajós/Madeira, parceira em estudos do Arco Norte.",
-        "Rodovias BR-153/222: concorrência em trechos curtos."
+        "Hidrovias do Brasil: hidrovia Tapajós/Madeira, parceira em estudos do Arco Norte."
       ],
       quote:"A porta de saída da nova fronteira agrícola do Brasil para o mundo.",
-      positioning:"Corredor da fronteira agrícola (MATOPIBA) rumo ao Arco Norte, com menos distância até o porto e menor pegada de carbono que o desvio para o Sudeste.",
-      tone:"Aspiracional e pioneiro: narrativa de crescimento, o agro que ainda está nascendo.",
-      audienceLabel:"Novos produtores do MATOPIBA, tradings exportadoras via Arco Norte, distribuidoras regionais de combustível"
+      positioning:"Corredor da fronteira agrícola (MATOPIBA) rumo ao Arco Norte. A VLI opera o trecho central, Açailândia a Porto Nacional; a chegada ao porto e a continuação para o sul dependem de interconexão com Vale e Rumo, o que também vira argumento comercial: menos baldeação e atrito para o cliente dentro do trecho VLI.",
+      tone:"Aspiracional e pioneiro: narrativa de crescimento, o agro que ainda está nascendo. Precisão sobre até onde vai o trilho da VLI é parte do argumento de confiabilidade.",
+      audienceLabel:"Produtores do MATOPIBA que embarcam via Porto Nacional/Açailândia, tradings exportadoras via Arco Norte, distribuidoras regionais de combustível"
     },
     {
-      id:"sudeste", name:"Corredor Sudeste", color:"var(--sudeste)",
-      path:["rondo","anapo","aragu","uberaba","santos"],
-      states:["MT","GO","MS","SP"],
+      id:"centro-sudeste", name:"Corredor Centro-Sudeste", color:"var(--sudeste)",
+      path:["anapo","aragu","uberaba","campinas"],
+      access:{path:["campinas","santos"], label:"Acesso ao Porto de Santos via interconexão", labelAt:[684,671], anchor:"start"},
+      states:["GO","MG","SP"],
       products:["graos","acucar","fertilizantes","conteineres"],
       audiences:["agro","imprensa","comunidades"],
-      network:"Ferrovia Centro-Atlântica, malha paulista/oeste: principal eixo de integração entre Sudeste e Centro-Oeste.",
-      ports:["Porto de Santos (terminais açucareiros / TIPLAM)"],
+      network:"Ferrovia Centro-Atlântica (FCA): trecho próprio da VLI entre Goiás, Minas Gerais e o interior paulista, incluindo o trecho Campinas-Uberlândia sob controle da FCA. O acesso final ao Porto de Santos depende de interconexão com outra malha.",
+      ports:["Porto de Santos (terminais açucareiros / TIPLAM), acesso final via interconexão"],
       players:[
-        "Rumo: maior operadora ferroviária do país, disputa direta em MT/GO/SP rumo a Santos e Paranaguá.",
-        "Transportadoras rodoviárias de longa distância: concorrência em trechos acima de 1.500 km, onde a ferrovia deveria vencer."
+        "Rumo: Malha Norte (Ferronorte) e Malha Paulista. O terminal de Rondonópolis-MT, o maior de grãos da América Latina, embarca soja e milho do Centro-Oeste até Santos por uma malha própria da Rumo, concorrente direta da rota VLI para o mesmo destino.",
+        "MRS Logística: também disputa acesso ferroviário à Baixada Santista."
       ],
       quote:"O caminho mais direto entre a safra recorde e o mundo.",
-      positioning:"Eficiência e capilaridade agro: reduzir o Custo Brasil da soja, milho e açúcar até o porto mais movimentado da América Latina.",
+      positioning:"Eficiência e capilaridade agro no eixo Goiás, Minas Gerais e São Paulo, com acesso à malha portuária de Santos via interconexão.",
       tone:"Técnico e comercial, orientado a resultado: custo por tonelada, previsibilidade de safra, parceria de longo prazo.",
       audienceLabel:"Tradings de grãos, usinas de açúcar e etanol, cooperativas agrícolas, importadores de fertilizantes"
     },
     {
-      id:"leste", name:"Corredor Leste", color:"var(--leste)",
-      path:["aragu","govval","vitoria"],
+      id:"centro-leste", name:"Corredor Centro-Leste", color:"var(--leste)",
+      path:["aragu","govval"],
+      access:{path:["govval","vitoria"], label:"Acesso a Vitória via EFVM (Vale)", labelAt:[772,591], anchor:"start"},
       states:["MG","ES"],
       products:["minerio","siderurgia","florestal"],
       audiences:["industria","investidores"],
-      network:"Ferrovia Centro-Atlântica integrada à Estrada de Ferro Vitória a Minas. Ramais menores seguem para BA/SE (fertilizantes e combustíveis).",
-      ports:["Vitória / Vila Velha (ES)"],
+      network:"Ferrovia Centro-Atlântica (FCA): trecho próprio em Minas Gerais, com cerca de 257 km também dentro do Espírito Santo. A chegada aos portos de Vitória depende de interconexão com a Estrada de Ferro Vitória a Minas (EFVM), da Vale. Ramais menores seguem para BA/SE (fertilizantes e combustíveis).",
+      ports:["Vitória / Vila Velha (ES), acesso final via interconexão com a EFVM"],
       players:[
-        "Vale: Estrada de Ferro Vitória a Minas (EFVM) e Carajás (EFC), integração e concorrência no minério.",
-        "MRS Logística: fronteira sul de Minas Gerais, minério, siderurgia e contêineres (MG, RJ, SP)."
+        "Vale: Estrada de Ferro Vitória a Minas (EFVM). Parceira de interconexão para o trecho final e, ao mesmo tempo, concorrente no minério.",
+        "MRS Logística: fronteira sul de Minas Gerais, minério, siderurgia e contêineres."
       ],
       quote:"Do minério ao aço, sem perder tempo nem competitividade.",
-      positioning:"Solução integrada para a indústria pesada: do minério bruto ao aço plano, com confiabilidade operacional como diferencial.",
+      positioning:"Solução integrada para a indústria pesada: do minério bruto ao aço plano, com confiabilidade operacional como diferencial dentro do trecho que a VLI de fato opera.",
       tone:"Institucional e técnico: robustez, segurança operacional, parceria industrial de longo ciclo.",
       audienceLabel:"Siderúrgicas, montadoras, indústria de alumínio e cimenteiras"
     }
@@ -596,10 +620,9 @@ footer.sheet-footer{
   ];
 
   var competitors = [
-    {id:"rumo", color:"var(--comp)", path:[[494.2,517.6],[652.3,656.0],[667.5,678.8]], label:"Rumo: malha paulista/norte (MT/GO até Santos-Paranaguá)"},
+    {id:"rumo-malha-norte", color:"var(--comp)", path:[[494.2,517.6],[590,610],[652.3,656.2],[667.5,678.8]], label:"Rumo, Malha Norte (Ferronorte): Rondonópolis-MT, maior terminal de grãos da América Latina, liga-se à Malha Paulista até Santos"},
+    {id:"rumo-malha-central", color:"var(--comp)", path:[[624.0,393.5],[610.4,415.4],[600,510],[582.6,599.9]], label:"Rumo, Malha Central: concessão própria ao sul de Porto Nacional até Estrela d'Oeste-SP (1.537 km, desde 2019)"},
     {id:"mrs", color:"var(--comp)", path:[[714.1,647.8],[717.4,591.8],[705.7,656.0]], label:"MRS: minério, siderurgia e contêineres (MG, RJ, SP)"},
-    {id:"vale-efc", color:"var(--comp)", path:[[593.0,293.6],[643.0,269.4]], label:"Vale: Carajás (EFC), minério"},
-    {id:"vale-efvm", color:"var(--comp)", path:[[717.4,591.8],[792.6,600.4]], label:"Vale: Vitória a Minas (EFVM)"},
     {id:"ferrograo", color:"var(--norte)", dash:"3 5", path:[[476.0,418.3],[466.2,255.1]], label:"Ferrogrão: estudo (Sinop-MT até Miritituba-PA)"},
     {id:"hidrovias", color:"var(--comp)", path:[[466.2,255.1],[455.3,367.5]], label:"Hidrovias do Brasil: Tapajós/Madeira"}
   ];
@@ -667,8 +690,19 @@ footer.sheet-footer{
   function straightPath(coords){
     return coords.map(function(p,i){ return (i===0?"M":"L") + p[0] + "," + p[1]; }).join(" ");
   }
+  function animateDraw(line, delay){
+    try{
+      var len = line.getTotalLength();
+      line.style.strokeDasharray = len;
+      line.style.strokeDashoffset = len;
+      line.getBoundingClientRect();
+      line.style.transition = "stroke-dashoffset 1.1s ease " + delay + "s, opacity .25s, stroke-width .15s";
+      requestAnimationFrame(function(){ line.style.strokeDashoffset = 0; });
+    }catch(e){}
+  }
 
   var corridorLayer = document.getElementById("corridor-layer");
+  var accessLayer = document.getElementById("access-layer");
   var branchLayer = document.getElementById("branch-layer");
   var compLayer = document.getElementById("comp-layer");
   var stationLayer = document.getElementById("station-layer");
@@ -683,14 +717,12 @@ footer.sheet-footer{
   });
   document.getElementById("map").insertBefore(defs, document.getElementById("map").firstChild);
 
-  corridors.forEach(function(c){
+  corridors.forEach(function(c, idx){
     var d = pathFromStationIds(c.path);
-    var length = 2000;
     var g = el("g", {"data-corridor": c.id});
-    var line = el("path", {
-      d:d, class:"corridor-path", stroke:c.color, "data-corridor": c.id,
-      "marker-end":"url(#arrow-"+c.id+")"
-    });
+    var lineAttrs = { d:d, class:"corridor-path", stroke:c.color, "data-corridor": c.id };
+    if(!c.access) lineAttrs["marker-end"] = "url(#arrow-"+c.id+")";
+    var line = el("path", lineAttrs);
     var hit = el("path", {d:d, class:"corridor-hit"});
     g.appendChild(line);
     g.appendChild(hit);
@@ -700,16 +732,21 @@ footer.sheet-footer{
     corridorLayer.appendChild(g);
     c._el = line;
     c._group = g;
+    animateDraw(line, idx * 0.15);
 
-    // line-draw entrance animation
-    try{
-      var len = line.getTotalLength();
-      line.style.strokeDasharray = len;
-      line.style.strokeDashoffset = len;
-      line.getBoundingClientRect();
-      line.style.transition = "stroke-dashoffset 1.1s ease " + (corridors.indexOf(c) * 0.15) + "s, opacity .25s, stroke-width .15s";
-      requestAnimationFrame(function(){ line.style.strokeDashoffset = 0; });
-    }catch(e){}
+    if(c.access){
+      var ad = straightPath(c.access.path.map(function(id){ var s = stationById[id]; return [s.x, s.y]; }));
+      var aline = el("path", {
+        d:ad, class:"access-path", stroke:c.color, "data-corridor":c.id,
+        "marker-end":"url(#arrow-"+c.id+")"
+      });
+      accessLayer.appendChild(aline);
+      animateDraw(aline, idx * 0.15 + 0.5);
+      var alabel = el("text", {x:c.access.labelAt[0], y:c.access.labelAt[1], class:"access-label", fill:c.color, "text-anchor": c.access.anchor || "start"});
+      alabel.textContent = c.access.label;
+      accessLayer.appendChild(alabel);
+      c._accessEl = aline;
+    }
 
     function activate(){ selectCorridor(c.id); }
     g.addEventListener("click", activate);
@@ -725,6 +762,7 @@ footer.sheet-footer{
     branchLayer.appendChild(t);
   });
 
+  var competitorStationNodes = [];
   competitors.forEach(function(cp){
     var d = straightPath(cp.path);
     var p = el("path", {d:d, class:"comp-path", stroke:cp.color, "data-comp": cp.id});
@@ -749,22 +787,26 @@ footer.sheet-footer{
   };
 
   stations.forEach(function(s){
-    stationLayer.appendChild(markShapes[s.type](s));
+    var targetLayer = s.competitorOnly ? compLayer : stationLayer;
+    var markNode = markShapes[s.type](s);
+    if(s.competitorOnly) markNode.classList ? markNode.classList.add("comp-station") : markNode.setAttribute("class", (markNode.getAttribute("class")||"")+" comp-station");
+    targetLayer.appendChild(markNode);
     var anchor = s.side === "right" ? "start" : "end";
     var tx = s.side === "right" ? s.x + 11 : s.x - 11;
     var ty1 = s.valign === "above" ? s.y - 9 : s.y + 15;
     var ty2 = ty1 + (s.valign === "above" ? -11 : 11);
-    var label = el("text", {x:tx, y:ty1, class:"station-label", "data-station": s.id, "text-anchor": anchor});
+    var labelClass = "station-label" + (s.competitorOnly ? " comp-station" : "");
+    var label = el("text", {x:tx, y:ty1, class:labelClass, "data-station": s.id, "text-anchor": anchor});
     label.textContent = s.name;
-    var sub = el("text", {x:tx, y:ty2, class:"station-label station-sub", "data-station": s.id, "text-anchor": anchor});
+    var sub = el("text", {x:tx, y:ty2, class:labelClass + " station-sub", "data-station": s.id, "text-anchor": anchor});
     sub.textContent = s.sub;
-    stationLayer.appendChild(label);
-    stationLayer.appendChild(sub);
+    targetLayer.appendChild(label);
+    targetLayer.appendChild(sub);
     s._nodes = [label, sub];
-    // include the mark node(s) for dim toggling
-    Array.prototype.forEach.call(stationLayer.querySelectorAll('[data-station="'+s.id+'"]'), function(n){
+    Array.prototype.forEach.call(targetLayer.querySelectorAll('[data-station="'+s.id+'"]'), function(n){
       if(s._nodes.indexOf(n) === -1) s._nodes.push(n);
     });
+    if(s.competitorOnly) competitorStationNodes.push(markNode, label, sub);
   });
 
   // ---------------------------------------------------------------
@@ -772,7 +814,7 @@ footer.sheet-footer{
   // ---------------------------------------------------------------
   var legendRows = document.getElementById("legend-corridor-rows");
   corridors.forEach(function(c, i){
-    var y = 46 + i * 30;
+    var y = 46 + i * 26;
     var g = el("g", {"data-corridor": c.id, style:"cursor:pointer"});
     g.appendChild(el("rect", {x:14, y:y-9, width:18, height:4, rx:2, fill:c.color}));
     var t = el("text", {x:40, y:y-4, class:"legend-row", "data-corridor": c.id});
@@ -780,6 +822,19 @@ footer.sheet-footer{
     g.appendChild(t);
     legendRows.appendChild(g);
     g.addEventListener("click", function(){ selectCorridor(c.id); });
+  });
+  var styleRows = document.getElementById("legend-style-rows");
+  var styleY0 = 46 + corridors.length * 26 + 8;
+  [
+    {kind:"access", text:"acesso via interconexão (outro operador)"},
+    {kind:"comp", text:"concessão de outra empresa (contexto)"}
+  ].forEach(function(row, i){
+    var y = styleY0 + i * 22;
+    var lineEl = el("line", {x1:14, y1:y-3, x2:32, y2:y-3, stroke: row.kind==="access" ? "var(--ink-soft)" : "var(--comp)", "stroke-width":2, "stroke-dasharray":"3 3"});
+    styleRows.appendChild(lineEl);
+    var t = el("text", {x:40, y:y, class:"legend-row-static"});
+    t.textContent = row.text;
+    styleRows.appendChild(t);
   });
 
   // ---------------------------------------------------------------
@@ -830,8 +885,10 @@ footer.sheet-footer{
     corridors.forEach(function(c){
       var dim = anyFilter && matches.indexOf(c.id) === -1;
       c._el.classList.toggle("dim", dim);
+      if(c._accessEl) c._accessEl.classList.toggle("dim", dim);
     });
     stations.forEach(function(s){
+      if(s.competitorOnly) return;
       var involved = corridors.some(function(c){
         return matches.indexOf(c.id) > -1 && c.path.indexOf(s.id) > -1;
       });
@@ -845,7 +902,7 @@ footer.sheet-footer{
   }
 
   // ---------------------------------------------------------------
-  // Competitor overlay toggle
+  // Competitor overlay toggle (also reveals context stations + access labels stay always on)
   // ---------------------------------------------------------------
   var toggleBtn = document.getElementById("toggle-comp");
   var compOn = false;
@@ -857,6 +914,7 @@ footer.sheet-footer{
       cp._path.classList.toggle("show", compOn);
       cp._label.classList.toggle("show", compOn);
     });
+    competitorStationNodes.forEach(function(n){ n.classList.toggle("show", compOn); });
   });
 
   // ---------------------------------------------------------------
@@ -874,15 +932,15 @@ footer.sheet-footer{
       '<h2>VLI em uma tela</h2>' +
       '<span class="code">Valor da Logística Integrada, 15 anos em 2025</span>' +
       '<p class="quote">Ferrovias, portos e terminais integrados ligando o Centro-Oeste, a nova fronteira agrícola (MATOPIBA), Minas Gerais e o Espírito Santo à costa brasileira.</p>' +
-      '<section><h3>Rede</h3><div class="stat-row">' +
+      '<section><h3>Rede própria da VLI</h3><div class="stat-row">' +
         '<div class="stat"><b>3</b><span>corredores</span></div>' +
-        '<div class="stat"><b>~10 mil km</b><span>ferrovias</span></div>' +
+        '<div class="stat"><b>~7,9 mil km</b><span>FCA + FNS tramo norte</span></div>' +
         '<div class="stat"><b>7</b><span>segmentos de produto</span></div>' +
       '</div></section>' +
       '<section><h3>Acionistas</h3><div class="tags">' +
         ['Brookfield 36,5%','Vale 29,6%','FI-FGTS 15,9%','Mitsui 10%','BNDESPar 8%'].map(function(t){return '<span class="tag">'+t+'</span>';}).join('') +
       '</div></section>' +
-      '<p class="hint">Clique numa linha do mapa, ou na legenda dentro dele, para abrir o dossiê de cada corredor.</p>' +
+      '<p class="hint">Linha cheia é trilho da VLI. Linha tracejada na mesma cor é acesso ao porto por interconexão. Clique numa linha do mapa, ou na legenda dentro dele, para abrir o dossiê de cada corredor.</p>' +
       '</div>';
   }
 
@@ -891,9 +949,10 @@ footer.sheet-footer{
       '<div class="flag" style="background:'+c.color+'"></div><div class="inner">' +
       '<span class="eyebrow" style="color:'+c.color+'">Corredor selecionado</span>' +
       '<h2>'+c.name+'</h2>' +
-      '<span class="code">'+c.states.join(' · ')+'</span>' +
+      '<span class="code">Trecho próprio: '+c.states.join(' · ')+'</span>' +
       '<p class="quote">'+c.quote+'</p>' +
       '<section><h3>Rede</h3><p class="field">'+c.network+'</p></section>' +
+      (c.access ? '<section><h3>Acesso ao porto</h3><p class="field">'+c.access.label+'. Este trecho não é concessão da VLI.</p></section>' : '') +
       '<section><h3>Produtos</h3><div class="tags">'+c.products.map(function(p){
         var ic = productIcon(p);
         return '<span class="tag">'+(ic?iconSvg(ic):'')+productLabel(p)+'</span>';
@@ -917,7 +976,7 @@ footer.sheet-footer{
       activeFilters.product = null;
       activeFilters.audience = null;
       refreshChips();
-      corridors.forEach(function(o){ o._el.classList.remove("dim"); });
+      corridors.forEach(function(o){ o._el.classList.remove("dim"); if(o._accessEl) o._accessEl.classList.remove("dim"); });
       stations.forEach(function(s){ s._nodes.forEach(function(n){ n.classList.remove("dim"); }); });
     }
   }
