@@ -9,14 +9,17 @@
 
   :root{
     --blue:#0074C1;
-    --blue-deep:#0A2E45;
+    --blue-deep:#082A40;
+    --blue-mid:#0A4E7D;
     --orange:#EF7A1D;
-    --ink:#22303A;
+    --orange-deep:#C25E0E;
+    --sand:#F4EDE1;
+    --ink:#1C2933;
     --muted:#5E6E77;
-    --line:#D7E0E5;
+    --line:#DDE4E8;
     --white:#FFFFFF;
-    --tint:#EEF5F6;
-    --page-bg:#E7EBEE;
+    --tint:#F2F7F9;
+    --page-bg:#DEE4E8;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--page-bg);font-family:'Manrope','Segoe UI',Arial,sans-serif;color:var(--ink);}
@@ -35,37 +38,41 @@
   .slide{
     width:1280px;height:720px;
     background:var(--white);
-    box-shadow:0 6px 28px rgba(20,40,60,.12);
-    border-radius:4px;
+    box-shadow:0 10px 34px rgba(10,30,45,.16);
+    border-radius:2px;
     margin-top:56px;
     position:relative;
     overflow:hidden;
     flex-shrink:0;
   }
   .slide:first-child{margin-top:8px;}
-  .slide-num{position:absolute;bottom:22px;right:34px;font-size:12px;color:#8C9AA3;font-weight:600;}
-  .slide-tag{position:absolute;bottom:22px;left:60px;font-size:10.5px;color:#8C9AA3;font-style:italic;max-width:820px;}
+  .slide-num{position:absolute;bottom:24px;right:40px;font-size:12px;color:#9AA9B1;font-weight:700;letter-spacing:.03em;}
+  .slide-tag{position:absolute;bottom:24px;left:64px;font-size:10.5px;color:#9AA9B1;font-style:italic;max-width:800px;}
   .slide.dark{background:var(--blue-deep);color:var(--white);}
-  .slide.dark .slide-num,.slide.dark .slide-tag{color:#6E93AC;}
+  .slide.dark .slide-num,.slide.dark .slide-tag{color:#5E85A0;}
+  .slide.share{background:var(--sand);}
 
-  .pad{padding:56px 60px 0 60px;}
-  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--blue);text-transform:uppercase;margin:0 0 10px 0;}
-  .slide.dark .eyebrow{color:#7FC3F0;}
-  h1.slide-title{font-size:32px;line-height:1.16;font-weight:800;margin:0 0 6px 0;color:var(--ink);}
+  .pad{padding:52px 64px 0 64px;}
+  .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--blue);text-transform:uppercase;margin:0 0 12px 0;}
+  .slide.dark .eyebrow{color:#6FB6EE;}
+  .slide.share .eyebrow{color:var(--orange-deep);}
+  h1.slide-title{font-size:32px;line-height:1.14;font-weight:800;margin:0 0 6px 0;color:var(--ink);letter-spacing:-.01em;}
   .slide.dark h1.slide-title{color:var(--white);}
-  h1.slide-title .light{font-weight:400;}
-  .sub{font-size:16px;color:var(--muted);font-weight:500;margin:0;}
-  .slide.dark .sub{color:#AEC9DC;}
+  h1.slide-title .light{font-weight:400;opacity:.92;}
+  .sub{font-size:16px;color:var(--muted);font-weight:500;margin:0;line-height:1.5;}
+  .slide.dark .sub{color:#B9D3E4;}
 
   .rule{height:1px;background:var(--line);border:none;margin:0;}
-  .slide.dark .rule{background:rgba(255,255,255,.18);}
+  .slide.dark .rule{background:rgba(255,255,255,.16);}
 
-  .row{display:flex;gap:32px;}
+  .row{display:flex;gap:28px;}
   .col{flex:1;}
 
-  .status-pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:700;}
-  .status-pill.ok{background:#E3F1E6;color:#2E7D45;}
-  .status-pill.pending{background:#FDF0E4;color:#B25A0F;}
+  .status-pill{display:inline-block;padding:4px 13px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.02em;}
+  .status-pill.ok{background:#DFF0E3;color:#256B3B;}
+  .status-pill.pending{background:#FBEBD8;color:#9C5209;}
+
+  .railmark{position:absolute;left:0;right:0;bottom:0;height:64px;pointer-events:none;}
 
   svg text{font-family:'Manrope','Segoe UI',Arial,sans-serif;}
 
@@ -88,179 +95,218 @@
 <!-- 01 — Capa -->
 <!-- ============================================================ -->
 <section class="slide dark">
-  <svg viewBox="0 0 1280 720" width="1280" height="720" style="position:absolute;inset:0;" preserveAspectRatio="none">
-    <line x1="0" y1="560" x2="1280" y2="560" stroke="#173C57" stroke-width="4"/>
-    <line x1="0" y1="592" x2="1280" y2="592" stroke="#173C57" stroke-width="4"/>
-    <g stroke="#173C57" stroke-width="4">
-      <line x1="60" y1="552" x2="60" y2="600"/><line x1="130" y1="552" x2="130" y2="600"/>
-      <line x1="200" y1="552" x2="200" y2="600"/><line x1="270" y1="552" x2="270" y2="600"/>
-      <line x1="340" y1="552" x2="340" y2="600"/><line x1="410" y1="552" x2="410" y2="600"/>
-      <line x1="480" y1="552" x2="480" y2="600"/><line x1="550" y1="552" x2="550" y2="600"/>
-      <line x1="620" y1="552" x2="620" y2="600"/><line x1="690" y1="552" x2="690" y2="600"/>
-      <line x1="760" y1="552" x2="760" y2="600"/><line x1="830" y1="552" x2="830" y2="600"/>
-      <line x1="900" y1="552" x2="900" y2="600"/><line x1="970" y1="552" x2="970" y2="600"/>
-      <line x1="1040" y1="552" x2="1040" y2="600"/><line x1="1110" y1="552" x2="1110" y2="600"/>
-      <line x1="1180" y1="552" x2="1180" y2="600"/><line x1="1250" y1="552" x2="1250" y2="600"/>
+  <svg viewBox="0 0 1280 720" width="1280" height="720" style="position:absolute;inset:0;">
+    <defs>
+      <radialGradient id="glow1" cx="82%" cy="18%" r="60%">
+        <stop offset="0%" stop-color="#1C6FA6" stop-opacity=".55"/>
+        <stop offset="100%" stop-color="#1C6FA6" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="glow2" cx="8%" cy="92%" r="55%">
+        <stop offset="0%" stop-color="#EF7A1D" stop-opacity=".22"/>
+        <stop offset="100%" stop-color="#EF7A1D" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1280" height="720" fill="url(#glow1)"/>
+    <rect width="1280" height="720" fill="url(#glow2)"/>
+    <!-- trilho estilizado atravessando o rodape -->
+    <g stroke="#153E58" stroke-width="5">
+      <line x1="-20" y1="574" x2="1300" y2="574"/>
+      <line x1="-20" y1="610" x2="1300" y2="610"/>
     </g>
-    <circle cx="1090" cy="576" r="10" fill="#EF7A1D"/>
+    <g stroke="#153E58" stroke-width="5">
+      <line x1="40" y1="566" x2="40" y2="618"/><line x1="112" y1="566" x2="112" y2="618"/>
+      <line x1="184" y1="566" x2="184" y2="618"/><line x1="256" y1="566" x2="256" y2="618"/>
+      <line x1="328" y1="566" x2="328" y2="618"/><line x1="400" y1="566" x2="400" y2="618"/>
+      <line x1="472" y1="566" x2="472" y2="618"/><line x1="544" y1="566" x2="544" y2="618"/>
+      <line x1="616" y1="566" x2="616" y2="618"/><line x1="688" y1="566" x2="688" y2="618"/>
+      <line x1="760" y1="566" x2="760" y2="618"/><line x1="832" y1="566" x2="832" y2="618"/>
+      <line x1="904" y1="566" x2="904" y2="618"/><line x1="976" y1="566" x2="976" y2="618"/>
+      <line x1="1048" y1="566" x2="1048" y2="618"/><line x1="1120" y1="566" x2="1120" y2="618"/>
+      <line x1="1192" y1="566" x2="1192" y2="618"/><line x1="1264" y1="566" x2="1264" y2="618"/>
+    </g>
+    <circle cx="920" cy="592" r="11" fill="#EF7A1D"/>
+    <circle cx="920" cy="592" r="20" fill="none" stroke="#EF7A1D" stroke-width="1.5" opacity=".5"/>
   </svg>
-  <div class="pad" style="padding-top:118px;position:relative;">
+  <div class="pad" style="padding-top:104px;position:relative;">
     <div class="eyebrow">Visão estratégica · Movimento Nacional pela Segurança Ferroviária</div>
-    <h1 class="slide-title" style="font-size:50px;max-width:920px;">Como a VLI enxerga<br><span class="light">o Dia D, 23 de setembro</span></h1>
-    <p class="sub" style="max-width:720px;margin-top:20px;font-size:18px;">Nossa visão para o comitê das concessionárias (Rumo, MRS, Vale, CSN, TLSA): o que já construímos, nosso diferencial e onde queremos concentrar força.</p>
+    <h1 class="slide-title" style="font-size:56px;max-width:960px;letter-spacing:-.02em;">Como a VLI enxerga<br><span class="light">o Dia D, 23 de setembro</span></h1>
+    <p class="sub" style="max-width:680px;margin-top:22px;font-size:18px;">O que já construímos, nosso diferencial e onde queremos concentrar força — para decidirmos, juntos, o papel da VLI no comitê das concessionárias.</p>
+    <div style="display:flex;gap:10px;margin-top:34px;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.04em;color:#8FC3EA;border:1px solid #2C5975;border-radius:20px;padding:6px 14px;">RUMO</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.04em;color:#8FC3EA;border:1px solid #2C5975;border-radius:20px;padding:6px 14px;">MRS</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.04em;color:#8FC3EA;border:1px solid #2C5975;border-radius:20px;padding:6px 14px;">VALE</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.04em;color:#8FC3EA;border:1px solid #2C5975;border-radius:20px;padding:6px 14px;">CSN</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.04em;color:#8FC3EA;border:1px solid #2C5975;border-radius:20px;padding:6px 14px;">TLSA</span>
+    </div>
   </div>
   <div class="slide-num">01</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 02 — Objetivo e pilares da campanha -->
+<!-- 02 — Nossa visao: 3 pilares -->
 <!-- ============================================================ -->
 <section class="slide">
   <div class="pad">
     <div class="eyebrow">Nossa visão</div>
     <h1 class="slide-title" style="max-width:980px;">A VLI chega ao Dia D como protagonista, apoiada em três pilares</h1>
-    <hr class="rule" style="margin-top:16px;">
+    <hr class="rule" style="margin-top:18px;">
   </div>
-  <div class="pad" style="padding-top:34px;">
+  <div class="pad" style="padding-top:36px;">
     <div class="row">
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:26px 22px;">
-        <svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#0074C1" stroke-width="2.5"/><circle cx="20" cy="20" r="11" fill="none" stroke="#0074C1" stroke-width="2.5"/><circle cx="20" cy="20" r="4" fill="#EF7A1D"/></svg>
-        <div style="font-weight:800;font-size:18px;margin-top:14px;">Escala</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.55;">143 ações mapeadas para setembro, em 5 corredores. Nenhuma outra frente do movimento parte desse volume.</div>
+      <div class="col" style="background:linear-gradient(165deg,#F2F7F9,#E7F0F5);border:1px solid var(--line);border-radius:10px;padding:28px 24px;position:relative;">
+        <div style="width:48px;height:48px;border-radius:12px;background:#0074C1;display:flex;align-items:center;justify-content:center;">
+          <svg width="26" height="26" viewBox="0 0 26 26"><circle cx="13" cy="13" r="11" fill="none" stroke="#fff" stroke-width="2"/><circle cx="13" cy="13" r="6" fill="none" stroke="#fff" stroke-width="2"/><circle cx="13" cy="13" r="2" fill="#fff"/></svg>
+        </div>
+        <div style="font-weight:800;font-size:19px;margin-top:16px;">Escala</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6;">143 ações mapeadas para setembro, em 5 corredores. Nenhuma outra frente do movimento parte desse volume.</div>
       </div>
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:26px 22px;">
-        <svg width="40" height="40" viewBox="0 0 40 40"><path d="M8 30 Q20 6 32 30" fill="none" stroke="#0074C1" stroke-width="2.5"/><circle cx="14" cy="24" r="3" fill="#EF7A1D"/><circle cx="20" cy="14" r="3" fill="#EF7A1D"/><circle cx="26" cy="24" r="3" fill="#EF7A1D"/></svg>
-        <div style="font-weight:800;font-size:18px;margin-top:14px;">Diferencial</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.55;">Segurança nos Trilhos: cultura, teatro e arte como ferramenta de conscientização. Formato exclusivo da VLI no movimento.</div>
+      <div class="col" style="background:linear-gradient(165deg,#F2F7F9,#E7F0F5);border:1px solid var(--line);border-radius:10px;padding:28px 24px;position:relative;">
+        <div style="width:48px;height:48px;border-radius:12px;background:#EF7A1D;display:flex;align-items:center;justify-content:center;">
+          <svg width="26" height="26" viewBox="0 0 26 26"><path d="M5 20 Q13 4 21 20" fill="none" stroke="#fff" stroke-width="2"/><circle cx="9" cy="15" r="2" fill="#fff"/><circle cx="13" cy="8" r="2" fill="#fff"/><circle cx="17" cy="15" r="2" fill="#fff"/></svg>
+        </div>
+        <div style="font-weight:800;font-size:19px;margin-top:16px;">Diferencial</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6;">Segurança nos Trilhos: cultura, teatro e arte como ferramenta de conscientização. Formato exclusivo da VLI no movimento.</div>
       </div>
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:26px 22px;">
-        <svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 4 L34 12 V26 L20 36 L6 26 V12 Z" fill="none" stroke="#0074C1" stroke-width="2.5"/><circle cx="20" cy="20" r="5" fill="#EF7A1D"/></svg>
-        <div style="font-weight:800;font-size:18px;margin-top:14px;">Ativação-âncora</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.55;">Betim concentra simulado autorizado, lei municipal pioneira e proximidade com a imprensa de BH.</div>
+      <div class="col" style="background:linear-gradient(165deg,#F2F7F9,#E7F0F5);border:1px solid var(--line);border-radius:10px;padding:28px 24px;position:relative;">
+        <div style="width:48px;height:48px;border-radius:12px;background:#0A4E7D;display:flex;align-items:center;justify-content:center;">
+          <svg width="26" height="26" viewBox="0 0 26 26"><path d="M13 3 L23 9 V17 L13 23 L3 17 V9 Z" fill="none" stroke="#fff" stroke-width="2"/><circle cx="13" cy="13" r="4" fill="#fff"/></svg>
+        </div>
+        <div style="font-weight:800;font-size:19px;margin-top:16px;">Ativação-âncora</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6;">Betim concentra simulado autorizado, lei municipal pioneira e proximidade com a imprensa de BH.</div>
       </div>
     </div>
-    <div class="row" style="margin-top:26px;gap:0;">
-      <div style="flex:1;height:1px;background:var(--line);align-self:center;"></div>
-      <div style="padding:0 18px;font-size:13px;color:var(--muted);font-weight:700;">RESULTADO ESPERADO</div>
-      <div style="flex:1;height:1px;background:var(--line);align-self:center;"></div>
+    <div style="margin-top:32px;background:var(--blue-deep);border-radius:10px;padding:22px 28px;display:flex;align-items:center;gap:20px;">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;color:#6FB6EE;white-space:nowrap;">RESULTADO<br>ESPERADO</div>
+      <div style="width:1px;align-self:stretch;background:rgba(255,255,255,.18);"></div>
+      <div style="font-size:14.5px;color:#E4F0F8;line-height:1.6;">Que o material conjunto do comitê (release e peça compartilhada) tenha a VLI como uma das referências centrais de protagonismo, não apenas de adesão.</div>
     </div>
-    <p style="text-align:center;font-size:15px;color:var(--ink);margin-top:14px;max-width:900px;margin-left:auto;margin-right:auto;">
-      Que o material conjunto do comitê (release e peça compartilhada) tenha a VLI como uma das referências centrais de protagonismo, não apenas de adesão.
-    </p>
   </div>
   <div class="slide-tag">Fonte: planejamento VLI, agosto de 2026</div>
   <div class="slide-num">02</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 03 — Escala do projeto (diagrama proporcional) -->
+<!-- 03 — Escala do projeto -->
 <!-- ============================================================ -->
 <section class="slide">
   <div class="pad">
     <div class="eyebrow">Escala do projeto</div>
     <h1 class="slide-title">143 ações mapeadas, em 5 corredores, para setembro de 2026</h1>
-    <hr class="rule" style="margin-top:16px;">
+    <hr class="rule" style="margin-top:18px;">
   </div>
-  <div class="pad" style="padding-top:34px;">
-    <svg width="1160" height="420" viewBox="0 0 1160 420">
-      <!-- barra proporcional: blitz por corredor (total 70) -->
-      <text x="0" y="20" font-size="12" font-weight="700" fill="#5E6E77" letter-spacing="0.5">70 BLITZ EDUCATIVAS, POR CORREDOR</text>
-      <!-- widths proportional to 21,16,13,9,9 out of 68 total, scaled to 1120 -->
-      <g transform="translate(0,34)">
-        <rect x="0" y="0" width="345" height="46" fill="#0074C1"/>
-        <rect x="347" y="0" width="263" height="46" fill="#2E8FD1"/>
-        <rect x="612" y="0" width="213" height="46" fill="#5AA9DE"/>
-        <rect x="827" y="0" width="148" height="46" fill="#8CC4E9"/>
-        <rect x="977" y="0" width="148" height="46" fill="#BFDFF3"/>
-        <text x="10" y="29" font-size="14" font-weight="800" fill="#fff">Sudeste 21</text>
-        <text x="357" y="29" font-size="14" font-weight="800" fill="#fff">Leste 16</text>
-        <text x="622" y="29" font-size="13" font-weight="800" fill="#fff">Minas-Bahia 13</text>
-        <text x="837" y="29" font-size="13" font-weight="800" fill="#22303A">Norte 9</text>
-        <text x="987" y="29" font-size="13" font-weight="800" fill="#22303A">Minas-Rio 9</text>
+  <div class="pad" style="padding-top:38px;">
+    <svg width="1152" height="430" viewBox="0 0 1152 430">
+      <text x="0" y="16" font-size="11.5" font-weight="800" fill="#5E6E77" letter-spacing="1">70 BLITZ EDUCATIVAS, POR CORREDOR</text>
+      <g transform="translate(0,30)">
+        <rect x="0" y="0" width="345" height="52" rx="4" fill="#0074C1"/>
+        <rect x="349" y="0" width="263" height="52" rx="4" fill="#2E8FD1"/>
+        <rect x="616" y="0" width="213" height="52" rx="4" fill="#5AA9DE"/>
+        <rect x="833" y="0" width="148" height="52" rx="4" fill="#9ACDEE"/>
+        <rect x="985" y="0" width="167" height="52" rx="4" fill="#CCE6F5"/>
+        <text x="14" y="33" font-size="15" font-weight="800" fill="#fff">Sudeste 21</text>
+        <text x="363" y="33" font-size="15" font-weight="800" fill="#fff">Leste 16</text>
+        <text x="630" y="33" font-size="14" font-weight="800" fill="#fff">Minas-Bahia 13</text>
+        <text x="847" y="33" font-size="14" font-weight="800" fill="#0A2E45">Norte 9</text>
+        <text x="999" y="33" font-size="14" font-weight="800" fill="#0A2E45">Minas-Rio 9</text>
       </g>
 
-      <text x="0" y="130" font-size="12" font-weight="700" fill="#5E6E77" letter-spacing="0.5">73 AÇÕES DO SEGURANÇA NOS TRILHOS (CULTURA, TEATRO, ARTE)</text>
-      <g transform="translate(0,144)">
-        <rect x="0" y="0" width="1125" height="46" fill="#EF7A1D"/>
-        <text x="10" y="29" font-size="14" font-weight="800" fill="#fff">73 ações distribuídas nas cidades do programa, culminando em setembro</text>
+      <text x="0" y="126" font-size="11.5" font-weight="800" fill="#5E6E77" letter-spacing="1">73 AÇÕES DO SEGURANÇA NOS TRILHOS · CULTURA, TEATRO, ARTE</text>
+      <g transform="translate(0,140)">
+        <rect x="0" y="0" width="1152" height="52" rx="4" fill="#EF7A1D"/>
+        <text x="14" y="33" font-size="15" font-weight="800" fill="#fff">73 ações distribuídas nas cidades do programa, culminando em setembro</text>
       </g>
 
-      <!-- soma visual -->
-      <g transform="translate(500,230)">
-        <line x1="60" y1="0" x2="60" y2="40" stroke="#5E6E77" stroke-width="2"/>
-        <text x="60" y="60" font-size="22" font-weight="800" fill="#5E6E77" text-anchor="middle">+</text>
+      <g transform="translate(556,222)">
+        <line x1="0" y1="0" x2="0" y2="34" stroke="#9AA9B1" stroke-width="2"/>
+        <circle cx="0" cy="42" r="14" fill="none" stroke="#9AA9B1" stroke-width="2"/>
+        <text x="0" y="47" font-size="16" font-weight="800" fill="#5E6E77" text-anchor="middle">+</text>
       </g>
       <g transform="translate(0,300)">
-        <rect x="440" y="0" width="240" height="90" rx="6" fill="#22303A"/>
-        <text x="560" y="40" font-size="34" font-weight="800" fill="#fff" text-anchor="middle">143</text>
-        <text x="560" y="66" font-size="11" fill="#AEC9DC" text-anchor="middle">ações mapeadas ao todo</text>
+        <rect x="436" y="0" width="280" height="110" rx="10" fill="#0A2E45"/>
+        <text x="576" y="52" font-size="42" font-weight="800" fill="#fff" text-anchor="middle">143</text>
+        <text x="576" y="80" font-size="11.5" fill="#9AC3DE" text-anchor="middle" letter-spacing=".4">AÇÕES MAPEADAS AO TODO</text>
       </g>
     </svg>
-    <p style="font-size:11.5px;color:var(--muted);margin-top:6px;max-width:900px;">
-      Parte das 143 ações será conjunta entre blitz e Segurança nos Trilhos, não simplesmente somada.
-    </p>
+    <p style="font-size:11.5px;color:var(--muted);margin-top:10px;max-width:900px;">Parte das 143 ações será conjunta entre blitz e Segurança nos Trilhos, não simplesmente somada.</p>
   </div>
   <div class="slide-tag">Fonte: planejamento VLI por corredor, agosto de 2026</div>
   <div class="slide-num">03</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 04 — O conceito criativo: Segurança nos Trilhos -->
+<!-- 04 — O conceito criativo (cena ilustrada) -->
 <!-- ============================================================ -->
-<section class="slide">
+<section class="slide dark">
   <div class="pad">
     <div class="eyebrow">O conceito criativo</div>
     <h1 class="slide-title">Segurança nos Trilhos: cultura e arte como intervenção de segurança</h1>
-    <hr class="rule" style="margin-top:16px;">
   </div>
-  <div class="pad" style="padding-top:30px;">
+  <svg width="1280" height="420" viewBox="0 0 1280 420" style="margin-top:14px;">
+    <!-- linha do horizonte / trilho -->
+    <line x1="0" y1="330" x2="1280" y2="330" stroke="#1C4E6E" stroke-width="3"/>
+    <g stroke="#173E5A" stroke-width="3">
+      <line x1="80" y1="322" x2="80" y2="338"/><line x1="140" y1="322" x2="140" y2="338"/>
+      <line x1="200" y1="322" x2="200" y2="338"/><line x1="260" y1="322" x2="260" y2="338"/>
+      <line x1="1020" y1="322" x2="1020" y2="338"/><line x1="1080" y1="322" x2="1080" y2="338"/>
+      <line x1="1140" y1="322" x2="1140" y2="338"/><line x1="1200" y1="322" x2="1200" y2="338"/>
+    </g>
+    <path d="M60 330 Q340 250 620 292 T1220 250" fill="none" stroke="#2C5975" stroke-width="2" stroke-dasharray="2 10" stroke-linecap="round"/>
+
+    <!-- performer 1: percussao -->
+    <g transform="translate(300,300)">
+      <ellipse cx="0" cy="26" rx="22" ry="6" fill="#04151F" opacity=".4"/>
+      <circle cx="0" cy="-20" r="14" fill="#F3C99B"/>
+      <rect x="-16" y="-6" width="32" height="34" rx="10" fill="#0074C1"/>
+      <rect x="-13" y="6" width="26" height="16" rx="3" fill="#EF7A1D"/>
+      <circle cx="0" cy="14" r="3" fill="#0A2E45"/>
+      <text x="0" y="60" font-size="13" font-weight="800" text-anchor="middle" fill="#fff">Percussão</text>
+      <text x="0" y="76" font-size="10.5" text-anchor="middle" fill="#9AC3DE">marca o ritmo</text>
+    </g>
+
+    <!-- performer 2: sopro, central e maior -->
+    <g transform="translate(620,270)">
+      <ellipse cx="0" cy="56" rx="26" ry="7" fill="#04151F" opacity=".4"/>
+      <circle cx="0" cy="0" r="17" fill="#F3C99B"/>
+      <rect x="-19" y="16" width="38" height="40" rx="12" fill="#EF7A1D"/>
+      <rect x="14" y="24" width="22" height="6" rx="3" fill="#FBD9B3" transform="rotate(-8 14 24)"/>
+      <path d="M0 -17 q10 -14 22 -10" fill="none" stroke="#FBD9B3" stroke-width="3" stroke-linecap="round"/>
+      <text x="0" y="90" font-size="14" font-weight="800" text-anchor="middle" fill="#fff">Sopro</text>
+      <text x="0" y="106" font-size="10.5" text-anchor="middle" fill="#9AC3DE">anuncia a ação</text>
+    </g>
+
+    <!-- performer 3: puxador do cortejo -->
+    <g transform="translate(940,300)">
+      <ellipse cx="0" cy="26" rx="22" ry="6" fill="#04151F" opacity=".4"/>
+      <circle cx="0" cy="-20" r="14" fill="#F3C99B"/>
+      <rect x="-16" y="-6" width="32" height="34" rx="10" fill="#0A4E7D"/>
+      <path d="M14 6 L34 -6 L34 2 L18 12 Z" fill="#EF7A1D"/>
+      <text x="0" y="60" font-size="13" font-weight="800" text-anchor="middle" fill="#fff">Puxador</text>
+      <text x="0" y="76" font-size="10.5" text-anchor="middle" fill="#9AC3DE">conduz o cortejo</text>
+    </g>
+
+    <!-- badges pare olhe escute -->
+    <g transform="translate(120,60)">
+      <rect x="0" y="0" width="118" height="42" rx="21" fill="#0074C1"/>
+      <text x="59" y="27" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">1 · PARE</text>
+    </g>
+    <g transform="translate(260,60)">
+      <rect x="0" y="0" width="118" height="42" rx="21" fill="#0074C1"/>
+      <text x="59" y="27" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">2 · OLHE</text>
+    </g>
+    <g transform="translate(400,60)">
+      <rect x="0" y="0" width="130" height="42" rx="21" fill="#EF7A1D"/>
+      <text x="65" y="27" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">3 · ESCUTE</text>
+    </g>
+  </svg>
+  <div class="pad" style="padding-top:6px;">
     <div class="row">
-      <div class="col" style="flex:1.3;">
-        <svg width="440" height="260" viewBox="0 0 440 260">
-          <path d="M20 220 Q120 160 220 200 T420 160" fill="none" stroke="#D7E0E5" stroke-width="2" stroke-dasharray="6 6"/>
-          <!-- performer 1: percussao -->
-          <g transform="translate(40,150)">
-            <circle cx="0" cy="0" r="26" fill="#E9F2FA" stroke="#0074C1" stroke-width="2"/>
-            <rect x="-8" y="-6" width="16" height="14" rx="2" fill="#0074C1"/>
-            <text x="0" y="48" font-size="11" font-weight="800" text-anchor="middle" fill="#22303A">Percussão</text>
-            <text x="0" y="62" font-size="9.5" text-anchor="middle" fill="#5E6E77">marca o ritmo</text>
-          </g>
-          <!-- performer 2: sopro -->
-          <g transform="translate(220,120)">
-            <circle cx="0" cy="0" r="26" fill="#FDF0E4" stroke="#EF7A1D" stroke-width="2"/>
-            <rect x="-2" y="-8" width="14" height="4" rx="2" fill="#EF7A1D"/>
-            <text x="0" y="48" font-size="11" font-weight="800" text-anchor="middle" fill="#22303A">Sopro</text>
-            <text x="0" y="62" font-size="9.5" text-anchor="middle" fill="#5E6E77">anuncia a ação</text>
-          </g>
-          <!-- performer 3: puxador -->
-          <g transform="translate(400,150)">
-            <circle cx="0" cy="0" r="26" fill="#E9F2FA" stroke="#0074C1" stroke-width="2"/>
-            <path d="M-8 4 L0 -10 L8 4 Z" fill="#0074C1"/>
-            <text x="-10" y="48" font-size="11" font-weight="800" text-anchor="middle" fill="#22303A">Puxador</text>
-            <text x="-10" y="62" font-size="9.5" text-anchor="middle" fill="#5E6E77">conduz o cortejo</text>
-          </g>
-        </svg>
-        <p style="font-size:12.5px;color:var(--muted);line-height:1.6;max-width:440px;margin-top:6px;">
-          Intervenção cênica itinerante: três atores caracterizados interagem com o público de forma lúdica, percorrendo o território e mobilizando a população.
+      <div class="col">
+        <p style="font-size:13.5px;color:#C8DEEC;line-height:1.7;max-width:520px;margin:0;">
+          Intervenção cênica itinerante: três atores caracterizados interagem com o público de forma lúdica, percorrendo o território e reforçando as três regras de ouro da segurança ferroviária.
         </p>
       </div>
       <div class="col">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em;margin-bottom:10px;">AS TRÊS REGRAS DE OURO</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <div style="display:flex;align-items:center;gap:14px;background:var(--tint);border-radius:6px;padding:14px 16px;">
-            <div style="width:34px;height:34px;border-radius:50%;background:#0074C1;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">1</div>
-            <div><div style="font-weight:800;font-size:15px;">PARE</div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;background:var(--tint);border-radius:6px;padding:14px 16px;">
-            <div style="width:34px;height:34px;border-radius:50%;background:#0074C1;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">2</div>
-            <div><div style="font-weight:800;font-size:15px;">OLHE</div></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:14px;background:var(--tint);border-radius:6px;padding:14px 16px;">
-            <div style="width:34px;height:34px;border-radius:50%;background:#0074C1;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">3</div>
-            <div><div style="font-weight:800;font-size:15px;">ESCUTE</div></div>
-          </div>
-        </div>
-        <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:16px;">
+        <p style="font-size:13.5px;font-style:italic;color:#fff;line-height:1.6;margin:0;border-left:3px solid var(--orange);padding-left:16px;">
           "Todas as ações envolvem cultura, teatro, arte." — coordenação do Segurança nos Trilhos. Formato único entre as concessionárias do movimento.
         </p>
       </div>
@@ -277,35 +323,38 @@
   <div class="pad">
     <div class="eyebrow">Formatos de ativação</div>
     <h1 class="slide-title">Três formatos, cada um mirando um público diferente</h1>
-    <hr class="rule" style="margin-top:16px;">
+    <hr class="rule" style="margin-top:18px;">
   </div>
-  <div class="pad" style="padding-top:32px;">
+  <div class="pad" style="padding-top:36px;">
     <div class="row">
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:0;overflow:hidden;">
-        <div style="background:#0074C1;height:8px;"></div>
-        <div style="padding:22px 20px;">
-          <svg width="36" height="36" viewBox="0 0 36 36"><path d="M4 18 L18 6 L32 18 M10 16 V30 H26 V16" fill="none" stroke="#0074C1" stroke-width="2.4"/></svg>
-          <div style="font-weight:800;font-size:16px;margin-top:12px;">Blitz educativa</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.55;">Ação itinerante em espaços de circulação pública, percorrendo o território.</div>
-          <div style="font-size:11px;color:var(--blue);font-weight:700;margin-top:10px;">População em geral</div>
+      <div class="col" style="background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,45,.06);">
+        <div style="background:linear-gradient(120deg,#0074C1,#0A4E7D);height:96px;display:flex;align-items:center;justify-content:center;">
+          <svg width="44" height="44" viewBox="0 0 44 44"><path d="M5 22 L22 7 L39 22 M12 20 V38 H32 V20" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="padding:22px 22px 26px;">
+          <div style="font-weight:800;font-size:16.5px;">Blitz educativa</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6;">Ação itinerante em espaços de circulação pública, percorrendo o território.</div>
+          <div style="font-size:11px;color:var(--blue);font-weight:800;margin-top:12px;letter-spacing:.02em;">POPULAÇÃO EM GERAL</div>
         </div>
       </div>
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:0;overflow:hidden;">
-        <div style="background:#0074C1;height:8px;"></div>
-        <div style="padding:22px 20px;">
-          <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="12" cy="26" r="5" fill="none" stroke="#0074C1" stroke-width="2.4"/><circle cx="26" cy="26" r="5" fill="none" stroke="#0074C1" stroke-width="2.4"/><path d="M12 26 L16 12 H24 L26 26 M16 12 L20 6" fill="none" stroke="#0074C1" stroke-width="2.4"/></svg>
-          <div style="font-weight:800;font-size:16px;margin-top:12px;">Segurança na pista</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.55;">Intervenções em autoescolas e locais de exame de motociclistas, duas por cidade.</div>
-          <div style="font-size:11px;color:var(--blue);font-weight:700;margin-top:10px;">Candidatos a exame de habilitação</div>
+      <div class="col" style="background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,45,.06);">
+        <div style="background:linear-gradient(120deg,#0074C1,#0A4E7D);height:96px;display:flex;align-items:center;justify-content:center;">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="14" cy="32" r="6" fill="none" stroke="#fff" stroke-width="2.6"/><circle cx="32" cy="32" r="6" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M14 32 L19 14 H28 L32 32 M19 14 L24 6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="padding:22px 22px 26px;">
+          <div style="font-weight:800;font-size:16.5px;">Segurança na pista</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6;">Intervenções em autoescolas e locais de exame de motociclistas, duas por cidade.</div>
+          <div style="font-size:11px;color:var(--blue);font-weight:800;margin-top:12px;letter-spacing:.02em;">CANDIDATOS A EXAME</div>
         </div>
       </div>
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:0;overflow:hidden;">
-        <div style="background:#0074C1;height:8px;"></div>
-        <div style="padding:22px 20px;">
-          <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="12" r="6" fill="none" stroke="#0074C1" stroke-width="2.4"/><path d="M6 30 Q6 18 18 18 Q30 18 30 30" fill="none" stroke="#0074C1" stroke-width="2.4"/></svg>
-          <div style="font-weight:800;font-size:16px;margin-top:12px;">Segurança na comunidade</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.55;">Via parceiros locais, em festas, festivais e eventos temáticos próximos à linha férrea.</div>
-          <div style="font-size:11px;color:var(--blue);font-weight:700;margin-top:10px;">Jovens, idosos, motoristas urbanos</div>
+      <div class="col" style="background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,45,.06);">
+        <div style="background:linear-gradient(120deg,#0074C1,#0A4E7D);height:96px;display:flex;align-items:center;justify-content:center;">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="14" r="7" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M7 38 Q7 22 22 22 Q37 22 37 38" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>
+        </div>
+        <div style="padding:22px 22px 26px;">
+          <div style="font-weight:800;font-size:16.5px;">Segurança na comunidade</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6;">Via parceiros locais, em festas, festivais e eventos temáticos próximos à linha férrea.</div>
+          <div style="font-size:11px;color:var(--blue);font-weight:800;margin-top:12px;letter-spacing:.02em;">JOVENS, IDOSOS, MOTORISTAS</div>
         </div>
       </div>
     </div>
@@ -321,130 +370,140 @@
   <div class="pad">
     <div class="eyebrow">Mapa de execução, 23/09</div>
     <h1 class="slide-title">Betim reúne o que nenhuma outra cidade reúne sozinha</h1>
-    <hr class="rule" style="margin-top:16px;">
+    <hr class="rule" style="margin-top:18px;">
   </div>
-  <div class="pad" style="padding-top:36px;">
-    <svg width="1160" height="120" viewBox="0 0 1160 120">
-      <line x1="40" y1="20" x2="1120" y2="20" stroke="#D7E0E5" stroke-width="3"/>
-      <circle cx="90" cy="20" r="9" fill="#0074C1"/>
-      <circle cx="420" cy="20" r="9" fill="#0074C1"/>
-      <circle cx="740" cy="20" r="9" fill="#0074C1"/>
-      <circle cx="1070" cy="20" r="9" fill="#B9C6CD"/>
-      <text x="90" y="46" font-size="13" font-weight="800" text-anchor="middle" fill="#22303A">Betim (MG)</text>
-      <text x="420" y="46" font-size="13" font-weight="800" text-anchor="middle" fill="#22303A">Uberaba (MG)</text>
-      <text x="740" y="46" font-size="13" font-weight="800" text-anchor="middle" fill="#22303A">Divinópolis (MG)</text>
-      <text x="1070" y="46" font-size="13" font-weight="800" text-anchor="middle" fill="#5E6E77">Aguaí (SP)</text>
+  <div class="pad" style="padding-top:40px;">
+    <svg width="1152" height="110" viewBox="0 0 1152 110">
+      <line x1="30" y1="24" x2="1122" y2="24" stroke="#DDE4E8" stroke-width="3"/>
+      <line x1="30" y1="24" x2="750" y2="24" stroke="#0074C1" stroke-width="3"/>
+      <circle cx="90" cy="24" r="10" fill="#0074C1"/>
+      <circle cx="90" cy="24" r="17" fill="none" stroke="#0074C1" stroke-width="1.4" opacity=".4"/>
+      <circle cx="410" cy="24" r="9" fill="#0074C1"/>
+      <circle cx="730" cy="24" r="9" fill="#0074C1"/>
+      <circle cx="1062" cy="24" r="9" fill="#B9C6CD"/>
+      <text x="90" y="52" font-size="14" font-weight="800" text-anchor="middle" fill="#0A2E45">Betim</text>
+      <text x="410" y="52" font-size="13.5" font-weight="800" text-anchor="middle" fill="#0A2E45">Uberaba</text>
+      <text x="730" y="52" font-size="13.5" font-weight="800" text-anchor="middle" fill="#0A2E45">Divinópolis</text>
+      <text x="1062" y="52" font-size="13.5" font-weight="800" text-anchor="middle" fill="#5E6E77">Aguaí</text>
     </svg>
-    <div class="row" style="margin-top:6px;">
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:18px;">
+    <div class="row" style="margin-top:14px;">
+      <div class="col" style="background:linear-gradient(165deg,#F2F7F9,#E7F0F5);border:1px solid var(--line);border-radius:10px;padding:20px;">
         <span class="status-pill ok">Autorizado pelo corredor</span>
-        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:12px;">Primeira lei municipal de segurança ferroviária do Brasil · CPN crítico · Segurança nos Trilhos ativo · proximidade com a imprensa de BH</div>
+        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:14px;">Primeira lei municipal de segurança ferroviária do Brasil · CPN crítico · Segurança nos Trilhos ativo · proximidade com a imprensa de BH</div>
       </div>
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:18px;">
+      <div class="col" style="background:var(--tint);border:1px solid var(--line);border-radius:10px;padding:20px;">
         <span class="status-pill ok">23/09</span>
-        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:12px;">Cobertura regional viável via presença exclusiva da FCA no Triângulo Mineiro</div>
+        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:14px;">Cobertura regional viável via presença exclusiva da FCA no Triângulo Mineiro</div>
       </div>
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:18px;">
+      <div class="col" style="background:var(--tint);border:1px solid var(--line);border-radius:10px;padding:20px;">
         <span class="status-pill ok">23/09</span>
-        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:12px;">Ação do corredor Leste</div>
+        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:14px;">Ação do corredor Leste</div>
       </div>
-      <div class="col" style="background:var(--tint);border-radius:6px;padding:18px;">
+      <div class="col" style="background:var(--tint);border:1px solid var(--line);border-radius:10px;padding:20px;">
         <span class="status-pill pending">Em definição</span>
-        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:12px;">Ação relevante, sem cobertura de imprensa local garantida</div>
+        <div style="font-size:12px;color:var(--ink);line-height:1.6;margin-top:14px;">Ação relevante, sem cobertura de imprensa local garantida</div>
       </div>
     </div>
-    <p style="font-size:12px;color:var(--muted);margin-top:16px;">Reunião com a prefeitura de Betim em 20/08 para viabilizar a autorização operacional do simulado.</p>
+    <p style="font-size:12px;color:var(--muted);margin-top:18px;">Reunião com a prefeitura de Betim em 20/08 para viabilizar a autorização operacional do simulado.</p>
   </div>
   <div class="slide-tag">Fonte: atualização de planejamento VLI, agosto de 2026</div>
   <div class="slide-num">06</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 07 — Ativacao-ancora: Betim (diagrama de camadas) -->
+<!-- 07 — Ativacao-ancora: Betim -->
 <!-- ============================================================ -->
 <section class="slide dark">
   <div class="pad">
     <div class="eyebrow">A ativação-âncora</div>
     <h1 class="slide-title" style="font-size:28px;max-width:1000px;">Betim: simulado e cortejo do Segurança nos Trilhos, no mesmo dia</h1>
-    <hr class="rule" style="margin-top:16px;">
+    <hr class="rule" style="margin-top:18px;">
   </div>
-  <div class="pad" style="padding-top:30px;">
+  <div class="pad" style="padding-top:32px;">
     <div class="row">
-      <div class="col" style="flex:1.1;">
-        <svg width="480" height="280" viewBox="0 0 480 280">
-          <rect x="20" y="30" width="440" height="90" rx="8" fill="#173C57" stroke="#EF7A1D" stroke-width="2"/>
-          <text x="40" y="65" font-size="15" font-weight="800" fill="#fff">Simulado</text>
-          <text x="40" y="88" font-size="11.5" fill="#AEC9DC">O choque: encenação de um acidente</text>
-          <rect x="60" y="150" width="440" height="90" rx="8" fill="#0A4E7D" stroke="#7FC3F0" stroke-width="2"/>
-          <text x="80" y="185" font-size="15" font-weight="800" fill="#fff">Cortejo do Segurança nos Trilhos</text>
-          <text x="80" y="208" font-size="11.5" fill="#AEC9DC">A resposta cultural: cena, música, regras de ouro</text>
-          <text x="270" y="140" font-size="13" font-weight="800" fill="#EF7A1D" text-anchor="middle">+</text>
+      <div class="col" style="flex:1.05;">
+        <svg width="480" height="270" viewBox="0 0 480 270">
+          <rect x="10" y="20" width="440" height="92" rx="10" fill="#123A55" stroke="#EF7A1D" stroke-width="2"/>
+          <circle cx="52" cy="66" r="18" fill="#EF7A1D" opacity=".18"/>
+          <path d="M44 66 L52 58 L60 66 M52 58 V74" stroke="#EF7A1D" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="82" y="58" font-size="16" font-weight="800" fill="#fff">Simulado</text>
+          <text x="82" y="80" font-size="12" fill="#B9D3E4">O choque: encenação de um acidente</text>
+          <rect x="40" y="140" width="440" height="92" rx="10" fill="#0A4E7D" stroke="#7FC3F0" stroke-width="2"/>
+          <circle cx="82" cy="186" r="18" fill="#7FC3F0" opacity=".18"/>
+          <path d="M74 190 Q82 176 90 190" stroke="#7FC3F0" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <circle cx="82" cy="180" r="3" fill="#7FC3F0"/>
+          <text x="112" y="178" font-size="16" font-weight="800" fill="#fff">Cortejo do Segurança nos Trilhos</text>
+          <text x="112" y="200" font-size="12" fill="#B9D3E4">A resposta cultural: cena, música, regras de ouro</text>
+          <g transform="translate(250,124)">
+            <circle cx="0" cy="0" r="15" fill="#0F2E44" stroke="#EF7A1D" stroke-width="2"/>
+            <text x="0" y="5" font-size="16" font-weight="800" fill="#EF7A1D" text-anchor="middle">+</text>
+          </g>
         </svg>
       </div>
       <div class="col">
-        <div style="font-size:12px;font-weight:700;color:#7FC3F0;letter-spacing:.05em;margin-bottom:10px;">POR QUE ISSO FUNCIONA</div>
-        <p style="font-size:14px;line-height:1.7;color:#DCEBF5;">
+        <div style="font-size:11.5px;font-weight:800;color:#7FC3F0;letter-spacing:.06em;margin-bottom:12px;">POR QUE ISSO FUNCIONA</div>
+        <p style="font-size:14.5px;line-height:1.7;color:#DCEBF5;margin:0;">
           Duas camadas na mesma cobertura de imprensa: o choque do simulado e a resposta cultural do cortejo. Betim já realiza blitz e cortejo regularmente, geralmente no dia 22; a proposta é concentrar no dia 23.
         </p>
-        <div style="margin-top:18px;padding:14px 16px;background:rgba(255,255,255,.06);border-left:3px solid #EF7A1D;border-radius:4px;">
+        <div style="margin-top:20px;padding:16px 18px;background:rgba(255,255,255,.06);border-left:3px solid #EF7A1D;border-radius:6px;">
           <div style="font-size:12.5px;color:#DCEBF5;line-height:1.6;">Referência: cobertura da Fantástico sobre acidentes na malha de Resende foi seguida por redução observada de acidentes na região metropolitana de Curitiba nas semanas posteriores.</div>
         </div>
       </div>
     </div>
   </div>
-  <div class="slide-tag" style="color:#7FC3F0;">Em validação: negociação final com a prefeitura de Betim (20/08) e formato exato da combinação</div>
+  <div class="slide-tag" style="color:#6B96AF;">Em validação: negociação final com a prefeitura de Betim (20/08) e formato exato da combinação</div>
   <div class="slide-num">07</div>
 </section>
 
 <!-- ============================================================ -->
-<!-- 08 — Entregaveis pro comite (funil) -->
+<!-- 08 — Material conjunto, com brainstorm -->
 <!-- ============================================================ -->
 <section class="slide">
   <div class="pad">
-    <div class="eyebrow">Entregáveis para o comitê</div>
-    <h1 class="slide-title">A VLI já tem o que alimentar os dois produtos do grupo</h1>
-    <hr class="rule" style="margin-top:16px;">
+    <div class="eyebrow">Material conjunto do comitê</div>
+    <h1 class="slide-title">Além do release: o que pode ser unificado entre as empresas</h1>
+    <hr class="rule" style="margin-top:18px;">
   </div>
-  <div class="pad" style="padding-top:34px;">
-    <svg width="1160" height="380" viewBox="0 0 1160 380">
-      <!-- inputs -->
-      <rect x="0" y="20" width="330" height="70" rx="6" fill="var(--tint)" fill-opacity="1" style="fill:#EEF5F6"/>
-      <text x="20" y="48" font-size="14" font-weight="800" fill="#22303A">Grade de 143 ações</text>
-      <text x="20" y="68" font-size="11" fill="#5E6E77">Betim como ação-âncora do Dia D</text>
-
-      <rect x="0" y="110" width="330" height="70" rx="6" style="fill:#EEF5F6"/>
-      <text x="20" y="138" font-size="14" font-weight="800" fill="#22303A">Conteúdo do Segurança nos Trilhos</text>
-      <text x="20" y="158" font-size="11" fill="#5E6E77">Material diferenciado, pronto para uso</text>
-
-      <!-- arrows -->
-      <path d="M330 55 L480 55 L480 130 L520 130" fill="none" stroke="#B9C6CD" stroke-width="2"/>
-      <path d="M330 145 L440 145 L440 220 L520 220" fill="none" stroke="#B9C6CD" stroke-width="2"/>
-      <path d="M330 55 L480 55 L480 220 L520 220" fill="none" stroke="#B9C6CD" stroke-width="2" opacity="0"/>
-
-      <!-- outputs -->
-      <rect x="520" y="90" width="330" height="90" rx="6" fill="#0074C1"/>
-      <text x="544" y="128" font-size="15" font-weight="800" fill="#fff">Produto 1: Release conjunto</text>
-      <text x="544" y="150" font-size="11.5" fill="#DCEBF5">
-        <tspan x="544" dy="0">Assinado por todas as empresas, buscando</tspan>
-        <tspan x="544" dy="16">exposição qualificada (TV, matéria nacional)</tspan>
-      </text>
-
-      <rect x="520" y="200" width="330" height="90" rx="6" fill="#EF7A1D"/>
-      <text x="544" y="238" font-size="15" font-weight="800" fill="#fff">Produto 2: Peça compartilhada</text>
-      <text x="544" y="260" font-size="11.5" fill="#FDEBD9">
-        <tspan x="544" dy="0">Folder/panfleto com a logo de todas as empresas,</tspan>
-        <tspan x="544" dy="16">a partir de materiais já em produção</tspan>
-      </text>
-
-      <path d="M330 55 L470 55" fill="none" stroke="#B9C6CD" stroke-width="2"/>
-      <path d="M470 55 L470 135 L520 135" fill="none" stroke="#B9C6CD" stroke-width="2" marker-end="url(#arrow)"/>
-      <path d="M330 145 L460 145 L460 245 L520 245" fill="none" stroke="#B9C6CD" stroke-width="2" marker-end="url(#arrow)"/>
-      <defs>
-        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#B9C6CD"/></marker>
-      </defs>
-    </svg>
+  <div class="pad" style="padding-top:32px;">
+    <div class="row">
+      <div class="col" style="flex:.85;">
+        <div style="font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.05em;margin-bottom:12px;">JÁ COMBINADO</div>
+        <div style="background:var(--blue);border-radius:10px;padding:18px 20px;color:#fff;margin-bottom:12px;">
+          <div style="font-weight:800;font-size:14.5px;">Release conjunto</div>
+          <div style="font-size:11.5px;color:#DCEBF5;margin-top:4px;">Assinado por todas as empresas</div>
+        </div>
+        <div style="background:var(--orange);border-radius:10px;padding:18px 20px;color:#fff;">
+          <div style="font-weight:800;font-size:14.5px;">Flyer / panfleto</div>
+          <div style="font-size:11.5px;color:#FDEBD9;margin-top:4px;">Peça única com a logo de todas as empresas</div>
+        </div>
+      </div>
+      <div class="col" style="flex:1.3;">
+        <div style="font-size:11.5px;font-weight:800;color:var(--orange-deep);letter-spacing:.05em;margin-bottom:12px;">PARA PROPOR AO COMITÊ</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:var(--tint);border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+            <div style="font-weight:800;font-size:13px;">Banner / faixa</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">Para o local da ação-âncora, mesma identidade do flyer</div>
+          </div>
+          <div style="background:var(--tint);border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+            <div style="font-weight:800;font-size:13px;">Placa educativa</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">Sinalização fixa nas PNs mais críticas</div>
+          </div>
+          <div style="background:var(--tint);border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+            <div style="font-weight:800;font-size:13px;">Template de post</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">Padrão para cada empresa publicar no próprio perfil</div>
+          </div>
+          <div style="background:var(--tint);border:1px solid var(--line);border-radius:8px;padding:14px 16px;">
+            <div style="font-weight:800;font-size:13px;">Backdrop de coletiva</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;">Para entrevistas no Dia D, com todas as logos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:22px;background:#0A2E45;border-radius:10px;padding:18px 24px;">
+      <div style="font-size:13px;color:#E4F0F8;line-height:1.6;"><b style="color:#fff;">A estratégia da VLI:</b> oferecer o Segurança nos Trilhos como base visual e criativa desses materiais, não só como conteúdo próprio. Se o grupo cênico e as regras PARE/OLHE/ESCUTE aparecerem no flyer e no banner comuns, a VLI se sobressai mesmo dentro do material do setor.</div>
+    </div>
   </div>
-  <div class="slide-tag">Fonte: planejamento VLI, agosto de 2026</div>
+  <div class="slide-tag">Fonte: planejamento VLI, agosto de 2026 · lista de materiais em aberto para validação do comitê</div>
   <div class="slide-num">08</div>
 </section>
 
@@ -456,28 +515,28 @@
     <div class="eyebrow">Cronograma de execução</div>
     <h1 class="slide-title" style="font-size:28px;">Linha do tempo até 23 de setembro</h1>
   </div>
-  <div class="pad" style="padding-top:60px;">
-    <svg width="1160" height="280" viewBox="0 0 1160 280">
-      <line x1="60" y1="40" x2="1100" y2="40" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+  <div class="pad" style="padding-top:64px;">
+    <svg width="1152" height="280" viewBox="0 0 1152 280">
+      <line x1="60" y1="40" x2="1092" y2="40" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
       <g>
         <circle cx="60" cy="40" r="7" fill="#7FC3F0"/>
         <text x="60" y="16" font-size="12" font-weight="800" fill="#7FC3F0" text-anchor="start">20/08</text>
         <text x="60" y="70" font-size="13" font-weight="800" fill="#fff" text-anchor="start">Reunião com a prefeitura de Betim</text>
         <text x="60" y="90" font-size="11" fill="#AEC9DC" text-anchor="start">Viabilizar autorização operacional do simulado</text>
       </g>
-      <g transform="translate(407,0)">
+      <g transform="translate(404,0)">
         <circle cx="0" cy="40" r="7" fill="#7FC3F0"/>
         <text x="0" y="16" font-size="12" font-weight="800" fill="#7FC3F0" text-anchor="middle">Até 22/08</text>
         <text x="0" y="70" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">Grade final compilada</text>
         <text x="0" y="90" font-size="11" fill="#AEC9DC" text-anchor="middle">143 ações consolidadas por corredor</text>
       </g>
-      <g transform="translate(753,0)">
+      <g transform="translate(748,0)">
         <circle cx="0" cy="40" r="7" fill="#7FC3F0"/>
         <text x="0" y="16" font-size="12" font-weight="800" fill="#7FC3F0" text-anchor="middle">Semana seguinte</text>
         <text x="0" y="70" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">Proposta ao comitê</text>
         <text x="0" y="90" font-size="11" fill="#AEC9DC" text-anchor="middle">Apresentação às demais concessionárias</text>
       </g>
-      <g transform="translate(1100,0)">
+      <g transform="translate(1092,0)">
         <circle cx="0" cy="40" r="8" fill="#EF7A1D"/>
         <text x="0" y="16" font-size="12" font-weight="800" fill="#EF7A1D" text-anchor="end">23/09</text>
         <text x="0" y="70" font-size="13" font-weight="800" fill="#fff" text-anchor="end">Dia D</text>
@@ -489,10 +548,10 @@
 </section>
 
 <!-- ============================================================ -->
-<!-- 10 — Fechamento -->
+<!-- 10 — Fechamento interno -->
 <!-- ============================================================ -->
 <section class="slide">
-  <div class="pad" style="padding-top:120px;">
+  <div class="pad" style="padding-top:118px;">
     <div class="eyebrow">O pedido da VLI ao comitê</div>
     <h1 class="slide-title" style="font-size:32px;max-width:920px;">Reconhecer Betim como ação-âncora do Dia D, e o Segurança nos Trilhos como diferencial do setor</h1>
     <hr class="rule" style="margin:26px 0;max-width:500px;">
@@ -500,8 +559,49 @@
       Com isso, a VLI entra no material conjunto (release e peça compartilhada) com uma ação concreta, autorizada e com apelo real de imprensa, além de um formato de atuação que nenhuma outra concessionária tem hoje.
     </p>
   </div>
-  <div class="slide-tag">Documento vivo. Atualizado conforme novos alinhamentos chegam.</div>
+  <div class="slide-tag">Uso interno VLI. Atualizado conforme novos alinhamentos chegam.</div>
   <div class="slide-num">10</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11 — Para compartilhar com o comite (visao externa) -->
+<!-- ============================================================ -->
+<section class="slide share">
+  <svg viewBox="0 0 1280 720" width="1280" height="720" style="position:absolute;inset:0;">
+    <defs>
+      <radialGradient id="glowShare" cx="90%" cy="10%" r="55%">
+        <stop offset="0%" stop-color="#EF7A1D" stop-opacity=".14"/>
+        <stop offset="100%" stop-color="#EF7A1D" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1280" height="720" fill="url(#glowShare)"/>
+  </svg>
+  <div class="pad" style="padding-top:96px;position:relative;">
+    <div class="eyebrow">Para compartilhar com o comitê</div>
+    <h1 class="slide-title" style="font-size:38px;max-width:920px;">Como a VLI quer atuar no Dia D</h1>
+    <hr class="rule" style="margin:22px 0;max-width:420px;">
+  </div>
+  <div class="pad" style="padding-top:8px;">
+    <div class="row" style="gap:22px;">
+      <div class="col" style="background:#fff;border-radius:10px;padding:22px;box-shadow:0 3px 14px rgba(10,30,45,.06);">
+        <div style="font-size:11px;font-weight:800;color:var(--orange-deep);letter-spacing:.05em;">O QUE TRAZEMOS</div>
+        <div style="font-size:14.5px;color:var(--ink);line-height:1.6;margin-top:8px;">Um programa próprio de cultura, teatro e arte pela segurança ferroviária, já em execução em cinco cidades.</div>
+      </div>
+      <div class="col" style="background:#fff;border-radius:10px;padding:22px;box-shadow:0 3px 14px rgba(10,30,45,.06);">
+        <div style="font-size:11px;font-weight:800;color:var(--orange-deep);letter-spacing:.05em;">COMO QUEREMOS PARTICIPAR</div>
+        <div style="font-size:14.5px;color:var(--ink);line-height:1.6;margin-top:8px;">Com uma ação-âncora concreta em setembro, integrada ao material conjunto do setor.</div>
+      </div>
+      <div class="col" style="background:#fff;border-radius:10px;padding:22px;box-shadow:0 3px 14px rgba(10,30,45,.06);">
+        <div style="font-size:11px;font-weight:800;color:var(--orange-deep);letter-spacing:.05em;">O QUE PROPOMOS AO GRUPO</div>
+        <div style="font-size:14.5px;color:var(--ink);line-height:1.6;margin-top:8px;">Construir juntos o release, o flyer e os demais materiais comuns do Dia D, a partir do que cada empresa já tem pronto.</div>
+      </div>
+    </div>
+    <div style="margin-top:26px;text-align:center;">
+      <div style="font-size:22px;font-weight:800;color:var(--ink);max-width:760px;margin:0 auto;line-height:1.4;">"Queremos um Dia D em que cada concessionária mostre sua força real, e a soma vire uma mobilização nacional de verdade."</div>
+    </div>
+  </div>
+  <div class="slide-tag">Documento para apresentação ao comitê das concessionárias</div>
+  <div class="slide-num">11</div>
 </section>
 
 </body>
