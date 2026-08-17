@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>VLI no Dia D da Segurança Ferroviária</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --blue:#0074C1;
+    --orange:#EF7A1D;
+    --ink:#22303A;
+    --muted:#5E6E77;
+    --line:#D7E0E5;
+    --white:#FFFFFF;
+    --tint:#EEF5F6;
+    --page-bg:#E7EBEE;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--page-bg);font-family:'Manrope','Segoe UI',Arial,sans-serif;color:var(--ink);}
+  body{
+    display:flex;flex-direction:column;align-items:center;
+    padding:48px 0 120px;
+    scroll-behavior:smooth;
+  }
+  .deck-nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:18px;
+    padding:10px 28px;font-size:13px;color:var(--muted);
+  }
+  .deck-nav b{color:var(--blue);}
+  .deck-nav .status{margin-left:auto;font-size:11px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);}
+  .deck-nav .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:6px;}
+
+  /* ---- cada "dobra" = uma pagina/slide no tamanho padrao 1280x720 (16:9),
+     ja no formato que sera exportado pra PPT depois ---- */
+  .slide{
+    width:1280px;height:720px;
+    background:var(--white);
+    box-shadow:0 6px 28px rgba(20,40,60,.12);
+    border-radius:4px;
+    margin-top:56px;
+    position:relative;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .slide:first-child{margin-top:8px;}
+  .slide-num{
+    position:absolute;bottom:22px;right:34px;
+    font-size:12px;color:#8C9AA3;font-weight:600;
+  }
+  .slide-tag{
+    position:absolute;bottom:22px;left:60px;
+    font-size:10.5px;color:#8C9AA3;font-style:italic;max-width:820px;
+  }
+  .slide.dark{background:var(--blue);color:var(--white);}
+  .slide.dark .muted{color:#BFE0F5;}
+  .slide.dark .slide-num,.slide.dark .slide-tag{color:#8FC3EA;}
+
+  .pad{padding:60px 60px 0 60px;}
+  .eyebrow{
+    font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--blue);
+    text-transform:uppercase;margin:0 0 10px 0;
+  }
+  .slide.dark .eyebrow{color:#7FC3F0;}
+  h1.slide-title{
+    font-size:34px;line-height:1.18;font-weight:800;margin:0 0 6px 0;color:var(--ink);
+  }
+  .slide.dark h1.slide-title{color:var(--white);}
+  h1.slide-title .light{font-weight:400;}
+  .sub{font-size:17px;color:var(--muted);font-weight:500;margin:0;}
+  .slide.dark .sub{color:#BFE0F5;}
+
+  .rule{height:1px;background:var(--line);border:none;margin:0;}
+  .slide.dark .rule{background:rgba(255,255,255,.25);}
+
+  .row{display:flex;gap:36px;}
+  .col{flex:1;}
+
+  table.plain{width:100%;border-collapse:collapse;font-size:14px;}
+  table.plain th{
+    text-align:left;font-size:11px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--ink);
+  }
+  table.plain td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.plain tr:last-child td{border-bottom:none;}
+  .status-pill{
+    display:inline-block;padding:3px 11px;border-radius:20px;font-size:11.5px;font-weight:700;
+  }
+  .status-pill.ok{background:#E3F1E6;color:#2E7D45;}
+  .status-pill.pending{background:#FDF0E4;color:#B25A0F;}
+  .status-pill.open{background:#EEF2F4;color:#5E6E77;}
+
+  .stat{font-size:52px;font-weight:800;color:var(--blue);line-height:1;margin:0;}
+  .stat-label{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.4;}
+  .slide.dark .stat{color:var(--white);}
+  .slide.dark .stat-label{color:#BFE0F5;}
+
+  ul.clean{margin:0;padding:0;list-style:none;}
+  ul.clean li{
+    padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink);
+    display:flex;gap:12px;
+  }
+  ul.clean li:last-child{border-bottom:none;}
+  ul.clean b{min-width:190px;flex-shrink:0;}
+
+  .quote{
+    font-size:20px;font-weight:600;font-style:italic;color:var(--ink);line-height:1.5;
+    border-left:3px solid var(--orange);padding-left:22px;margin:0;
+  }
+  .quote cite{display:block;font-size:12.5px;font-style:normal;font-weight:500;color:var(--muted);margin-top:10px;}
+
+  .tl{position:relative;margin-top:40px;height:2px;background:var(--line);}
+  .slide.dark .tl{background:rgba(255,255,255,.3);}
+  .tl-pt{position:absolute;top:-6px;width:14px;height:14px;border-radius:50%;background:var(--blue);border:2px solid var(--white);}
+  .tl-pt.last{background:var(--orange);}
+  .tl-label{position:absolute;top:-52px;font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap;transform:translateX(-50%);}
+  .tl-body{position:absolute;top:26px;font-size:12.5px;color:var(--ink);font-weight:700;transform:translateX(-50%);width:180px;text-align:center;}
+  .tl-desc{position:absolute;top:48px;font-size:10.5px;color:var(--muted);transform:translateX(-50%);width:190px;text-align:center;line-height:1.4;}
+  /* pontas da linha do tempo: alinhar pra dentro do slide em vez de centralizar,
+     senao o texto estoura a borda (medido e corrigido, nao suposto) */
+  .tl-label.edge-first,.tl-body.edge-first,.tl-desc.edge-first{transform:none;text-align:left;}
+  .tl-label.edge-last,.tl-body.edge-last,.tl-desc.edge-last{transform:translateX(-100%);text-align:right;}
+
+  @media print{
+    body{background:white;padding:0;}
+    .deck-nav{display:none;}
+    .slide{box-shadow:none;margin:0;page-break-after:always;}
+  }
+</style>
+</head>
+<body>
+
+<div class="deck-nav">
+  <span><b>VLI</b> no Dia D da Segurança Ferroviária</span>
+  <span>proposta para o comitê das concessionárias</span>
+  <span class="status"><span class="dot"></span>rascunho vivo, atualizado em tempo real</span>
+</div>
+
+<!-- ============================================================ -->
+<!-- DOBRA 1 — Capa -->
+<!-- ============================================================ -->
+<section class="slide dark">
+  <div class="pad" style="padding-top:150px;">
+    <div class="eyebrow">Movimento Nacional pela Segurança Ferroviária · 23/09/2026</div>
+    <h1 class="slide-title" style="font-size:46px;">O que a VLI traz<br><span class="light">para o Dia D</span></h1>
+    <p class="sub" style="max-width:760px;margin-top:18px;">Proposta para o comitê das concessionárias (Rumo, MRS, Vale, CSN, TLSA), com base no que a VLI já tem em campo e no que propomos concentrar no dia 23.</p>
+  </div>
+  <div class="slide-tag">Documento de trabalho · atualizado a partir da reunião interna de 11/08/2026 e alinhamentos posteriores</div>
+  <div class="slide-num">01</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 2 — A base real que a VLI já tem em campo -->
+<!-- ============================================================ -->
+<section class="slide">
+  <div class="pad">
+    <div class="eyebrow">O que já está em campo</div>
+    <h1 class="slide-title">143 ações mapeadas para setembro, em 5 corredores</h1>
+    <hr class="rule" style="margin-top:18px;">
+  </div>
+  <div class="pad" style="padding-top:36px;">
+    <div class="row">
+      <div class="col" style="max-width:280px;">
+        <p class="stat">70</p>
+        <p class="stat-label">blitz educativas itinerantes, distribuídas nos 5 corredores</p>
+      </div>
+      <div class="col" style="max-width:280px;">
+        <p class="stat">73</p>
+        <p class="stat-label">ações do Segurança nos Trilhos (cultura, teatro e arte)</p>
+      </div>
+      <div class="col" style="max-width:320px;">
+        <p class="stat">143</p>
+        <p class="stat-label">ações mapeadas ao todo. Parte delas será conjunta, não simplesmente somada</p>
+      </div>
+    </div>
+    <hr class="rule" style="margin-top:36px;">
+    <table class="plain" style="margin-top:18px;">
+      <tr><th>Corredor</th><th>Blitz educativas</th></tr>
+      <tr><td>Sudeste</td><td>21</td></tr>
+      <tr><td>Minas-Bahia</td><td>13</td></tr>
+      <tr><td>Leste</td><td>16</td></tr>
+      <tr><td>Norte</td><td>9</td></tr>
+      <tr><td>Minas-Rio</td><td>9</td></tr>
+    </table>
+  </div>
+  <div class="slide-tag">Fonte: reunião interna VLI, 11/08/2026 (Jaqueline Xavier, planejamento por corredor)</div>
+  <div class="slide-num">02</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 3 — Segurança nos Trilhos: o diferencial -->
+<!-- ============================================================ -->
+<section class="slide">
+  <div class="pad">
+    <div class="eyebrow">O diferencial da VLI</div>
+    <h1 class="slide-title">Nenhuma outra concessionária mantém ações nesse formato</h1>
+    <hr class="rule" style="margin-top:18px;">
+  </div>
+  <div class="pad" style="padding-top:30px;">
+    <div class="row">
+      <div class="col">
+        <p class="quote">"Todas as ações envolvem cultura, teatro, arte."
+          <cite>Elizabeth Gomes Pimenta de Castro, coordenação do Segurança nos Trilhos</cite>
+        </p>
+        <p style="font-size:13.5px;color:var(--muted);margin-top:24px;line-height:1.6;max-width:480px;">
+          Intervenção cênica: três atores caracterizados interagem com o público de forma lúdica.
+          Um usa instrumento de percussão, outro de sopro; o terceiro puxa o cortejo pela cidade,
+          reforçando as três regras de ouro da segurança ferroviária.
+        </p>
+      </div>
+      <div class="col">
+        <ul class="clean">
+          <li><b>PARE</b><span>Primeira regra de ouro, reforçada em cada intervenção</span></li>
+          <li><b>OLHE</b><span>Segunda regra, distribuída em material educativo</span></li>
+          <li><b>ESCUTE</b><span>Terceira regra, encenada pelo grupo cênico</span></li>
+        </ul>
+        <hr class="rule" style="margin:20px 0;">
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">
+          Formato único entre as concessionárias no movimento: cultura e arte como ferramenta de
+          conscientização, não só panfleto ou blitz convencional.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-tag">Fonte: detalhamento de ações compartilhado por Elizabeth Gomes Pimenta de Castro</div>
+  <div class="slide-num">03</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 4 — Os 3 formatos de acao -->
+<!-- ============================================================ -->
+<section class="slide">
+  <div class="pad">
+    <div class="eyebrow">Como a ação chega às pessoas</div>
+    <h1 class="slide-title">Três formatos, cada um mirando um público diferente</h1>
+    <hr class="rule" style="margin-top:18px;">
+  </div>
+  <div class="pad" style="padding-top:30px;">
+    <table class="plain">
+      <tr><th>Formato</th><th>Onde acontece</th><th>Público</th></tr>
+      <tr>
+        <td><b>Blitz educativa</b></td>
+        <td>Espaços de circulação pública, ação itinerante que percorre o território</td>
+        <td>População em geral, mobilizada no percurso</td>
+      </tr>
+      <tr>
+        <td><b>Segurança na pista</b></td>
+        <td>Autoescolas e locais de exame de motociclistas</td>
+        <td>Candidatos a exame de habilitação, duas intervenções por cidade</td>
+      </tr>
+      <tr>
+        <td><b>Segurança na comunidade</b></td>
+        <td>Festas, festivais e eventos temáticos locais, via parceiros da cidade</td>
+        <td>Moradores próximos à linha férrea: jovens, idosos, motoristas de transporte urbano</td>
+      </tr>
+    </table>
+  </div>
+  <div class="slide-tag">Fonte: detalhamento de ações compartilhado por Elizabeth Gomes Pimenta de Castro</div>
+  <div class="slide-num">04</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 5 — Onde a VLI concentra forca no Dia D -->
+<!-- ============================================================ -->
+<section class="slide">
+  <div class="pad">
+    <div class="eyebrow">Onde concentrar força em 23/09</div>
+    <h1 class="slide-title">Betim reúne o que nenhuma outra cidade reúne sozinha</h1>
+    <hr class="rule" style="margin-top:18px;">
+  </div>
+  <div class="pad" style="padding-top:30px;">
+    <table class="plain">
+      <tr><th>Cidade</th><th>Simulado</th><th>O que mais a cidade já tem</th></tr>
+      <tr>
+        <td><b>Betim (MG)</b></td>
+        <td><span class="status-pill ok">Autorizado pelo corredor</span></td>
+        <td>Primeira lei municipal de segurança ferroviária do Brasil · CPN crítico · Segurança nos Trilhos ativo · proximidade com a imprensa de BH</td>
+      </tr>
+      <tr>
+        <td>Uberaba (MG)</td>
+        <td><span class="status-pill ok">23/09</span></td>
+        <td>Cobertura regional viável via presença exclusiva da FCA no Triângulo Mineiro</td>
+      </tr>
+      <tr>
+        <td>Divinópolis (MG)</td>
+        <td><span class="status-pill ok">23/09</span></td>
+        <td>Corredor Leste</td>
+      </tr>
+      <tr>
+        <td>Aguaí (SP)</td>
+        <td><span class="status-pill pending">Em definição</span></td>
+        <td>Ação relevante, mas sem cobertura de imprensa local garantida</td>
+      </tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted);margin-top:18px;">
+      Reunião com a prefeitura de Betim em 20/08 para viabilizar a autorização operacional do simulado.
+    </p>
+  </div>
+  <div class="slide-tag">Fonte: atualização de Jaqueline Xavier (11 e 14/08/2026) e reunião interna VLI</div>
+  <div class="slide-num">05</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 6 — A proposta: simulado + cortejo no mesmo dia -->
+<!-- ============================================================ -->
+<section class="slide dark">
+  <div class="pad">
+    <div class="eyebrow">A proposta da VLI para Betim</div>
+    <h1 class="slide-title" style="font-size:30px;">Unir o simulado ao cortejo do Segurança nos Trilhos, no mesmo dia, na mesma cidade</h1>
+    <hr class="rule" style="margin-top:18px;">
+  </div>
+  <div class="pad" style="padding-top:26px;">
+    <div class="row">
+      <div class="col">
+        <p style="font-size:14px;line-height:1.7;color:#DCEBF5;max-width:480px;">
+          Betim já realiza uma blitz e cortejo regularmente, geralmente no dia 22. A proposta é concentrar
+          essa atividade no dia 23, junto do simulado, para criar duas camadas na mesma cobertura: o choque
+          do simulado e a resposta cultural do cortejo.
+        </p>
+      </div>
+      <div class="col">
+        <p class="quote" style="border-left-color:var(--orange);color:var(--white);">
+          "Você mostra o simulado, aquela coisa mais fria, que choca, mas também mostra uma abordagem
+          diferente de chamar a atenção da comunidade."
+          <cite style="color:#8FC3EA;">Discussão da reunião interna, sobre o racional de imprensa</cite>
+        </p>
+      </div>
+    </div>
+    <hr class="rule" style="margin:28px 0;">
+    <p style="font-size:12.5px;color:#9FC1D8;max-width:900px;line-height:1.6;">
+      Referência citada na reunião: matéria do Fantástico sobre acidentes ferroviários na malha de Resende
+      foi seguida, nas semanas posteriores, por redução observada de acidentes em áreas críticas da região
+      metropolitana de Curitiba. Exposição qualificada de imprensa é tratada, no grupo, como parte da
+      estratégia de redução de ocorrências, não só como resultado de comunicação.
+    </p>
+  </div>
+  <div class="slide-tag" style="color:#8FC3EA;">Ainda em validação: negociação final com a prefeitura de Betim (20/08) e formato exato da combinação</div>
+  <div class="slide-num">06</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 7 — O que propomos para o material conjunto -->
+<!-- ============================================================ -->
+<section class="slide">
+  <div class="pad">
+    <div class="eyebrow">Para o material conjunto do comitê</div>
+    <h1 class="slide-title">Dois produtos para o grupo, e a VLI já tem o que alimentar os dois</h1>
+    <hr class="rule" style="margin-top:18px;">
+  </div>
+  <div class="pad" style="padding-top:30px;">
+    <div class="row">
+      <div class="col">
+        <div class="eyebrow" style="color:var(--ink);">Produto 1</div>
+        <h1 class="slide-title" style="font-size:19px;">Release assinado por todas as empresas</h1>
+        <p style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:10px;">
+          Texto único de imprensa, resumindo o esforço conjunto das concessionárias, buscando a melhor
+          exposição qualificada (TV, matéria nacional).
+        </p>
+      </div>
+      <div class="col">
+        <div class="eyebrow" style="color:var(--ink);">Produto 2</div>
+        <h1 class="slide-title" style="font-size:19px;">Peça única com a logo de todas as empresas</h1>
+        <p style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:10px;">
+          Folder ou panfleto padrão do setor, aplicação compartilhada. A VLI já tem materiais de campanhas
+          anteriores que podem servir de ponto de partida.
+        </p>
+      </div>
+    </div>
+    <hr class="rule" style="margin:30px 0;">
+    <p style="font-size:13.5px;color:var(--ink);max-width:900px;line-height:1.6;">
+      O que a VLI propõe entregar para alimentar os dois produtos: a grade completa de 143 ações mapeadas,
+      com destaque para Betim como ação-âncora do Dia D, e o conteúdo do Segurança nos Trilhos como material
+      diferenciado, pronto para uso.
+    </p>
+  </div>
+  <div class="slide-tag">Fonte: reunião interna VLI, 11/08/2026 (discussão sobre os dois produtos do comitê)</div>
+  <div class="slide-num">07</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 8 — Cronograma ate o Dia D -->
+<!-- ============================================================ -->
+<section class="slide dark">
+  <div class="pad">
+    <div class="eyebrow">Próximos passos</div>
+    <h1 class="slide-title" style="font-size:30px;">Linha do tempo até 23 de setembro</h1>
+  </div>
+  <div class="pad" style="padding-top:70px;position:relative;height:280px;">
+    <div class="tl" style="left:60px;right:60px;">
+      <div class="tl-pt" style="left:0%;"></div>
+      <div class="tl-label edge-first" style="left:0%;">20/08</div>
+      <div class="tl-body edge-first" style="left:0%;">Reunião com a prefeitura de Betim</div>
+      <div class="tl-desc edge-first" style="left:0%;">Viabilizar autorização operacional do simulado</div>
+
+      <div class="tl-pt" style="left:33%;"></div>
+      <div class="tl-label" style="left:33%;">Até 22/08</div>
+      <div class="tl-body" style="left:33%;">Grade final compilada</div>
+      <div class="tl-desc" style="left:33%;">143 ações consolidadas, datas fechadas por corredor</div>
+
+      <div class="tl-pt" style="left:66%;"></div>
+      <div class="tl-label" style="left:66%;">Semana seguinte</div>
+      <div class="tl-body" style="left:66%;">Proposta ao comitê</div>
+      <div class="tl-desc" style="left:66%;">Apresentação deste material às demais concessionárias</div>
+
+      <div class="tl-pt last" style="left:100%;"></div>
+      <div class="tl-label edge-last" style="left:100%;">23/09</div>
+      <div class="tl-body edge-last" style="left:100%;">Dia D</div>
+      <div class="tl-desc edge-last" style="left:100%;">Execução do Movimento Nacional pela Segurança Ferroviária</div>
+    </div>
+  </div>
+  <div class="slide-num">08</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOBRA 9 — Fechamento -->
+<!-- ============================================================ -->
+<section class="slide">
+  <div class="pad" style="padding-top:130px;">
+    <div class="eyebrow">O pedido da VLI ao comitê</div>
+    <h1 class="slide-title" style="font-size:32px;max-width:900px;">Reconhecer Betim como ação-âncora do Dia D, e o Segurança nos Trilhos como diferencial do setor</h1>
+    <hr class="rule" style="margin:28px 0;max-width:500px;">
+    <p style="font-size:14px;color:var(--muted);max-width:640px;line-height:1.7;">
+      Com isso, a VLI entra no material conjunto (release e peça compartilhada) com uma ação concreta,
+      autorizada e com apelo real de imprensa, além de um formato de atuação que nenhuma outra concessionária
+      tem hoje.
+    </p>
+  </div>
+  <div class="slide-tag">Documento vivo. Atualizado conforme novos alinhamentos chegam.</div>
+  <div class="slide-num">09</div>
+</section>
+
+</body>
+</html>
