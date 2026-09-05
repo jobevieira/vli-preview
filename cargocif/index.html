@@ -22,22 +22,11 @@ header{height:72px;position:sticky;top:0;z-index:30;background:rgba(255,255,255,
 .innovation{position:relative;padding:72px 0 70px;overflow:hidden}.ghost{position:absolute;left:3vw;top:20px;font-size:clamp(105px,14vw,220px);font-weight:800;letter-spacing:-.07em;color:transparent;-webkit-text-stroke:1px #dbe5ec;opacity:.9;line-height:1}.innovation-grid{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr .3fr;gap:54px;align-items:center}.innovation h2{font-size:34px;line-height:1.08;letter-spacing:-.035em;margin:12px 0 0;font-weight:500}.innovation h2 b{color:var(--blue)}.innovation p{font-size:14px;line-height:1.7;color:var(--muted)}.innovation-tag{border-left:2px solid var(--blue);padding-left:17px;font-size:9px;line-height:2;letter-spacing:.24em;text-transform:uppercase;color:#4e6f87;font-weight:700}
 .cta{background:linear-gradient(120deg,#005497,#0075bd);color:#fff;overflow:hidden}.cta-grid{display:grid;grid-template-columns:.95fr 1.05fr;min-height:420px}.cta-copy{padding:64px 0;display:flex;flex-direction:column;justify-content:center}.cta .eyebrow{color:#c6e7f9}.cta h2{font-size:40px;line-height:1.06;letter-spacing:-.04em;font-weight:500;margin:13px 0 14px}.cta h2 b{font-weight:700}.cta p{font-size:14px;color:#dceff9;margin:0 0 24px}.cta .btn{align-self:flex-start}.cta-media{position:relative;min-height:420px}.cta-media img{width:100%;height:100%;object-fit:cover;object-position:center}.cta-media:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0061a6 0%,rgba(0,97,166,.45) 18%,transparent 55%)}
 .faq{padding:64px 0}.faq-grid{display:grid;grid-template-columns:.75fr 1.25fr;gap:70px}.faq h2{font-size:34px;margin:12px 0}.faq details{padding:18px 0;border-top:1px solid var(--line)}.faq summary{font-weight:600;cursor:pointer}.faq p{font-size:14px;line-height:1.6;color:var(--muted)}footer{padding:38px 0;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.foot{display:flex;align-items:center;justify-content:space-between}
-@media(max-width:800px){.wrap{width:calc(100% - 28px)}header{height:64px}.nav{grid-template-columns:auto 1fr auto}.nav nav,.nav>.btn{display:none}.nav nav.open{display:flex;position:absolute;top:64px;left:0;right:0;background:#fff;padding:22px 20px;box-shadow:0 16px 28px rgba(0,52,90,.1);flex-direction:column;gap:16px;border-top:1px solid #edf2f6}.menu{display:block;justify-self:end}.hero-inner{min-height:auto;display:block}.hero-copy{padding:48px 0 28px;max-width:none}.hero-title{font-size:58px}.hero h1{font-size:34px;max-width:360px}.hero-copy p{font-size:15px}.hero-media{position:relative;right:auto;width:100vw;height:390px;margin-left:-14px}.hero-media img{object-position:55% 42%}.hero-media:after{background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,.65) 11%,rgba(255,255,255,0) 35%)}.hero-note{top:auto;right:28px;bottom:35px;color:#466a83;background:rgba(255,255,255,.8);padding:8px 10px 8px 14px}.grainline{display:none}.problem{padding:52px 0}.problem-grid,.innovation-grid,.faq-grid{grid-template-columns:1fr;gap:34px}.problem h2{font-size:34px}.compare{grid-template-columns:1fr}.compare-arrow{display:none}.compare-note{margin-top:5px}.stats-grid{grid-template-columns:1fr 1fr}.stat{border-left:0;border-top:1px solid var(--line);padding:20px 0}.stat:first-child{grid-column:1/-1}.stat strong,.stat:first-child strong{font-size:46px}.timeline{grid-template-columns:1fr}.timeline:before{left:31px;top:0;bottom:0;width:2px;height:auto}.node{padding:0 0 34px 88px}.icon{left:0}.ops{grid-template-columns:1fr}.ops-media{min-height:315px}.ops-copy{padding:42px 24px}.ops-copy h2{font-size:31px}.benefits{grid-template-columns:1fr}.benefit{border-left:0;border-top:1px solid var(--line);padding:15px 0}.benefit:first-child{border-top:0}.rail{min-height:420px}.rail img{height:420px;object-fit:cover;object-position:24% 52%}.rail-overlay{position:absolute}.rail-overlay:after{background:linear-gradient(180deg,rgba(0,39,70,.78) 0%,rgba(0,39,70,.5) 58%,rgba(0,39,70,.18) 100%)}.rail-copy{grid-template-columns:1fr;gap:22px}.rail-copy h2{font-size:30px}.co2{padding-left:0;border-left:0}.co2 strong{font-size:62px}.innovation{padding:54px 0}.ghost{top:32px}.innovation-tag{display:none}.cta-grid{grid-template-columns:1fr}.cta-copy{padding:52px 0}.cta h2{font-size:35px}.cta-media{min-height:330px;margin:0 -14px}.cta-media img{object-position:38% 50%}.cta-media:after{background:linear-gradient(180deg,#0061a6 0%,rgba(0,97,166,.35) 18%,transparent 50%)}.faq{padding:50px 0}.foot{flex-direction:column;align-items:flex-start;gap:14px}}
-
-@media(max-width:800px){
-  .hero{min-height:clamp(520px,145vw,560px)}
-  .hero-inner{min-height:clamp(520px,145vw,560px);display:block;position:relative}
-  .hero-copy{position:relative;z-index:4;min-height:clamp(520px,145vw,560px);padding:42px 0 30px;max-width:none}
-  .hero-copy p{max-width:340px;color:#3f5870;line-height:1.5}
-  .hero-media{position:absolute;z-index:1;inset:0;right:auto;width:100%;height:100%;margin-left:0}
-  .hero-media img{object-position:69% 24%}
-  .hero-media:after{background:linear-gradient(180deg,rgba(255,255,255,.98) 0%,rgba(255,255,255,.94) 20%,rgba(255,255,255,.78) 43%,rgba(255,255,255,.18) 76%,rgba(255,255,255,.04) 100%)}
-  .hero-note{top:auto;right:20px;bottom:22px;color:#466a83;background:rgba(255,255,255,.88);padding:8px 10px 8px 14px}
-}
 </style>
+<link rel="stylesheet" href="mobile.css?v=20260905-2" media="(max-width: 800px)">
 </head>
 <body>
-<header><div class="wrap nav"><a class="logo" href="#top" aria-label="VLI"><img src="assets/vli-logo.svg" alt="VLI" width="83" height="42"></a><nav id="mainnav"><a href="#como">Como funciona</a><a href="#resultados">Resultados</a><a href="#sustentabilidade">Sustentabilidade</a><a href="#inovacao">Inovação</a></nav><a class="btn" href="#contato">Quero conhecer</a><button class="menu" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div></header>
+<header><div class="wrap nav"><a class="logo" href="#top" aria-label="VLI"><img src="assets/vli-logo.svg" alt="VLI" width="83" height="42"></a><button class="menu" id="menuBtn" type="button" aria-label="Abrir menu" aria-controls="mainnav" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><nav id="mainnav" aria-label="Navegação principal"><a href="#como">Como funciona</a><a href="#resultados">Resultados</a><a href="#sustentabilidade">Sustentabilidade</a><a href="#inovacao">Inovação</a></nav><a class="btn" href="#contato">Quero conhecer</a></div></header>
 <main id="top">
 <section class="hero"><div class="wrap hero-inner"><div class="hero-copy"><span class="eyebrow">Do campo à ferrovia.</span><div class="hero-title">CargoCIF</div><h1>Agora, sem o caminho burocrático.</h1><p>Solução VLI que simplifica o recebimento de cargas CIF e conecta o agronegócio à ferrovia de forma segura, rastreável e integrada.</p><a class="btn" href="#contato">Quero conhecer o CargoCIF <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div><div class="hero-media"><img src="assets/hero-cargocif-v2.webp" alt="Mãos com uniforme e luvas segurando e derramando grãos de soja em um terminal agrícola" fetchpriority="high" decoding="async"><div class="hero-note">Mais fluxo<br>para o agro.<br>Mais futuro<br>para o Brasil.</div></div><svg class="grainline" viewBox="0 0 520 100" preserveAspectRatio="none"><path d="M0 22C130 18 125 72 235 72S375 42 520 70"/><circle cx="90" cy="41" r="7"/><circle cx="188" cy="70" r="7"/><circle cx="303" cy="63" r="7"/><circle cx="417" cy="56" r="7"/></svg></div></section>
 <section class="problem"><div class="wrap problem-grid"><div><span class="eyebrow">O problema</span><h2>O problema nunca foi levar o grão até a ferrovia.<span>Era fazer a operação chegar até ela.</span></h2></div><div class="compare"><div><div class="flow-label">Antes</div><div class="flow"><div class="step">Produtor</div><div class="step">Documentação e gestão fiscal</div><div class="step">Etapas intermediárias</div><div class="step">Rodovia</div><div class="step">Porto</div></div></div><div class="compare-arrow"><svg viewBox="0 0 24 24"><path d="M7 4l8 8-8 8"/></svg></div><div><div class="flow-label">Agora</div><div class="flow now"><div class="step">Produtor</div><div class="step hot">CargoCIF</div><div class="step">Terminal VLI</div><div class="step">Ferrovia</div><div class="step">Porto</div></div></div><div class="compare-note">Com o CargoCIF, a VLI elimina uma barreira operacional e amplia o acesso do agronegócio à ferrovia.</div></div></div></section>
@@ -51,8 +40,29 @@ header{height:72px;position:sticky;top:0;z-index:30;background:rgba(255,255,255,
 </main>
 <footer><div class="wrap foot"><div class="logo"><img src="assets/vli-logo.svg" alt="VLI" width="83" height="42"></div><div>Preview conceitual CargoCIF</div></div></footer>
 <script>
-const mb=document.getElementById('menuBtn'),mn=document.getElementById('mainnav');
-if(mb&&mn){mb.addEventListener('click',()=>{const o=mn.classList.toggle('open');mb.setAttribute('aria-expanded',o?'true':'false')});mn.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mn.classList.remove('open');mb.setAttribute('aria-expanded','false')}));}
+const mb = document.getElementById('menuBtn');
+const mn = document.getElementById('mainnav');
+if (mb && mn) {
+  const mobile = window.matchMedia('(max-width: 800px)');
+  const setMenu = (open, restoreFocus = false) => {
+    mn.classList.toggle('open', open);
+    mb.setAttribute('aria-expanded', String(open));
+    mb.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    if (restoreFocus) mb.focus();
+  };
+  mb.addEventListener('click', () => setMenu(mb.getAttribute('aria-expanded') !== 'true'));
+  mn.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && mb.getAttribute('aria-expanded') === 'true') setMenu(false, true);
+  });
+  document.addEventListener('click', event => {
+    if (!mn.contains(event.target) && !mb.contains(event.target)) setMenu(false);
+  });
+  document.addEventListener('focusin', event => {
+    if (!mn.contains(event.target) && !mb.contains(event.target)) setMenu(false);
+  });
+  mobile.addEventListener('change', () => setMenu(false));
+}
 </script>
 </body>
 </html>
