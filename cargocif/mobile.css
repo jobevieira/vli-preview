@@ -74,7 +74,8 @@
   .ops-media img { object-position: 52% 56%; }
   .ops-label { left: var(--mobile-gutter); bottom: 20px; padding: 10px 24px 10px 12px; font-size: 9px; }
   .ops-copy { min-width: 0; padding: 36px var(--mobile-gutter) 44px; }
-  .ops-copy h2 { font-size: clamp(27px,7.7vw,32px); line-height: 1.15; margin-bottom: 24px; }
+  .ops-copy h2 { font-size: clamp(27px,7.7vw,32px); line-height: 1.12; letter-spacing: -.04em; margin-bottom: 24px; }
+  .ops-copy h2 .ops-break { display: none; }
   .benefits { grid-template-columns: minmax(0,1fr); }
   .benefit { padding: 18px 0; border-left: 0; border-top: 1px solid var(--line); }
   .benefit:first-child { padding-top: 0; border-top: 0; }
