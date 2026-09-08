@@ -72,7 +72,7 @@
   .ops { grid-template-columns: minmax(0,1fr); min-height: 0; }
   .ops-media { height: clamp(230px,66vw,350px); min-height: 0; }
   .ops-media img { object-position: 52% 56%; }
-  .ops-label { left: var(--mobile-gutter); bottom: 20px; padding-left: 12px; font-size: 9px; }
+  .ops-label { left: var(--mobile-gutter); bottom: 20px; padding: 10px 24px 10px 12px; font-size: 9px; }
   .ops-copy { min-width: 0; padding: 36px var(--mobile-gutter) 44px; }
   .ops-copy h2 { font-size: clamp(27px,7.7vw,32px); line-height: 1.15; margin-bottom: 24px; }
   .benefits { grid-template-columns: minmax(0,1fr); }
