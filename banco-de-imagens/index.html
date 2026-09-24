@@ -311,7 +311,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.10';
+const APP_VERSION = '2026-09-24.11';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -642,7 +642,7 @@ async function loadAI() {
     window.MODELO_PESSOAS = null;
     ai.state = 'ok';
   } catch (e) {
-    console.warn(e); ai.state = 'erro';
+    console.warn(e); ai.state = 'erro'; ai.errMsg = `${e.name || 'Erro'}: ${e.message || e}`;
   }
   anRender();
 }
@@ -850,17 +850,29 @@ async function rememberLib(handle) {
 async function openLib(lib, interactive) {
   const wantWrite = ls.get('bi.share.' + lib.name, false);
   let mode = wantWrite ? 'readwrite' : 'read';
-  let p = 'prompt';
-  try { p = await lib.handle.queryPermission({ mode }); } catch {}
-  if (p !== 'granted' && interactive) {
-    try { p = await lib.handle.requestPermission({ mode }); } catch { p = 'denied'; }
-    if (p !== 'granted' && mode === 'readwrite') { mode = 'read'; try { p = await lib.handle.requestPermission({ mode }); } catch {} }
+  let p = 'prompt', broken = false;
+  try { p = await lib.handle.queryPermission({ mode }); }
+  catch (e) { broken = true; }
+  if (!broken && p !== 'granted' && interactive) {
+    try { p = await lib.handle.requestPermission({ mode }); }
+    catch (e) { broken = true; }
+    if (!broken && p !== 'granted' && mode === 'readwrite') { mode = 'read'; try { p = await lib.handle.requestPermission({ mode }); } catch (e) { broken = true; } }
   }
-  if (p !== 'granted') return false;
+  if (broken) return 'broken';
+  if (p !== 'granted') return 'denied';
   shared.canWrite = mode === 'readwrite';
-  await fromHandle(lib.handle, true);
-  return true;
+  // A permissão pode continuar "concedida" mesmo se a pasta foi apagada e recriada com o mesmo
+  // nome — o Chrome só percebe isso na hora de ler de verdade (erro NotFoundError).
+  try { await fromHandle(lib.handle, true); }
+  catch (e) {
+    console.warn('abrir biblioteca', lib.name, e);
+    if (e && e.name === 'NotFoundError') return 'broken';
+    lastOpenErr = `${(e && (e.name || e.message)) || e}`;
+    return 'error';
+  }
+  return 'ok';
 }
+let lastOpenErr = '';
 async function renderLibs(hintAuto) {
   const box = $('libs');
   if (!window.showDirectoryPicker) { box.replaceChildren(); return; }
@@ -871,7 +883,17 @@ async function renderLibs(hintAuto) {
     const row = document.createElement('div'); row.className = 'lib' + (hintAuto && lib.auto ? ' hint' : '');
     const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = '📁 ' + lib.name; nm.title = lib.name;
     const open = document.createElement('button'); open.className = 'btn' + (lib.auto ? ' primary' : ''); open.textContent = 'Abrir';
-    open.onclick = async () => { try { if (!await openLib(lib, true)) toast('Sem permissão para abrir essa pasta.'); } catch { toast('Pasta não encontrada. Ela foi movida ou apagada? Use “Abrir pasta”.'); } };
+    open.onclick = async () => {
+      const r = await openLib(lib, true);
+      if (r === 'denied') toast('Sem permissão para abrir essa pasta.');
+      else if (r === 'broken') {
+        await saveLibs((await getLibs()).filter(x => x.name !== lib.name || x.at !== lib.at));
+        renderLibs();
+        toast(`“${lib.name}” não é mais a mesma pasta (foi apagada e recriada, ou movida) — removida da lista. Use “Abrir pasta” para escolhê-la de novo.`);
+      } else if (r === 'error') {
+        toast(`Não foi possível abrir “${lib.name}”: ${lastOpenErr}. Veja “Diagnóstico”.`);
+      }
+    };
     const auto = document.createElement('label'); auto.className = 'chk';
     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!lib.auto;
     cb.onchange = async () => { l.forEach(x => x.auto = false); lib.auto = cb.checked; await saveLibs(l); renderLibs(); };
@@ -898,7 +920,14 @@ async function renderLibSel() {
     const v = sel.value;
     if (v === 'new') { await openFolder(); renderLibSel(); return; }
     if (v === 'cur') return;
-    try { if (!await openLib(l[+v], true)) toast('Sem permissão para abrir essa pasta.'); } catch { toast('Pasta não encontrada. Use “Abrir outra pasta…”.'); }
+    const lib = l[+v], r = await openLib(lib, true);
+    if (r === 'denied') toast('Sem permissão para abrir essa pasta.');
+    else if (r === 'broken') {
+      await saveLibs((await getLibs()).filter(x => x.name !== lib.name || x.at !== lib.at));
+      toast(`“${lib.name}” não é mais a mesma pasta (foi apagada e recriada, ou movida) — removida da lista. Use “Abrir outra pasta…”.`);
+    } else if (r === 'error') {
+      toast(`Não foi possível abrir “${lib.name}”: ${lastOpenErr}. Veja “Diagnóstico”.`);
+    }
     renderLibSel();
   };
   sel.classList.remove('hidden');
@@ -907,7 +936,9 @@ async function renderLibSel() {
   await renderLibs();
   const l = await getLibs(), auto = l.find(x => x.auto);
   if (!auto) return;
-  try { if (await openLib(auto, false)) return; } catch {}
+  const r = await openLib(auto, false).catch(e => { lastOpenErr = `${(e && (e.name || e.message)) || e}`; return 'error'; });
+  if (r === 'ok') return;
+  if (r === 'broken') await saveLibs((await getLibs()).filter(x => x.name !== auto.name || x.at !== auto.at));
   renderLibs(true);
 })();
 $('refreshBtn').onclick = () => {
@@ -1086,7 +1117,7 @@ async function diagnostics() {
     `Aberta por: ${state.rootHandle ? 'Abrir pasta (acesso direto)' : 'seleção de arquivos / arrastar'} | gravação na pasta: ${shared.canWrite ? 'sim' : 'não'}`,
     `Recursos: WebGL ${gl} | IndexedDB ${idbOk} | createImageBitmap ${typeof createImageBitmap === 'function' ? 'sim' : 'não'} | CompressionStream ${typeof CompressionStream === 'function' ? 'sim' : 'não'}`,
     `Municípios carregados: ${GEO ? 'sim (' + GEO.length + ')' : 'não'}`,
-    `IA: ${$('aiOn').checked ? 'ligada' : 'desligada'} | estado ${ai.state} | processamento ${ai.backend || '-'}`,
+    `IA: ${$('aiOn').checked ? 'ligada' : 'desligada'} | estado ${ai.state}${ai.errMsg ? ' (' + ai.errMsg + ')' : ''} | processamento ${ai.backend || '-'}`,
     `Imagens: ${state.items.length} | por tipo: ${Object.entries(exts).map(([k, v]) => k + ' ' + v).join(', ')}`,
     `Analisadas: ${analyzed} (com IA: ${withAi}) | fila: ${an.queue.length} | rodando: ${an.running ? 'sim' : 'não'}${an.paused ? ' (pausada)' : ''}`,
     `Problemas por imagem: ${Object.entries(errs).map(([k, v]) => k + ' ' + v).join(', ') || 'nenhum'}`,
@@ -1094,7 +1125,8 @@ async function diagnostics() {
     `Erros na análise: ${an.errs}`,
     ...an.lastErrs.map(e => '  - ' + e),
     `Compartilhado: ${[...state.meta.values()].filter(m => m._shared).length} de outras pessoas | arquivos em .banco-imagens: ${shared.files.size}`,
-    `Rostos (local, nunca compartilhado): ${$('facesOn').checked ? 'ligado' : 'desligado'} | estado ${fr.state} | ${state.faces.size} imagens verificadas | ${[...state.faces.values()].reduce((n, f) => n + (f.faces ? f.faces.length : 0), 0)} rostos | ${[...state.faces.values()].filter(f => f.suggest).length} sugestões pendentes`,
+    `Rostos (local, nunca compartilhado): ${$('facesOn').checked ? 'ligado' : 'desligado'} | estado ${fr.state}${fr.errMsg ? ' (' + fr.errMsg + ')' : ''} | ${state.faces.size} imagens verificadas | ${[...state.faces.values()].reduce((n, f) => n + (f.faces ? f.faces.length : 0), 0)} rostos | ${[...state.faces.values()].filter(f => f.suggest).length} sugestões pendentes`,
+    ...(lastOpenErr ? [`Último erro ao abrir uma biblioteca: ${lastOpenErr}`] : []),
   ].join('\n');
 }
 $('diagBtn').onclick = async () => { $('diagTxt').textContent = await diagnostics(); $('diag').classList.toggle('hidden'); };
@@ -1183,7 +1215,7 @@ async function loadFaceModels() {
     await faceapi.nets.faceRecognitionNet.loadFromUri('rostos/recognition');
     window.MODELOS_ROSTO = null;
     fr.state = 'ok';
-  } catch (e) { console.warn(e); fr.state = 'erro'; }
+  } catch (e) { console.warn(e); fr.state = 'erro'; fr.errMsg = `${e.name || 'Erro'}: ${e.message || e}`; }
   facesRender();
 }
 const faceDist = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) { const d = a[i] - b[i]; s += d * d; } return Math.sqrt(s); };
@@ -1268,7 +1300,7 @@ function facesRender() {
   const msg = $('facesMsg');
   if (!facesWanted()) { msg.textContent = ''; return; }
   if (fr.state === 'loading') { msg.textContent = 'Carregando modelo de rostos…'; return; }
-  if (fr.state === 'erro') { msg.innerHTML = '<span class="warn">Reconhecimento facial indisponível neste navegador.</span>'; return; }
+  if (fr.state === 'erro') { msg.innerHTML = `<span class="warn">Reconhecimento facial indisponível neste navegador${fr.errMsg ? ' (' + fr.errMsg + ')' : ''}.</span>`; return; }
   const analyzed = [...state.faces.values()].length;
   if (fr.running) {
     const el = (performance.now() - fr.t0) / 1000, rate = fr.done / Math.max(el, 0.001);
@@ -1439,7 +1471,7 @@ function anRender() {
   const w = document.createElement('div');
   if (aiWanted()) {
     if (ai.state === 'loading') w.textContent = 'Carregando modelo de IA…';
-    else if (ai.state === 'erro') { w.textContent = 'IA indisponível neste navegador — o resto da análise continua.'; w.className = 'warn'; }
+    else if (ai.state === 'erro') { w.textContent = `IA indisponível neste navegador${ai.errMsg ? ' (' + ai.errMsg + ')' : ''} — o resto da análise continua.`; w.className = 'warn'; }
     else if (ai.state === 'ok' && ai.backend === 'cpu') { w.textContent = 'Sem aceleração gráfica: a IA vai ficar lenta.'; w.className = 'warn'; }
   }
   if (w.textContent) msg.appendChild(w);
