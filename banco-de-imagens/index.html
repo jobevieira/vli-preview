@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banco de Imagens VLI</title>
+<meta name="description" content="Banco de imagens portátil: navegue, busque e visualize imagens de pastas locais direto no navegador, sem instalação e sem enviar nada para a internet.">
+<style>
+:root{
+  --bg:#ffffff;--panel:#f7f4ee;--card:#efeae0;--text:#22262a;--muted:#5b6168;--line:#d8d2c4;
+  --accent:#f2b705;--accent-ink:#22262a;--focus:#0a66c2;--overlay:rgba(18,20,22,.94);
+  --sans:'IBM Plex Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16181a;--panel:#1d2023;--card:#26292d;--text:#ecebe7;--muted:#a3a7ac;--line:#33373b;--focus:#6cb4ff;
+}}
+:root[data-theme="dark"]{--bg:#16181a;--panel:#1d2023;--card:#26292d;--text:#ecebe7;--muted:#a3a7ac;--line:#33373b;--focus:#6cb4ff}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:15px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.hidden{display:none!important}
+
+/* Top bar */
+.top{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:19px;white-space:nowrap;margin-right:8px}
+.brand i{width:10px;height:10px;background:var(--accent);display:inline-block}
+.search{flex:1 1 220px;min-width:0;position:relative}
+.search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.6}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,.btn{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.size{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}
+.size input{width:90px;accent-color:var(--accent)}
+
+/* Layout */
+.main{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 62px)}
+aside{border-right:1px solid var(--line);background:var(--panel);padding:16px 8px 32px;overflow:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
+aside h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:4px 10px 10px;font-weight:600}
+.tree ul{list-style:none;margin:0;padding:0 0 0 12px}
+.tree>ul{padding-left:0}
+.tree button{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;gap:8px;width:100%;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px}
+.tree button:hover{background:var(--card)}
+.tree button.sel{background:var(--text);color:var(--bg)}
+.tree button:focus-visible{outline:2px solid var(--focus)}
+.tree .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tree .c{font-size:12px;opacity:.65;font-variant-numeric:tabular-nums}
+.content{padding:16px;min-width:0}
+.status{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--thumb,180px),1fr));gap:10px}
+.card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:var(--card);position:relative}
+.card:focus-visible{outline:3px solid var(--focus)}
+.card .ph{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .25s}
+.card img.ok{opacity:1}
+.fit-contain .card img{object-fit:contain}
+.card .cap{padding:7px 9px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.card .fav{position:absolute;top:6px;right:6px;background:var(--accent);color:var(--accent-ink);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.sentinel{height:1px}
+
+/* Empty / welcome */
+.welcome{max-width:640px;margin:8vh auto;padding:0 16px;text-align:left}
+.welcome h1{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,42px);line-height:1.15;margin:0 0 16px}
+.welcome p{color:var(--muted);line-height:1.6;margin:0 0 20px}
+.welcome .actions{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
+.welcome ul{color:var(--muted);line-height:1.7;padding-left:20px;font-size:14px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:28px;text-align:center;color:var(--muted);margin-top:8px}
+body.dragging .drop{border-color:var(--accent);color:var(--text)}
+.progress{margin-top:16px;color:var(--muted);font-size:14px}
+
+/* Lightbox */
+.lb{position:fixed;inset:0;z-index:20;background:var(--overlay);display:grid;grid-template-columns:1fr 300px;color:#ecebe7}
+.lb .stage{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;padding:48px 56px}
+.lb .stage img{max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:0;color:#fff;width:44px;height:64px;border-radius:8px;font-size:26px}
+.lb .nav:hover{background:rgba(255,255,255,.2)}
+.lb .prev{left:8px}.lb .next{right:8px}
+.lb .close{position:absolute;top:10px;right:10px;background:none;border:0;color:#fff;font-size:28px;width:40px;height:40px}
+.lb .info{background:#1d2023;padding:24px 20px;overflow:auto;border-left:1px solid #33373b}
+.lb .info h3{font-family:var(--serif);font-weight:400;font-size:18px;margin:0 0 16px;word-break:break-all}
+.lb dl{margin:0 0 20px;font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
+.lb dt{color:#a3a7ac}.lb dd{margin:0;word-break:break-all}
+.lb .acts{display:flex;flex-direction:column;gap:8px}
+.lb .acts .btn{background:#26292d;border-color:#33373b;color:#ecebe7;justify-content:center;text-decoration:none}
+.lb .acts .btn.primary{background:var(--accent);color:#22262a;border-color:var(--accent)}
+.lb .count{position:absolute;top:16px;left:16px;font-size:13px;color:#a3a7ac}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30}
+
+@media (max-width:820px){
+  .main{grid-template-columns:1fr}
+  aside{position:static;max-height:220px;border-right:0;border-bottom:1px solid var(--line)}
+  .lb{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .lb .stage{padding:48px 8px 8px}
+  .lb .info{max-height:38vh;border-left:0;border-top:1px solid #33373b}
+  .size{display:none}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .content{padding:12px 16px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><i></i>Banco de Imagens</div>
+  <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Buscar por nome ou pasta…" aria-label="Buscar imagens" disabled></label>
+  <div class="ctrl">
+    <select id="sort" aria-label="Ordenar" disabled>
+      <option value="name">Nome (A–Z)</option>
+      <option value="-date">Mais recentes</option>
+      <option value="date">Mais antigas</option>
+      <option value="-size">Maiores</option>
+      <option value="size">Menores</option>
+    </select>
+    <select id="type" aria-label="Filtrar por formato" disabled><option value="">Todos os formatos</option></select>
+    <button class="btn" id="favOnly" aria-pressed="false" disabled title="Mostrar só favoritas (F no visualizador marca/desmarca)">★ Favoritas</button>
+    <label class="size">Tamanho <input id="thumb" type="range" min="110" max="360" step="10" value="180" aria-label="Tamanho das miniaturas"></label>
+    <button class="btn" id="fit" aria-pressed="false" title="Alternar recorte/imagem inteira nas miniaturas">⤢ Ajustar</button>
+    <button class="btn" id="theme" title="Alternar tema claro/escuro" aria-label="Alternar tema">☾ Tema</button>
+    <button class="btn primary" id="openBtn">Abrir pasta</button>
+  </div>
+</header>
+
+<div class="main hidden" id="app">
+  <aside><h2>Pastas</h2><nav class="tree" id="tree" aria-label="Pastas"></nav></aside>
+  <section class="content">
+    <div class="status"><span id="stat"></span><span id="rootName"></span></div>
+    <div class="grid" id="grid"></div>
+    <div class="sentinel" id="sentinel"></div>
+  </section>
+</div>
+
+<section class="welcome" id="welcome">
+  <h1>Suas imagens locais, organizadas em um só lugar.</h1>
+  <p>Escolha uma pasta do computador, pen drive ou rede. As imagens são lidas <strong>direto do disco, no seu navegador</strong> — nada é instalado e nada é enviado para a internet.</p>
+  <div class="actions">
+    <button class="btn primary" id="openBtn2">Abrir pasta de imagens</button>
+    <button class="btn hidden" id="reopenBtn">Reabrir última pasta</button>
+  </div>
+  <div class="drop">…ou arraste uma pasta para cá</div>
+  <div class="progress" id="progress" role="status" aria-live="polite"></div>
+  <ul>
+    <li>Subpastas viram uma árvore de navegação à esquerda.</li>
+    <li>Busca por nome, ordenação por data/tamanho e filtro por formato.</li>
+    <li>Visualizador com setas ← →, informações da imagem, download e favoritas (tecla F).</li>
+    <li>Formatos: JPG, PNG, WEBP, GIF, AVIF, SVG, BMP, ICO. (HEIC e TIFF dependem do navegador.)</li>
+    <li>Para levar no pen drive: copie este arquivo <code>index.html</code> para a pasta das imagens e abra com Chrome, Edge ou Firefox.</li>
+  </ul>
+</section>
+
+<div class="lb hidden" id="lb" role="dialog" aria-modal="true" aria-label="Visualizador de imagem">
+  <div class="stage">
+    <span class="count" id="lbCount"></span>
+    <img id="lbImg" alt="">
+    <button class="nav prev" id="lbPrev" aria-label="Imagem anterior">‹</button>
+    <button class="nav next" id="lbNext" aria-label="Próxima imagem">›</button>
+    <button class="close" id="lbClose" aria-label="Fechar">×</button>
+  </div>
+  <div class="info">
+    <h3 id="lbName"></h3>
+    <dl id="lbMeta"></dl>
+    <div class="acts">
+      <a class="btn primary" id="lbDown" download>Baixar cópia</a>
+      <button class="btn" id="lbFav">☆ Favoritar (F)</button>
+      <button class="btn" id="lbCopy">Copiar caminho</button>
+      <a class="btn" id="lbOpen" target="_blank" rel="noopener">Abrir em nova aba</a>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="dirInput" webkitdirectory directory multiple class="hidden">
+
+<script>
+(() => {
+'use strict';
+const EXT = ['jpg','jpeg','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff','jfif'];
+const BATCH = 120;
+const $ = id => document.getElementById(id);
+
+const state = {
+  items: [],        // {file, name, dir, path, ext, size, date}
+  view: [],         // filtered + sorted
+  shown: 0,
+  folder: '',       // selected folder path ('' = all)
+  root: '',
+  lbIndex: -1,
+};
+
+/* ---------- storage helpers (tudo opcional) ---------- */
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+let favs = new Set(ls.get('bi.favs', []));
+const favKey = it => state.root + '/' + it.path;
+const saveFavs = () => ls.set('bi.favs', [...favs]);
+
+function idb(mode, fn) {
+  return new Promise((res, rej) => {
+    let req;
+    try { req = indexedDB.open('banco-imagens', 1); } catch (e) { return rej(e); }
+    req.onupgradeneeded = () => req.result.createObjectStore('kv');
+    req.onerror = () => rej(req.error);
+    req.onsuccess = () => {
+      const tx = req.result.transaction('kv', mode);
+      const r = fn(tx.objectStore('kv'));
+      tx.oncomplete = () => res(r && r.result);
+      tx.onerror = () => rej(tx.error);
+    };
+  });
+}
+const saveHandle = h => idb('readwrite', s => s.put(h, 'dir')).catch(() => {});
+const loadHandle = () => idb('readonly', s => s.get('dir')).catch(() => null);
+
+/* ---------- utils ---------- */
+const extOf = n => { const i = n.lastIndexOf('.'); return i < 0 ? '' : n.slice(i + 1).toLowerCase(); };
+const isImg = n => EXT.includes(extOf(n)) && !n.startsWith('.');
+const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+const fmtDate = t => new Date(t).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+const collator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 1800);
+}
+const urls = new WeakMap();
+function urlFor(it) {
+  let u = urls.get(it.file);
+  if (!u) { u = URL.createObjectURL(it.file); urls.set(it.file, u); }
+  return u;
+}
+
+/* ---------- carregamento ---------- */
+function progress(n) { $('progress').textContent = n ? `Lendo… ${n} imagens encontradas` : ''; }
+
+function addItem(file, relPath) {
+  const parts = relPath.split('/');
+  const name = parts.pop();
+  if (parts.some(p => p.startsWith('.'))) return;
+  state.items.push({ file, name, dir: parts.join('/'), path: relPath, ext: extOf(name), size: file.size, date: file.lastModified });
+  if (state.items.length % 200 === 0) progress(state.items.length);
+}
+
+async function walkHandle(dir, prefix) {
+  for await (const entry of dir.values()) {
+    if (entry.name.startsWith('.')) continue;
+    const p = prefix ? prefix + '/' + entry.name : entry.name;
+    if (entry.kind === 'directory') await walkHandle(entry, p);
+    else if (isImg(entry.name)) {
+      try { addItem(await entry.getFile(), p); } catch {}
+    }
+  }
+}
+
+function readEntries(reader) {
+  return new Promise((res, rej) => reader.readEntries(res, rej));
+}
+async function walkEntry(entry, prefix) {
+  const p = prefix ? prefix + '/' + entry.name : entry.name;
+  if (entry.name.startsWith('.')) return;
+  if (entry.isFile) {
+    if (isImg(entry.name)) {
+      const f = await new Promise((res, rej) => entry.file(res, rej)).catch(() => null);
+      if (f) addItem(f, p);
+    }
+  } else if (entry.isDirectory) {
+    const reader = entry.createReader();
+    let batch;
+    do { batch = await readEntries(reader); for (const e of batch) await walkEntry(e, p); } while (batch.length);
+  }
+}
+
+function reset(rootName) {
+  state.items = []; state.folder = ''; state.root = rootName;
+  progress(0);
+}
+
+async function fromHandle(handle) {
+  reset(handle.name);
+  progress(0.1);
+  await walkHandle(handle, '');
+  saveHandle(handle);
+  ready();
+}
+
+async function openFolder() {
+  if (window.showDirectoryPicker) {
+    try {
+      const h = await window.showDirectoryPicker({ id: 'banco-imagens', mode: 'read' });
+      await fromHandle(h);
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      // SecurityError etc. → cai para o método clássico
+    }
+  }
+  $('dirInput').click();
+}
+
+$('dirInput').addEventListener('change', e => {
+  const files = [...e.target.files];
+  if (!files.length) return;
+  const root = (files[0].webkitRelativePath || '').split('/')[0] || 'Pasta';
+  reset(root);
+  for (const f of files) {
+    const rel = (f.webkitRelativePath || f.name).split('/').slice(1).join('/') || f.name;
+    if (isImg(f.name)) addItem(f, rel);
+  }
+  e.target.value = '';
+  ready();
+});
+
+// Arrastar e soltar
+let dragDepth = 0;
+addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; document.body.classList.add('dragging'); });
+addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', async e => {
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
+  const items = [...(e.dataTransfer.items || [])].filter(i => i.kind === 'file');
+  const entries = items.map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if (!entries.length) return;
+  reset(entries.length === 1 && entries[0].isDirectory ? entries[0].name : 'Itens soltos');
+  progress(0.1);
+  const single = entries.length === 1 && entries[0].isDirectory;
+  for (const en of entries) {
+    if (single) {
+      const reader = en.createReader(); let b;
+      do { b = await readEntries(reader); for (const x of b) await walkEntry(x, ''); } while (b.length);
+    } else await walkEntry(en, '');
+  }
+  ready();
+});
+
+// Reabrir última pasta (Chrome/Edge)
+(async () => {
+  if (!window.showDirectoryPicker) return;
+  const h = await loadHandle();
+  if (!h) return;
+  const btn = $('reopenBtn');
+  btn.textContent = `Reabrir “${h.name}”`;
+  btn.classList.remove('hidden');
+  btn.onclick = async () => {
+    try {
+      const perm = await h.requestPermission({ mode: 'read' });
+      if (perm === 'granted') await fromHandle(h);
+    } catch { toast('Não foi possível reabrir. Escolha a pasta novamente.'); }
+  };
+})();
+
+$('openBtn').onclick = openFolder;
+$('openBtn2').onclick = openFolder;
+
+/* ---------- interface ---------- */
+function ready() {
+  progress(0);
+  if (!state.items.length) {
+    $('progress').textContent = 'Nenhuma imagem encontrada nessa pasta.';
+    return;
+  }
+  $('welcome').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  ['q', 'sort', 'type', 'favOnly'].forEach(id => $(id).disabled = false);
+  $('rootName').textContent = '📁 ' + state.root;
+  document.title = state.root + ' — Banco de Imagens';
+
+  const types = [...new Set(state.items.map(i => i.ext))].sort();
+  $('type').innerHTML = '<option value="">Todos os formatos</option>' +
+    types.map(t => `<option value="${t}">${t.toUpperCase()}</option>`).join('');
+  buildTree();
+  apply();
+}
+
+function buildTree() {
+  const root = { name: state.root, path: '', kids: new Map(), count: 0 };
+  for (const it of state.items) {
+    root.count++;
+    let node = root, acc = '';
+    if (!it.dir) continue;
+    for (const part of it.dir.split('/')) {
+      acc = acc ? acc + '/' + part : part;
+      if (!node.kids.has(part)) node.kids.set(part, { name: part, path: acc, kids: new Map(), count: 0 });
+      node = node.kids.get(part);
+      node.count++;
+    }
+  }
+  const render = n => {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.dataset.path = n.path;
+    b.innerHTML = '<span class="n"></span><span class="c"></span>';
+    b.firstChild.textContent = n.path === '' ? 'Todas as imagens' : n.name;
+    b.lastChild.textContent = n.count;
+    b.title = n.path || state.root;
+    li.appendChild(b);
+    if (n.kids.size) {
+      const ul = document.createElement('ul');
+      [...n.kids.values()].sort((a, c) => collator.compare(a.name, c.name)).forEach(k => ul.appendChild(render(k)));
+      li.appendChild(ul);
+    }
+    return li;
+  };
+  const ul = document.createElement('ul');
+  ul.appendChild(render(root));
+  $('tree').replaceChildren(ul);
+  markTree();
+}
+function markTree() {
+  document.querySelectorAll('#tree button').forEach(b => {
+    const on = b.dataset.path === state.folder;
+    b.classList.toggle('sel', on);
+    b.setAttribute('aria-current', on ? 'true' : 'false');
+  });
+}
+$('tree').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.folder = b.dataset.path; markTree(); apply();
+  window.scrollTo({ top: 0 });
+});
+
+function apply() {
+  const q = $('q').value.trim().toLowerCase();
+  const type = $('type').value;
+  const favOnly = $('favOnly').getAttribute('aria-pressed') === 'true';
+  const f = state.folder;
+  let v = state.items.filter(it =>
+    (!f || it.dir === f || it.dir.startsWith(f + '/')) &&
+    (!type || it.ext === type) &&
+    (!favOnly || favs.has(favKey(it))) &&
+    (!q || it.path.toLowerCase().includes(q)));
+  const s = $('sort').value, dir = s.startsWith('-') ? -1 : 1, key = s.replace('-', '');
+  v.sort((a, b) => key === 'name' ? collator.compare(a.path, b.path) : (a[key] - b[key]) * dir || collator.compare(a.path, b.path));
+  state.view = v;
+  state.shown = 0;
+  $('grid').replaceChildren();
+  const total = v.reduce((n, i) => n + i.size, 0);
+  $('stat').textContent = `${v.length} de ${state.items.length} imagens · ${fmtSize(total)}`;
+  more();
+}
+
+const thumbObs = new IntersectionObserver(entries => {
+  for (const en of entries) {
+    if (!en.isIntersecting) continue;
+    const img = en.target;
+    img.src = urlFor(state.view[+img.dataset.i]);
+    thumbObs.unobserve(img);
+  }
+}, { rootMargin: '400px' });
+
+function more() {
+  const frag = document.createDocumentFragment();
+  const end = Math.min(state.view.length, state.shown + BATCH);
+  for (let i = state.shown; i < end; i++) {
+    const it = state.view[i];
+    const card = document.createElement('button');
+    card.className = 'card'; card.dataset.i = i;
+    card.title = it.path;
+    card.innerHTML = '<div class="ph"><img alt="" decoding="async"></div><div class="cap"></div>';
+    const img = card.querySelector('img');
+    img.dataset.i = i; img.alt = it.name;
+    img.onload = () => img.classList.add('ok');
+    img.onerror = () => { img.replaceWith(Object.assign(document.createElement('span'), { textContent: it.ext.toUpperCase(), style: 'color:var(--muted);font-size:13px' })); };
+    card.querySelector('.cap').textContent = it.name;
+    if (favs.has(favKey(it))) card.insertAdjacentHTML('beforeend', '<span class="fav" aria-label="Favorita">★</span>');
+    frag.appendChild(card);
+    thumbObs.observe(img);
+  }
+  state.shown = end;
+  $('grid').appendChild(frag);
+}
+new IntersectionObserver(en => { if (en[0].isIntersecting && state.shown < state.view.length) more(); }, { rootMargin: '800px' }).observe($('sentinel'));
+
+$('grid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openLb(+c.dataset.i); });
+
+let qTimer;
+$('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(apply, 150); });
+$('sort').addEventListener('change', () => { ls.set('bi.sort', $('sort').value); apply(); });
+$('type').addEventListener('change', apply);
+$('favOnly').addEventListener('click', () => {
+  const on = $('favOnly').getAttribute('aria-pressed') !== 'true';
+  $('favOnly').setAttribute('aria-pressed', on); $('favOnly').classList.toggle('on', on); apply();
+});
+
+// Preferências
+$('sort').value = ls.get('bi.sort', 'name');
+const setThumb = v => { document.documentElement.style.setProperty('--thumb', v + 'px'); $('thumb').value = v; };
+setThumb(ls.get('bi.thumb', 180));
+$('thumb').addEventListener('input', e => { setThumb(e.target.value); ls.set('bi.thumb', +e.target.value); });
+const setFit = on => { document.body.classList.toggle('fit-contain', on); $('fit').setAttribute('aria-pressed', on); $('fit').classList.toggle('on', on); };
+setFit(ls.get('bi.fit', false));
+$('fit').addEventListener('click', () => { const on = !document.body.classList.contains('fit-contain'); setFit(on); ls.set('bi.fit', on); });
+const theme = ls.get('bi.theme', null);
+if (theme) document.documentElement.dataset.theme = theme;
+$('theme').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  const t = dark ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t; ls.set('bi.theme', t);
+});
+
+/* ---------- visualizador ---------- */
+let lastFocus = null;
+function openLb(i) {
+  lastFocus = document.activeElement;
+  $('lb').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  showLb(i);
+  $('lbClose').focus();
+}
+function closeLb() {
+  $('lb').classList.add('hidden');
+  document.body.style.overflow = '';
+  state.lbIndex = -1;
+  if (lastFocus) lastFocus.focus();
+}
+function showLb(i) {
+  const n = state.view.length;
+  if (!n) return closeLb();
+  i = (i + n) % n; state.lbIndex = i;
+  const it = state.view[i], u = urlFor(it);
+  const img = $('lbImg');
+  img.src = u; img.alt = it.name;
+  $('lbName').textContent = it.name;
+  $('lbCount').textContent = `${i + 1} / ${n}`;
+  $('lbDown').href = u; $('lbDown').download = it.name;
+  $('lbOpen').href = u;
+  updFavBtn(it);
+  const meta = [['Pasta', it.dir || '(raiz)'], ['Formato', it.ext.toUpperCase()], ['Tamanho', fmtSize(it.size)], ['Modificada', fmtDate(it.date)], ['Dimensões', '…']];
+  renderMeta(meta);
+  img.onload = () => { meta[4][1] = `${img.naturalWidth} × ${img.naturalHeight} px`; renderMeta(meta); };
+  img.onerror = () => { meta[4][1] = 'formato não suportado por este navegador'; renderMeta(meta); };
+  // pré-carrega a próxima
+  if (n > 1) { const nx = new Image(); nx.src = urlFor(state.view[(i + 1) % n]); }
+}
+function renderMeta(rows) {
+  $('lbMeta').replaceChildren(...rows.flatMap(([k, v]) => {
+    const dt = document.createElement('dt'); dt.textContent = k;
+    const dd = document.createElement('dd'); dd.textContent = v;
+    return [dt, dd];
+  }));
+}
+function updFavBtn(it) { $('lbFav').textContent = favs.has(favKey(it)) ? '★ Favorita (F)' : '☆ Favoritar (F)'; }
+function toggleFav() {
+  const it = state.view[state.lbIndex]; if (!it) return;
+  const k = favKey(it);
+  favs.has(k) ? favs.delete(k) : favs.add(k);
+  saveFavs(); updFavBtn(it);
+  const card = $('grid').querySelector(`.card[data-i="${state.lbIndex}"]`);
+  if (card) {
+    const badge = card.querySelector('.fav');
+    if (favs.has(k) && !badge) card.insertAdjacentHTML('beforeend', '<span class="fav" aria-label="Favorita">★</span>');
+    if (!favs.has(k) && badge) badge.remove();
+  }
+}
+$('lbPrev').onclick = () => showLb(state.lbIndex - 1);
+$('lbNext').onclick = () => showLb(state.lbIndex + 1);
+$('lbClose').onclick = closeLb;
+$('lbFav').onclick = toggleFav;
+$('lbCopy').onclick = async () => {
+  const it = state.view[state.lbIndex];
+  const text = state.root + '/' + it.path;
+  try { await navigator.clipboard.writeText(text); toast('Caminho copiado'); }
+  catch { prompt('Copie o caminho:', text); }
+};
+$('lb').addEventListener('click', e => { if (e.target.classList.contains('stage')) closeLb(); });
+addEventListener('keydown', e => {
+  if ($('lb').classList.contains('hidden')) {
+    if (e.key === '/' && document.activeElement !== $('q') && !$('q').disabled) { e.preventDefault(); $('q').focus(); }
+    return;
+  }
+  if (e.key === 'Escape') closeLb();
+  else if (e.key === 'ArrowLeft') showLb(state.lbIndex - 1);
+  else if (e.key === 'ArrowRight') showLb(state.lbIndex + 1);
+  else if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) toggleFav();
+  else if (e.key === 'Tab') { // mantém o foco dentro do visualizador
+    const f = [...$('lb').querySelectorAll('button, a[href]')].filter(el => el.offsetParent);
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
+// Swipe no celular
+let tx0 = null;
+$('lb').addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
+$('lb').addEventListener('touchend', e => {
+  if (tx0 == null) return;
+  const dx = e.changedTouches[0].clientX - tx0; tx0 = null;
+  if (Math.abs(dx) > 50) showLb(state.lbIndex + (dx < 0 ? 1 : -1));
+});
+})();
+</script>
+</body>
+</html>
