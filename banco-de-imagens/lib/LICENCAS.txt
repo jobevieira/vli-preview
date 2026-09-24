@@ -1,0 +1,14 @@
+Componentes de terceiros usados pelo Banco de Imagens (todos rodam localmente no navegador)
+
+tf.min.js — TensorFlow.js 4.22.0
+  Copyright Google LLC. Licença Apache 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+
+coco-ssd.min.js — @tensorflow-models/coco-ssd 2.2.3
+  Copyright Google LLC. Licença Apache 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+
+modelo-pessoas.js — pesos do modelo SSDLite MobileNet v2 (COCO) publicado em
+  storage.googleapis.com/tfjs-models, convertidos para float16. Licença Apache 2.0.
+
+municipios.js — Malha municipal (qualidade intermediária) e nomes dos municípios,
+  Instituto Brasileiro de Geografia e Estatística (IBGE), servicodados.ibge.gov.br.
+  Dados públicos; fonte: IBGE.

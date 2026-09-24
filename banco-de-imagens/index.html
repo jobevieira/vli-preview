@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Banco de Imagens VLI</title>
-<meta name="description" content="Banco de imagens portátil: navegue, busque e visualize imagens de pastas locais direto no navegador, sem instalação e sem enviar nada para a internet.">
+<meta name="description" content="Banco de imagens portátil: indexa pastas locais direto no navegador, identifica cidade pelo GPS, conta pessoas, acha duplicatas e fotos com problemas — sem instalação e sem enviar nada para a internet.">
 <style>
 :root{
   --bg:#ffffff;--panel:#f7f4ee;--card:#efeae0;--text:#22262a;--muted:#5b6168;--line:#d8d2c4;
-  --accent:#f2b705;--accent-ink:#22262a;--focus:#0a66c2;--overlay:rgba(18,20,22,.94);
+  --accent:#f2b705;--accent-ink:#22262a;--focus:#0a66c2;--overlay:rgba(18,20,22,.95);--warn:#9a4a00;
   --sans:'IBM Plex Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#16181a;--panel:#1d2023;--card:#26292d;--text:#ecebe7;--muted:#a3a7ac;--line:#33373b;--focus:#6cb4ff;
+  --bg:#16181a;--panel:#1d2023;--card:#26292d;--text:#ecebe7;--muted:#a3a7ac;--line:#33373b;--focus:#6cb4ff;--warn:#ffb86b;
 }}
-:root[data-theme="dark"]{--bg:#16181a;--panel:#1d2023;--card:#26292d;--text:#ecebe7;--muted:#a3a7ac;--line:#33373b;--focus:#6cb4ff}
+:root[data-theme="dark"]{--bg:#16181a;--panel:#1d2023;--card:#26292d;--text:#ecebe7;--muted:#a3a7ac;--line:#33373b;--focus:#6cb4ff;--warn:#ffb86b}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:15px}
@@ -24,7 +24,7 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .hidden{display:none!important}
 
-/* Top bar */
+/* Barra superior */
 .top{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:19px;white-space:nowrap;margin-right:8px}
 .brand i{width:10px;height:10px;background:var(--accent);display:inline-block}
@@ -33,17 +33,20 @@ button{cursor:pointer}
 .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.6}
 .ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 select,.btn{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
-.btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none}
 .btn:hover{border-color:var(--muted)}
+.btn:disabled{opacity:.5;cursor:default}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 .btn.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn.sm{padding:5px 10px;font-size:13px}
 .size{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}
 .size input{width:90px;accent-color:var(--accent)}
 
 /* Layout */
-.main{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 62px)}
-aside{border-right:1px solid var(--line);background:var(--panel);padding:16px 8px 32px;overflow:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
-aside h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:4px 10px 10px;font-weight:600}
+.main{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 62px)}
+aside{border-right:1px solid var(--line);background:var(--panel);padding:12px 8px 32px;overflow:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
+aside details{margin:0 0 12px}
+aside summary{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:4px 10px 8px;font-weight:600;cursor:pointer}
 .tree ul{list-style:none;margin:0;padding:0 0 0 12px}
 .tree>ul{padding-left:0}
 .tree button{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;gap:8px;width:100%;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px}
@@ -52,21 +55,39 @@ aside h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(
 .tree button:focus-visible{outline:2px solid var(--focus)}
 .tree .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tree .c{font-size:12px;opacity:.65;font-variant-numeric:tabular-nums}
-.content{padding:16px;min-width:0}
-.status{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:0 0 12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--thumb,180px),1fr));gap:10px}
-.card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:var(--card);position:relative}
-.card:focus-visible{outline:3px solid var(--focus)}
-.card .ph{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.card img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .25s}
-.card img.ok{opacity:1}
-.fit-contain .card img{object-fit:contain}
-.card .cap{padding:7px 9px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
-.card .fav{position:absolute;top:6px;right:6px;background:var(--accent);color:var(--accent-ink);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px}
-.sentinel{height:1px}
+.chk{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);padding:8px 10px 0;cursor:pointer}
+.chk input{accent-color:var(--accent)}
+.facets{display:flex;flex-direction:column;gap:10px;padding:0 10px}
+.facets label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.facets select{width:100%;padding:7px 8px;font-size:14px;background:var(--bg)}
+.facets .chk{padding:0}
+.an{margin:0 10px 12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:13px}
+.an b{display:block;font-size:14px;margin-bottom:6px}
+.bar{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.an .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.an .msg{color:var(--muted);line-height:1.45}
+.an .warn{color:var(--warn)}
+.foot{padding:0 10px;font-size:12px;color:var(--muted);line-height:1.5}
+.foot button{all:unset;cursor:pointer;text-decoration:underline}
 
-/* Empty / welcome */
-.welcome{max-width:640px;margin:8vh auto;padding:0 16px;text-align:left}
+.content{padding:16px;min-width:0}
+.status{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:0 0 12px}
+.status .r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vgrid{position:relative}
+.card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:var(--card);position:absolute}
+.card:focus-visible{outline:3px solid var(--focus)}
+.card .ph{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);font-size:12px}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.fit-contain .card img{object-fit:contain}
+.card .cap{height:30px;line-height:30px;padding:0 9px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.card .fav{position:absolute;top:6px;right:6px;background:var(--accent);color:var(--accent-ink);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.card .ppl{position:absolute;top:6px;left:6px;background:rgba(20,22,24,.75);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
+.card .grp{position:absolute;bottom:36px;left:6px;background:rgba(20,22,24,.75);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
+.empty{padding:48px 0;color:var(--muted);text-align:center}
+
+/* Boas-vindas */
+.welcome{max-width:680px;margin:7vh auto;padding:0 16px}
 .welcome h1{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,42px);line-height:1.15;margin:0 0 16px}
 .welcome p{color:var(--muted);line-height:1.6;margin:0 0 20px}
 .welcome .actions{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
@@ -75,8 +96,8 @@ aside h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(
 body.dragging .drop{border-color:var(--accent);color:var(--text)}
 .progress{margin-top:16px;color:var(--muted);font-size:14px}
 
-/* Lightbox */
-.lb{position:fixed;inset:0;z-index:20;background:var(--overlay);display:grid;grid-template-columns:1fr 300px;color:#ecebe7}
+/* Visualizador */
+.lb{position:fixed;inset:0;z-index:20;background:var(--overlay);display:grid;grid-template-columns:1fr 320px;color:#ecebe7}
 .lb .stage{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;padding:48px 56px}
 .lb .stage img{max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 10px 40px rgba(0,0,0,.4)}
 .lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);border:0;color:#fff;width:44px;height:64px;border-radius:8px;font-size:26px}
@@ -86,21 +107,24 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 .lb .info{background:#1d2023;padding:24px 20px;overflow:auto;border-left:1px solid #33373b}
 .lb .info h3{font-family:var(--serif);font-weight:400;font-size:18px;margin:0 0 16px;word-break:break-all}
 .lb dl{margin:0 0 20px;font-size:13px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
-.lb dt{color:#a3a7ac}.lb dd{margin:0;word-break:break-all}
+.lb dt{color:#a3a7ac}.lb dd{margin:0;word-break:break-word}
+.lb dd a{color:#ffd35c}
+.lb dd small{color:#a3a7ac}
 .lb .acts{display:flex;flex-direction:column;gap:8px}
-.lb .acts .btn{background:#26292d;border-color:#33373b;color:#ecebe7;justify-content:center;text-decoration:none}
+.lb .acts .btn{background:#26292d;border-color:#33373b;color:#ecebe7;justify-content:center}
 .lb .acts .btn.primary{background:var(--accent);color:#22262a;border-color:var(--accent)}
 .lb .count{position:absolute;top:16px;left:16px;font-size:13px;color:#a3a7ac}
+.lb .fix{display:flex;gap:6px;margin:0 0 12px}
+.lb .fix input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #33373b;background:#26292d;color:#ecebe7}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30}
 
 @media (max-width:820px){
   .main{grid-template-columns:1fr}
-  aside{position:static;max-height:220px;border-right:0;border-bottom:1px solid var(--line)}
+  aside{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}
   .lb{grid-template-columns:1fr;grid-template-rows:1fr auto}
   .lb .stage{padding:48px 8px 8px}
-  .lb .info{max-height:38vh;border-left:0;border-top:1px solid #33373b}
+  .lb .info{max-height:40vh;border-left:0;border-top:1px solid #33373b}
   .size{display:none}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
   .content{padding:12px 16px}
 }
 </style>
@@ -110,16 +134,16 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 <header class="top">
   <div class="brand"><i></i>Banco de Imagens</div>
   <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="q" type="search" placeholder="Buscar por nome ou pasta…" aria-label="Buscar imagens" disabled></label>
+    <input id="q" type="search" placeholder="Buscar por nome, pasta ou cidade…" aria-label="Buscar imagens" disabled></label>
   <div class="ctrl">
     <select id="sort" aria-label="Ordenar" disabled>
       <option value="name">Nome (A–Z)</option>
       <option value="-date">Mais recentes</option>
       <option value="date">Mais antigas</option>
+      <option value="-people">Mais pessoas</option>
       <option value="-size">Maiores</option>
       <option value="size">Menores</option>
     </select>
-    <select id="type" aria-label="Filtrar por formato" disabled><option value="">Todos os formatos</option></select>
     <button class="btn" id="favOnly" aria-pressed="false" disabled title="Mostrar só favoritas (F no visualizador marca/desmarca)">★ Favoritas</button>
     <label class="size">Tamanho <input id="thumb" type="range" min="110" max="360" step="10" value="180" aria-label="Tamanho das miniaturas"></label>
     <button class="btn" id="fit" aria-pressed="false" title="Alternar recorte/imagem inteira nas miniaturas">⤢ Ajustar</button>
@@ -129,17 +153,43 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 </header>
 
 <div class="main hidden" id="app">
-  <aside><h2>Pastas</h2><nav class="tree" id="tree" aria-label="Pastas"></nav></aside>
+  <aside>
+    <div class="an" id="an" aria-live="polite">
+      <b>Análise automática</b>
+      <div class="msg" id="anMsg">—</div>
+      <div class="bar"><i id="anBar"></i></div>
+      <label class="chk" style="padding:0"><input type="checkbox" id="aiOn" checked> Detectar pessoas e objetos (IA)</label>
+      <div class="row"><button class="btn sm" id="anPause">Pausar</button></div>
+    </div>
+    <details open id="dFolders"><summary>Pastas</summary>
+      <nav class="tree" id="tree" aria-label="Pastas"></nav>
+      <label class="chk"><input type="checkbox" id="subOn" checked> Incluir subpastas</label>
+    </details>
+    <details open id="dFilters"><summary>Filtros</summary>
+      <div class="facets" id="facets">
+        <label>Cidade<select data-f="city"></select></label>
+        <label>Pessoas<select data-f="people"></select></label>
+        <label>Objetos<select data-f="tag"></select></label>
+        <label>Ano<select data-f="year"></select></label>
+        <label>Formato da foto<select data-f="orient"></select></label>
+        <label>Qualidade<select data-f="quality"></select></label>
+        <label>Tipo de arquivo<select data-f="ext"></select></label>
+        <label class="chk"><input type="checkbox" id="dupOn"> Só duplicadas / semelhantes</label>
+        <button class="btn sm" id="clearF">Limpar filtros</button>
+      </div>
+    </details>
+    <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos desta pasta</button></div>
+  </aside>
   <section class="content">
-    <div class="status"><span id="stat"></span><span id="rootName"></span></div>
-    <div class="grid" id="grid"></div>
-    <div class="sentinel" id="sentinel"></div>
+    <div class="status"><span id="stat"></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
+    <div class="vgrid" id="grid"></div>
+    <div class="empty hidden" id="empty">Nenhuma imagem com esses filtros.</div>
   </section>
 </div>
 
 <section class="welcome" id="welcome">
-  <h1>Suas imagens locais, organizadas em um só lugar.</h1>
-  <p>Escolha uma pasta do computador, pen drive ou rede. As imagens são lidas <strong>direto do disco, no seu navegador</strong> — nada é instalado e nada é enviado para a internet.</p>
+  <h1>Suas imagens locais, organizadas e analisadas automaticamente.</h1>
+  <p>Escolha uma pasta do computador, pen drive ou rede — todas as subpastas entram. As imagens são lidas e analisadas <strong>no seu navegador</strong>: nada é instalado e nada é enviado para a internet.</p>
   <div class="actions">
     <button class="btn primary" id="openBtn2">Abrir pasta de imagens</button>
     <button class="btn hidden" id="reopenBtn">Reabrir última pasta</button>
@@ -147,11 +197,12 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   <div class="drop">…ou arraste uma pasta para cá</div>
   <div class="progress" id="progress" role="status" aria-live="polite"></div>
   <ul>
-    <li>Subpastas viram uma árvore de navegação à esquerda.</li>
-    <li>Busca por nome, ordenação por data/tamanho e filtro por formato.</li>
-    <li>Visualizador com setas ← →, informações da imagem, download e favoritas (tecla F).</li>
-    <li>Formatos: JPG, PNG, WEBP, GIF, AVIF, SVG, BMP, ICO. (HEIC e TIFF dependem do navegador.)</li>
-    <li>Para levar no pen drive: copie este arquivo <code>index.html</code> para a pasta das imagens e abra com Chrome, Edge ou Firefox.</li>
+    <li><strong>Cidade</strong> pelo GPS da foto (malha de municípios do IBGE, funciona sem internet) ou pelo nome da pasta.</li>
+    <li><strong>Pessoas</strong>: sem pessoas, 1, 2, 3 ou grupo (mais de 3) — e objetos como trem, caminhão e embarcação.</li>
+    <li><strong>Duplicatas e semelhantes</strong>, fotos <strong>borradas, escuras ou pequenas</strong>, horizontal/vertical, ano da foto.</li>
+    <li>A primeira análise leva um tempo (dá para pausar e continuar depois); o resultado fica salvo neste navegador e só fotos novas são analisadas de novo.</li>
+    <li>Busca, favoritas, visualizador com setas ← → e exportação para planilha.</li>
+    <li>Use Chrome ou Edge para reabrir a pasta com um clique. Firefox também funciona.</li>
   </ul>
 </section>
 
@@ -166,217 +217,773 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   <div class="info">
     <h3 id="lbName"></h3>
     <dl id="lbMeta"></dl>
+    <div class="fix hidden" id="lbFix">
+      <input id="lbCity" list="cityList" placeholder="Cidade – UF" aria-label="Corrigir cidade">
+      <button class="btn sm" id="lbCitySave">Salvar</button>
+    </div>
     <div class="acts">
       <a class="btn primary" id="lbDown" download>Baixar cópia</a>
       <button class="btn" id="lbFav">☆ Favoritar (F)</button>
+      <button class="btn" id="lbCityBtn">Corrigir cidade</button>
+      <button class="btn hidden" id="lbSim">Ver semelhantes</button>
       <button class="btn" id="lbCopy">Copiar caminho</button>
-      <a class="btn" id="lbOpen" target="_blank" rel="noopener">Abrir em nova aba</a>
     </div>
   </div>
 </div>
+<datalist id="cityList"></datalist>
 
 <input type="file" id="dirInput" webkitdirectory directory multiple class="hidden">
 
 <script>
 (() => {
 'use strict';
-const EXT = ['jpg','jpeg','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff','jfif'];
-const BATCH = 120;
+const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
+const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
+const THUMB = 384;             // lado maior da miniatura salva
+const DETECT = 640;            // lado maior da imagem enviada à IA
+const PERSON_MIN = 0.5;        // confiança mínima para contar uma pessoa
+const GROUP = 4;               // a partir daqui é "grupo": não precisa contar exatamente
+const BLUR_MAX = 6;            // nitidez relativa abaixo disso = possivelmente borrada (fotos nítidas ficam acima de 10)
+const DARK_MAX = 45;           // luminância média abaixo disso = escura
+const LOWRES = 1200;           // lado maior abaixo disso = baixa resolução
+const DUP_DIST = 7;            // distância máxima entre hashes para considerar semelhante (fotos diferentes ficam acima de 15)
+const TAGS = { train: 'Trem', truck: 'Caminhão', boat: 'Embarcação', car: 'Carro', bus: 'Ônibus',
+  motorcycle: 'Moto', bicycle: 'Bicicleta', airplane: 'Avião', 'traffic light': 'Semáforo',
+  'stop sign': 'Placa de pare', dog: 'Cachorro', horse: 'Cavalo', cow: 'Gado', laptop: 'Notebook', 'cell phone': 'Celular' };
 const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const state = {
-  items: [],        // {file, name, dir, path, ext, size, date}
-  view: [],         // filtered + sorted
-  shown: 0,
-  folder: '',       // selected folder path ('' = all)
-  root: '',
-  lbIndex: -1,
+  items: [], keySet: new Set(), view: [], folder: '', root: '', rootHandle: null,
+  meta: new Map(),     // key → resultado da análise
+  manual: new Map(),   // root|path → {city, uf}
+  dup: new Map(),      // key → id do grupo de semelhantes
+  dupSize: new Map(),  // id do grupo → quantidade
+  lbKey: null, onlyGroup: null,
 };
+const F = { city: '', people: '', tag: '', year: '', orient: '', quality: '', ext: '' };
 
-/* ---------- storage helpers (tudo opcional) ---------- */
+/* ================= armazenamento ================= */
 const ls = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
 let favs = new Set(ls.get('bi.favs', []));
-const favKey = it => state.root + '/' + it.path;
+const pathKey = it => state.root + '|' + it.path;
 const saveFavs = () => ls.set('bi.favs', [...favs]);
 
-function idb(mode, fn) {
-  return new Promise((res, rej) => {
-    let req;
-    try { req = indexedDB.open('banco-imagens', 1); } catch (e) { return rej(e); }
-    req.onupgradeneeded = () => req.result.createObjectStore('kv');
-    req.onerror = () => rej(req.error);
-    req.onsuccess = () => {
-      const tx = req.result.transaction('kv', mode);
-      const r = fn(tx.objectStore('kv'));
-      tx.oncomplete = () => res(r && r.result);
-      tx.onerror = () => rej(tx.error);
-    };
+let dbp = null;
+function db() {
+  if (!dbp) dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('banco-imagens', 2);
+    r.onupgradeneeded = () => { for (const s of ['kv', 'meta', 'thumbs', 'libs', 'manual']) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
   });
+  return dbp;
 }
-const saveHandle = h => idb('readwrite', s => s.put(h, 'dir')).catch(() => {});
-const loadHandle = () => idb('readonly', s => s.get('dir')).catch(() => null);
+async function idb(store, mode, fn) {
+  try {
+    const d = await db();
+    return await new Promise((res, rej) => {
+      const t = d.transaction(store, mode), req = fn(t.objectStore(store));
+      t.oncomplete = () => res(req && 'result' in req ? req.result : undefined);
+      t.onerror = t.onabort = () => rej(t.error);
+    });
+  } catch { return undefined; }
+}
+const range = root => IDBKeyRange.bound(root + '|', root + '|￿');
+let pending = [];
+async function flush() {
+  if (!pending.length) return;
+  const batch = pending; pending = [];
+  try {
+    const d = await db();
+    await new Promise((res, rej) => {
+      const t = d.transaction(['meta', 'thumbs'], 'readwrite');
+      for (const [m, blob] of batch) { t.objectStore('meta').put(m, m.k); if (blob) t.objectStore('thumbs').put(blob, m.k); }
+      t.oncomplete = res; t.onerror = t.onabort = () => rej(t.error);
+    });
+  } catch { batch.forEach(([m, b]) => b && memThumbs.set(m.k, b)); }
+}
+const memThumbs = new Map(); // usado se o IndexedDB não estiver disponível
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
+async function showStorage() {
+  try { const e = await navigator.storage.estimate(); $('storage').textContent = `Dados salvos no navegador: ${fmtSize(e.usage || 0)}`; } catch {}
+}
 
-/* ---------- utils ---------- */
+/* ================= utilidades ================= */
 const extOf = n => { const i = n.lastIndexOf('.'); return i < 0 ? '' : n.slice(i + 1).toLowerCase(); };
 const isImg = n => EXT.includes(extOf(n)) && !n.startsWith('.');
-const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : b < 1073741824 ? (b / 1048576).toFixed(1) + ' MB' : (b / 1073741824).toFixed(2) + ' GB';
 const fmtDate = t => new Date(t).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+const fmtNum = n => n.toLocaleString('pt-BR');
+const fmtDur = s => s < 90 ? Math.round(s) + ' s' : s < 5400 ? Math.round(s / 60) + ' min' : (s / 3600).toFixed(1).replace('.', ',') + ' h';
 const collator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 function toast(msg) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 1800);
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
 }
-const urls = new WeakMap();
-function urlFor(it) {
-  let u = urls.get(it.file);
-  if (!u) { u = URL.createObjectURL(it.file); urls.set(it.file, u); }
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.onload = res;
+    s.onerror = () => rej(new Error('Não foi possível carregar ' + src));
+    document.head.appendChild(s);
+  });
+}
+function option(value, text) { const o = document.createElement('option'); o.value = value; o.textContent = text; return o; }
+
+// Cache de URLs (miniaturas e originais) com limite, para não estourar memória
+const urlCache = new Map();
+function cacheUrl(key, blob) {
+  const u = URL.createObjectURL(blob);
+  urlCache.set(key, u);
+  if (urlCache.size > 900) { const [k, old] = urlCache.entries().next().value; urlCache.delete(k); URL.revokeObjectURL(old); }
   return u;
 }
 
-/* ---------- carregamento ---------- */
-function progress(n) { $('progress').textContent = n ? `Lendo… ${n} imagens encontradas` : ''; }
-
-function addItem(file, relPath) {
-  const parts = relPath.split('/');
-  const name = parts.pop();
-  if (parts.some(p => p.startsWith('.'))) return;
-  state.items.push({ file, name, dir: parts.join('/'), path: relPath, ext: extOf(name), size: file.size, date: file.lastModified });
-  if (state.items.length % 200 === 0) progress(state.items.length);
+/* ================= EXIF (data, câmera, GPS) ================= */
+function parseExif(buf) {
+  try {
+    const v = new DataView(buf);
+    if (v.byteLength < 4 || v.getUint16(0) !== 0xFFD8) return {};
+    let o = 2;
+    while (o + 4 <= v.byteLength) {
+      if (v.getUint8(o) !== 0xFF) return {};
+      const mk = v.getUint8(o + 1);
+      if (mk === 0xFF) { o++; continue; }
+      if (mk === 0xDA || mk === 0xD9) return {};
+      if ((mk >= 0xD0 && mk <= 0xD7) || mk === 0x01) { o += 2; continue; }
+      const len = v.getUint16(o + 2);
+      if (mk === 0xE1 && o + 10 <= v.byteLength && v.getUint32(o + 4) === 0x45786966 && v.getUint16(o + 8) === 0)
+        return readTiff(v, o + 10, Math.min(v.byteLength, o + 2 + len));
+      o += 2 + len;
+    }
+  } catch {}
+  return {};
+}
+function readTiff(v, t, end) {
+  const le = v.getUint16(t) === 0x4949;
+  const u16 = p => v.getUint16(p, le), u32 = p => v.getUint32(p, le);
+  if (u16(t + 2) !== 42) return {};
+  const SIZES = [0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8];
+  const ifd = off => {
+    const tags = {}, p = t + off;
+    if (!off || p + 2 > end) return tags;
+    const n = u16(p);
+    for (let i = 0; i < n; i++) {
+      const e = p + 2 + i * 12;
+      if (e + 12 > end) break;
+      const type = u16(e + 2), cnt = u32(e + 4), bytes = (SIZES[type] || 0) * cnt;
+      const vp = bytes <= 4 ? e + 8 : t + u32(e + 8);
+      if (bytes && vp + bytes <= end) tags[u16(e)] = { type, cnt, vp };
+    }
+    return tags;
+  };
+  const val = ({ type, cnt, vp }) => {
+    if (type === 2) { let s = ''; for (let i = 0; i < cnt; i++) { const c = v.getUint8(vp + i); if (!c) break; s += String.fromCharCode(c); } return s.trim(); }
+    if (type === 3) return u16(vp);
+    if (type === 4) return u32(vp);
+    if (type === 5 || type === 10) { const a = []; for (let i = 0; i < cnt; i++) { const d = u32(vp + i * 8 + 4); a.push(d ? u32(vp + i * 8) / d : 0); } return a; }
+    return null;
+  };
+  const out = {}, i0 = ifd(u32(t + 4));
+  if (i0[0x010F]) out.make = val(i0[0x010F]);
+  if (i0[0x0110]) out.model = val(i0[0x0110]);
+  if (i0[0x8769]) {
+    const ex = ifd(val(i0[0x8769])), d = ex[0x9003] || ex[0x9004];
+    const m = d && /^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)/.exec(val(d));
+    if (m && +m[1] > 1900) out.taken = new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5], +m[6]).getTime();
+  }
+  if (i0[0x8825]) {
+    const g = ifd(val(i0[0x8825]));
+    if (g[2] && g[4]) {
+      const a = val(g[2]), b = val(g[4]);
+      if (a.length === 3 && b.length === 3) {
+        let lat = a[0] + a[1] / 60 + a[2] / 3600, lon = b[0] + b[1] / 60 + b[2] / 3600;
+        if (g[1] && val(g[1]) === 'S') lat = -lat;
+        if (g[3] && val(g[3]) === 'W') lon = -lon;
+        if (isFinite(lat) && isFinite(lon) && (lat || lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180)
+          out.gps = [+lat.toFixed(6), +lon.toFixed(6)];
+      }
+    }
+  }
+  return out;
 }
 
-async function walkHandle(dir, prefix) {
+/* ================= municípios (IBGE) ================= */
+let GEO = null, geoCells = null, nameIndex = null;
+async function loadGeo() {
+  if (GEO) return true;
+  try { if (!window.MUNICIPIOS) await loadScript('lib/municipios.js'); } catch { return false; }
+  const M = window.MUNICIPIOS, S = M.scale;
+  GEO = M.list.map(([name, uf, bb, rings]) => ({
+    name, uf, bb, label: name + ' – ' + uf,
+    rings: rings.map(r => { const a = new Int32Array(r.length); let x = 0, y = 0; for (let i = 0; i < r.length; i += 2) { x += r[i]; y += r[i + 1]; a[i] = x; a[i + 1] = y; } return a; })
+  }));
+  geoCells = new Map();
+  GEO.forEach((g, i) => {
+    for (let cx = Math.floor(g.bb[0] / S); cx <= Math.floor(g.bb[2] / S); cx++)
+      for (let cy = Math.floor(g.bb[1] / S); cy <= Math.floor(g.bb[3] / S); cy++) {
+        const k = cx + ',' + cy; if (!geoCells.has(k)) geoCells.set(k, []); geoCells.get(k).push(i);
+      }
+  });
+  nameIndex = new Map();
+  for (const g of GEO) { const k = norm(g.name); if (!nameIndex.has(k)) nameIndex.set(k, []); nameIndex.get(k).push(g); }
+  const dl = $('cityList');
+  GEO.map(g => g.label).sort(collator.compare).forEach(l => dl.appendChild(option(l, '')));
+  window.MUNICIPIOS = null;
+  return true;
+}
+function inRings(x, y, rings) {
+  let inside = false;
+  for (const r of rings)
+    for (let i = 0, j = r.length - 2; i < r.length; j = i, i += 2) {
+      const xi = r[i], yi = r[i + 1], xj = r[j], yj = r[j + 1];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+    }
+  return inside;
+}
+function segDist2(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy;
+  let t = l ? ((px - ax) * dx + (py - ay) * dy) / l : 0; t = Math.max(0, Math.min(1, t));
+  const ex = ax + t * dx - px, ey = ay + t * dy - py; return ex * ex + ey * ey;
+}
+function geoLookup(lat, lon) {
+  if (!GEO) return null;
+  const S = 10000, x = Math.round(lon * S), y = Math.round(lat * S);
+  const cx = Math.floor(x / S), cy = Math.floor(y / S);
+  for (const i of geoCells.get(cx + ',' + cy) || []) {
+    const g = GEO[i];
+    if (x >= g.bb[0] && x <= g.bb[2] && y >= g.bb[1] && y <= g.bb[3] && inRings(x, y, g.rings)) return g;
+  }
+  // Pontos na costa ou na divisa podem cair fora da malha simplificada: pega o município mais próximo (até ~3 km)
+  let best = null, bd = (0.03 * S) ** 2;
+  for (let a = cx - 1; a <= cx + 1; a++) for (let b = cy - 1; b <= cy + 1; b++)
+    for (const i of geoCells.get(a + ',' + b) || []) {
+      for (const r of GEO[i].rings) for (let k = 2; k < r.length; k += 2) {
+        const d = segDist2(x, y, r[k - 2], r[k - 1], r[k], r[k + 1]);
+        if (d < bd) { bd = d; best = GEO[i]; }
+      }
+    }
+  return best;
+}
+// Cidade pelo nome da pasta (ex.: "Obras Tubarão 2025"). Palavras genéricas são ignoradas.
+const STOP = new Set(['porto', 'central', 'planalto', 'terra', 'mar', 'sol', 'luz', 'paz', 'bonito', 'formosa', 'esperanca', 'alianca', 'uniao', 'independencia', 'liberdade', 'progresso', 'triunfo', 'sucesso', 'amparo', 'presidente', 'general', 'fortaleza dos valos', 'campo', 'cruz', 'serra', 'vista', 'feliz', 'jardim', 'ouro', 'palmas', 'pedra', 'ponte', 'rio', 'barra', 'lagoa', 'aurora', 'harmonia', 'vitoria da uniao', 'nova', 'novo', 'santa', 'sao', 'boa', 'bom', 'belo', 'bela', 'natal', 'jesus', 'estrela', 'trindade', 'saudade', 'saudades', 'agua', 'aguas', 'areia', 'guarda', 'iguape', 'viana']);
+const UFS = new Set('ac al ap am ba ce df es go ma mt ms mg pa pb pr pe pi rj rn rs ro rr sc sp se to'.split(' '));
+const dirCity = new Map();
+function cityFromDir(dir) {
+  if (!nameIndex || !dir) return null;
+  if (dirCity.has(dir)) return dirCity.get(dir);
+  const words = norm(dir.replace(/\//g, ' / ')).split(' ');
+  const ufs = new Set(words.filter(w => UFS.has(w)));
+  let best = null;
+  const segs = dir.split('/').map(s => norm(s).split(' ').filter(Boolean));
+  for (let si = segs.length - 1; si >= 0 && !best; si--) {
+    const w = segs[si];
+    for (let n = Math.min(5, w.length); n >= 1 && !best; n--)
+      for (let i = 0; i + n <= w.length; i++) {
+        const k = w.slice(i, i + n).join(' ');
+        if (k.length < 4 || STOP.has(k) || /^\d+$/.test(k)) continue;
+        const c = nameIndex.get(k);
+        if (!c) continue;
+        const pick = c.length === 1 ? c[0] : c.find(g => ufs.has(g.uf.toLowerCase()));
+        best = pick ? { city: pick.name, uf: pick.uf, src: 'pasta' } : { city: c[0].name, uf: '', src: 'pasta' };
+        break;
+      }
+  }
+  dirCity.set(dir, best);
+  return best;
+}
+function cityOf(it) {
+  const man = state.manual.get(pathKey(it));
+  if (man) return { ...man, src: 'manual' };
+  const m = state.meta.get(it.key);
+  if (m && m.city) return { city: m.city, uf: m.uf, src: 'gps' };
+  if (m && m.gps && m.city === null) return { city: 'Fora do Brasil', uf: '', src: 'gps' };
+  return cityFromDir(it.dir);
+}
+const cityLabel = c => c ? (c.uf ? c.city + ' – ' + c.uf : c.city) : '';
+
+/* ================= IA (pessoas e objetos) ================= */
+const ai = { state: 'off', detector: null, backend: '' };
+async function loadAI() {
+  if (ai.state === 'ok' || ai.state === 'loading') return;
+  ai.state = 'loading'; anRender();
+  try {
+    if (!window.tf) await loadScript('lib/tf.min.js');
+    if (!window.cocoSsd) await loadScript('lib/coco-ssd.min.js');
+    if (!window.MODELO_PESSOAS) await loadScript('lib/modelo-pessoas.js');
+    const M = window.MODELO_PESSOAS;
+    const bin = Uint8Array.from(atob(M.d), c => c.charCodeAt(0));
+    await tf.ready();
+    ai.backend = tf.getBackend();
+    ai.detector = await cocoSsd.load({ base: 'lite_mobilenet_v2', modelUrl: tf.io.fromMemory({ modelTopology: M.t, weightSpecs: M.s, weightData: bin.buffer }) });
+    window.MODELO_PESSOAS = null;
+    ai.state = 'ok';
+  } catch (e) {
+    console.warn(e); ai.state = 'erro';
+  }
+  anRender();
+}
+
+/* ================= leitura das pastas ================= */
+function progress(n) { $('progress').textContent = n ? `Lendo pastas… ${fmtNum(n)} imagens encontradas` : ''; }
+function mkItem(file, relPath, size, date) {
+  const parts = relPath.split('/'), name = parts.pop();
+  if (parts.some(p => p.startsWith('.'))) return null;
+  size = file ? file.size : size; date = file ? file.lastModified : date;
+  return { key: state.root + '|' + relPath + '|' + size + '|' + date, file, name, dir: parts.join('/'), path: relPath, ext: extOf(name), size, date };
+}
+async function walkHandle(dir, prefix, out) {
   for await (const entry of dir.values()) {
     if (entry.name.startsWith('.')) continue;
     const p = prefix ? prefix + '/' + entry.name : entry.name;
-    if (entry.kind === 'directory') await walkHandle(entry, p);
+    if (entry.kind === 'directory') await walkHandle(entry, p, out);
     else if (isImg(entry.name)) {
-      try { addItem(await entry.getFile(), p); } catch {}
+      try { const it = mkItem(await entry.getFile(), p); if (it) out.push(it); } catch {}
+      if (out.length % 250 === 0) { progress(out.length); scanMsg(out.length); }
     }
   }
 }
-
-function readEntries(reader) {
-  return new Promise((res, rej) => reader.readEntries(res, rej));
-}
-async function walkEntry(entry, prefix) {
-  const p = prefix ? prefix + '/' + entry.name : entry.name;
+const readEntries = r => new Promise((res, rej) => r.readEntries(res, rej));
+async function walkEntry(entry, prefix, out) {
   if (entry.name.startsWith('.')) return;
+  const p = prefix ? prefix + '/' + entry.name : entry.name;
   if (entry.isFile) {
     if (isImg(entry.name)) {
       const f = await new Promise((res, rej) => entry.file(res, rej)).catch(() => null);
-      if (f) addItem(f, p);
+      const it = f && mkItem(f, p); if (it) out.push(it);
+      if (out.length % 250 === 0) progress(out.length);
     }
   } else if (entry.isDirectory) {
-    const reader = entry.createReader();
-    let batch;
-    do { batch = await readEntries(reader); for (const e of batch) await walkEntry(e, p); } while (batch.length);
+    const reader = entry.createReader(); let b;
+    do { b = await readEntries(reader); for (const e of b) await walkEntry(e, p, out); } while (b.length);
   }
 }
-
-function reset(rootName) {
-  state.items = []; state.folder = ''; state.root = rootName;
-  progress(0);
+async function fileOf(it) {
+  if (it.file) return it.file;
+  if (!state.rootHandle) throw new Error('sem acesso');
+  let d = state.rootHandle; const parts = it.path.split('/'), name = parts.pop();
+  for (const p of parts) d = await d.getDirectoryHandle(p);
+  it.file = await (await d.getFileHandle(name)).getFile();
+  return it.file;
 }
 
-async function fromHandle(handle) {
-  reset(handle.name);
-  progress(0.1);
-  await walkHandle(handle, '');
-  saveHandle(handle);
+async function setLibrary(root, items, handle) {
+  state.root = root; state.rootHandle = handle || null; state.folder = ''; state.onlyGroup = null;
+  state.items = items; state.keySet = new Set(items.map(i => i.key)); dirCity.clear();
+  const [metas, manual] = await Promise.all([
+    idb('meta', 'readonly', s => s.getAll(range(root))),
+    idb('manual', 'readonly', s => s.getAll(range(root))),
+  ]);
+  state.meta = new Map((metas || []).filter(m => m.v === ANALYSIS_V).map(m => [m.k, m]));
+  state.manual = new Map((manual || []).map(m => [m.pk, m]));
+  await loadGeo();
+  computeDups();
   ready();
+  runAnalysis();
+}
+function saveListing() {
+  idb('libs', 'readwrite', s => s.put({ at: Date.now(), files: state.items.map(i => [i.path, i.size, i.date]) }, state.root));
+}
+
+async function fromHandle(handle, useCache) {
+  state.root = handle.name;
+  if (useCache) {
+    // Abre na hora com a lista salva e atualiza as pastas em segundo plano
+    const lib = await idb('libs', 'readonly', s => s.get(handle.name));
+    if (lib && lib.files && lib.files.length) {
+      const items = lib.files.map(([p, sz, dt]) => mkItem(null, p, sz, dt)).filter(Boolean);
+      await setLibrary(handle.name, items, handle);
+      rescan(handle);
+      return;
+    }
+  }
+  progress(0.1);
+  const items = [];
+  await walkHandle(handle, '', items);
+  idb('kv', 'readwrite', s => s.put(handle, 'dir'));
+  await setLibrary(handle.name, items, handle);
+  saveListing();
+}
+let scanning = false;
+function scanMsg(n) { if (scanning) $('anMsg').textContent = `Procurando imagens novas… ${fmtNum(n)}`; }
+async function rescan(handle) {
+  scanning = true; anRender();
+  const items = [];
+  try { await walkHandle(handle, '', items); } catch { scanning = false; anRender(); return; }
+  scanning = false;
+  if (state.root !== handle.name) return;
+  const before = new Set(state.items.map(i => i.key));
+  const added = items.filter(i => !before.has(i.key)).length;
+  const removed = state.items.length - (items.length - added);
+  state.items = items; state.keySet = new Set(items.map(i => i.key)); dirCity.clear();
+  saveListing();
+  buildTree(); computeDups(); apply(true);
+  if (added || removed) toast(`Pasta atualizada: ${added} novas, ${removed} removidas`);
+  runAnalysis();
 }
 
 async function openFolder() {
   if (window.showDirectoryPicker) {
-    try {
-      const h = await window.showDirectoryPicker({ id: 'banco-imagens', mode: 'read' });
-      await fromHandle(h);
-      return;
-    } catch (e) {
-      if (e && e.name === 'AbortError') return;
-      // SecurityError etc. → cai para o método clássico
-    }
+    try { const h = await window.showDirectoryPicker({ id: 'banco-imagens', mode: 'read' }); await fromHandle(h, false); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
   }
   $('dirInput').click();
 }
-
 $('dirInput').addEventListener('change', e => {
   const files = [...e.target.files];
   if (!files.length) return;
   const root = (files[0].webkitRelativePath || '').split('/')[0] || 'Pasta';
-  reset(root);
+  state.root = root;
+  const items = [];
   for (const f of files) {
     const rel = (f.webkitRelativePath || f.name).split('/').slice(1).join('/') || f.name;
-    if (isImg(f.name)) addItem(f, rel);
+    if (isImg(f.name)) { const it = mkItem(f, rel); if (it) items.push(it); }
   }
   e.target.value = '';
-  ready();
+  setLibrary(root, items, null);
 });
 
-// Arrastar e soltar
 let dragDepth = 0;
 addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; document.body.classList.add('dragging'); });
 addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dragging'); } });
 addEventListener('dragover', e => e.preventDefault());
 addEventListener('drop', async e => {
   e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
-  const items = [...(e.dataTransfer.items || [])].filter(i => i.kind === 'file');
-  const entries = items.map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  const entries = [...(e.dataTransfer.items || [])].filter(i => i.kind === 'file').map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
   if (!entries.length) return;
-  reset(entries.length === 1 && entries[0].isDirectory ? entries[0].name : 'Itens soltos');
-  progress(0.1);
   const single = entries.length === 1 && entries[0].isDirectory;
+  state.root = single ? entries[0].name : 'Itens soltos';
+  progress(0.1);
+  const items = [];
   for (const en of entries) {
-    if (single) {
-      const reader = en.createReader(); let b;
-      do { b = await readEntries(reader); for (const x of b) await walkEntry(x, ''); } while (b.length);
-    } else await walkEntry(en, '');
+    if (single) { const r = en.createReader(); let b; do { b = await readEntries(r); for (const x of b) await walkEntry(x, '', items); } while (b.length); }
+    else await walkEntry(en, '', items);
   }
-  ready();
+  setLibrary(state.root, items, null);
 });
 
-// Reabrir última pasta (Chrome/Edge)
 (async () => {
   if (!window.showDirectoryPicker) return;
-  const h = await loadHandle();
+  const h = await idb('kv', 'readonly', s => s.get('dir'));
   if (!h) return;
   const btn = $('reopenBtn');
   btn.textContent = `Reabrir “${h.name}”`;
   btn.classList.remove('hidden');
   btn.onclick = async () => {
-    try {
-      const perm = await h.requestPermission({ mode: 'read' });
-      if (perm === 'granted') await fromHandle(h);
-    } catch { toast('Não foi possível reabrir. Escolha a pasta novamente.'); }
+    try { if (await h.requestPermission({ mode: 'read' }) === 'granted') await fromHandle(h, true); }
+    catch { toast('Não foi possível reabrir. Escolha a pasta novamente.'); }
   };
 })();
-
 $('openBtn').onclick = openFolder;
 $('openBtn2').onclick = openFolder;
 
-/* ---------- interface ---------- */
-function ready() {
-  progress(0);
-  if (!state.items.length) {
-    $('progress').textContent = 'Nenhuma imagem encontrada nessa pasta.';
-    return;
-  }
-  $('welcome').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  ['q', 'sort', 'type', 'favOnly'].forEach(id => $(id).disabled = false);
-  $('rootName').textContent = '📁 ' + state.root;
-  document.title = state.root + ' — Banco de Imagens';
+/* ================= análise ================= */
+const an = { running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0, t0: 0, rate: 0 };
+const needs = it => { const m = state.meta.get(it.key); return !m || m.err === 'read' || (aiWanted() && ai.state !== 'erro' && !m.ai && !m.bad); };
+const aiWanted = () => $('aiOn').checked;
 
-  const types = [...new Set(state.items.map(i => i.ext))].sort();
-  $('type').innerHTML = '<option value="">Todos os formatos</option>' +
-    types.map(t => `<option value="${t}">${t.toUpperCase()}</option>`).join('');
-  buildTree();
-  apply();
+async function runAnalysis() {
+  for (const it of state.items) if (needs(it) && !an.queued.has(it.key)) { an.queue.push(it); an.queued.add(it.key); }
+  an.total = an.done + an.queue.length;
+  anRender();
+  if (an.running || !an.queue.length) return;
+  an.running = true; an.t0 = performance.now(); an.done = 0; an.total = an.queue.length;
+  if (aiWanted()) await loadAI();
+  let lastUi = 0, lastRefresh = performance.now();
+  const worker = async () => {
+    const cv = { a: document.createElement('canvas'), t: document.createElement('canvas'), d: document.createElement('canvas') };
+    while (an.queue.length) {
+      if (an.paused) { await sleep(300); continue; }
+      const it = an.queue.shift(); an.queued.delete(it.key);
+      if (!state.keySet.has(it.key)) continue;
+      try { await analyze(it, cv); } catch (e) { console.warn(it.path, e); }
+      an.done++;
+      if (pending.length >= 25) await flush();
+      const now = performance.now();
+      if (now - lastUi > 400) { lastUi = now; anRender(); }
+      if (now - lastRefresh > 6000) { lastRefresh = now; apply(true); }
+      await sleep(0);
+    }
+  };
+  await Promise.all([worker(), worker()]);
+  await flush();
+  an.running = false;
+  computeDups(); apply(true); anRender(); showStorage();
+  if (an.queue.length) runAnalysis();
 }
 
+async function analyze(it, cv) {
+  const m = { k: it.key, v: ANALYSIS_V };
+  let file, head;
+  try { file = await fileOf(it); head = await file.slice(0, 262144).arrayBuffer(); }
+  catch {
+    // Não salva: o arquivo pode ficar disponível depois (ex.: baixado pelo OneDrive)
+    m.bad = 1; m.err = 'read'; state.meta.set(it.key, m); markCard(it); return;
+  }
+  if (it.ext === 'jpg' || it.ext === 'jpeg' || it.ext === 'jfif') Object.assign(m, parseExif(head));
+  if (m.gps && GEO) { const g = geoLookup(m.gps[0], m.gps[1]); m.city = g ? g.name : null; m.uf = g ? g.uf : ''; }
+  let bmp;
+  try { bmp = await createImageBitmap(file); }
+  catch {
+    // SVG e alguns formatos só abrem pelo elemento <img>
+    const u = URL.createObjectURL(file);
+    try { const im = new Image(); im.src = u; await im.decode(); bmp = await createImageBitmap(im, { resizeWidth: im.naturalWidth || 1024, resizeHeight: im.naturalHeight || 1024 }); }
+    catch { m.bad = 1; m.err = sniff(head); state.meta.set(it.key, m); pending.push([m, null]); markCard(it); return; }
+    finally { URL.revokeObjectURL(u); }
+  }
+  m.w = bmp.width; m.h = bmp.height;
+  // Imagem reduzida para análise
+  const s = Math.min(1, DETECT / Math.max(m.w, m.h));
+  const a = cv.a; a.width = Math.max(1, Math.round(m.w * s)); a.height = Math.max(1, Math.round(m.h * s));
+  const ax = a.getContext('2d', { willReadFrequently: true });
+  ax.imageSmoothingQuality = 'high'; ax.drawImage(bmp, 0, 0, a.width, a.height);
+  // Miniatura
+  const ts = Math.min(1, THUMB / Math.max(a.width, a.height));
+  const t = cv.t; t.width = Math.max(1, Math.round(a.width * ts)); t.height = Math.max(1, Math.round(a.height * ts));
+  const tx = t.getContext('2d');
+  tx.imageSmoothingQuality = 'high'; tx.drawImage(a, 0, 0, t.width, t.height);
+  const blob = await new Promise(r => t.toBlob(r, 'image/jpeg', 0.75));
+  // Brilho, contraste e nitidez (na imagem reduzida)
+  const px = ax.getImageData(0, 0, a.width, a.height).data, W = a.width, H = a.height;
+  const g = new Float32Array(W * H); let sum = 0, sq = 0;
+  for (let i = 0, j = 0; i < px.length; i += 4, j++) { const l = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]; g[j] = l; sum += l; sq += l * l; }
+  const n = W * H, mean = sum / n, std = Math.sqrt(Math.max(0, sq / n - mean * mean));
+  let ls = 0, ls2 = 0, cnt = 0;
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const i = y * W + x, v = 4 * g[i] - g[i - 1] - g[i + 1] - g[i - W] - g[i + W];
+    ls += v; ls2 += v * v; cnt++;
+  }
+  m.lum = Math.round(mean); m.std = Math.round(std);
+  // Nitidez relativa ao contraste: não confunde foto escura ou de pouco contraste com foto borrada
+  m.sharp = cnt && std > 1 ? +((ls2 / cnt - (ls / cnt) ** 2) / (std * std) * 100).toFixed(1) : 0;
+  // Hash perceptual (dHash 64 bits) por média de áreas: igual para a mesma foto em tamanhos diferentes
+  const cell = new Float64Array(72), area = new Float64Array(72);
+  for (let y = 0; y < H; y++) { const cy = Math.min(7, Math.floor(y * 8 / H)); for (let x = 0; x < W; x++) { const c = cy * 9 + Math.min(8, Math.floor(x * 9 / W)); cell[c] += g[y * W + x]; area[c]++; } }
+  for (let c = 0; c < 72; c++) cell[c] /= area[c] || 1;
+  let hi = 0, lo = 0;
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    const bit = cell[y * 9 + x] > cell[y * 9 + x + 1] ? 1 : 0, b = y * 8 + x;
+    if (b < 32) hi = (hi << 1 | bit) >>> 0; else lo = (lo << 1 | bit) >>> 0;
+  }
+  m.hash = [hi, lo];
+  // Pessoas e objetos
+  try {
+    if (aiWanted() && ai.state === 'ok') Object.assign(m, await detect(a, bmp, cv), { ai: 1 });
+  } finally { bmp.close(); }
+  state.meta.set(it.key, m);
+  pending.push([m, blob]);
+  const card = gridCards.get(it.key);
+  if (card && !card.dataset.thumb) { setImg(card, cacheUrl('t:' + it.key, blob)); card.dataset.thumb = 1; }
+}
+
+// Identifica o formato real pelos primeiros bytes (a extensão pode mentir)
+function sniff(buf) {
+  const b = new Uint8Array(buf.slice(0, 16));
+  const txt = String.fromCharCode(...b.slice(4, 12));
+  if (b.length === 0 || b.every(x => x === 0)) return 'empty';
+  if (/^ftyp(heic|heix|hevc|heim|heis|mif1|msf1)/.test(txt)) return 'heic';
+  if ((b[0] === 0x49 && b[1] === 0x49) || (b[0] === 0x4D && b[1] === 0x4D)) return 'tiff';
+  return 'format';
+}
+const ERR = {
+  read: 'Não foi possível ler o arquivo (só na nuvem ou sem permissão?)',
+  empty: 'Arquivo vazio ou ainda não baixado',
+  heic: 'Foto HEIC (iPhone): este navegador não exibe esse formato',
+  tiff: 'TIFF: este navegador não exibe esse formato',
+  format: 'Formato não suportado ou arquivo corrompido',
+};
+function markCard(it) {
+  const card = gridCards.get(it.key), m = state.meta.get(it.key);
+  if (card && m && m.err) { card.firstChild.textContent = ERR[m.err]; card.dataset.thumb = 1; }
+}
+const overlap = (a, b) => {
+  const x1 = Math.max(a[0], b[0]), y1 = Math.max(a[1], b[1]), x2 = Math.min(a[0] + a[2], b[0] + b[2]), y2 = Math.min(a[1] + a[3], b[1] + b[3]);
+  const i = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+  return Math.max(i / (a[2] * a[3] + b[2] * b[3] - i), i / Math.min(a[2] * a[3], b[2] * b[3]) * 0.75);
+};
+async function detect(a, bmp, cv) {
+  const preds = await ai.detector.detect(a, 40, 0.3);
+  const people = preds.filter(p => p.class === 'person' && p.score >= PERSON_MIN).map(p => p.bbox);
+  const tags = [...new Set(preds.filter(p => TAGS[p.class] && p.score >= 0.5).map(p => TAGS[p.class]))];
+  if (people.length && people.length < GROUP) {
+    // Pessoas pequenas escapam na foto inteira: analisa 4 recortes ampliados (da foto original) e soma só quem ainda não foi contado
+    const W = bmp.width, H = bmp.height, tw = W * 0.6, th = H * 0.6, sx = W / a.width, cand = [];
+    const d = cv.d, ts = Math.min(1, DETECT / Math.max(tw, th));
+    d.width = Math.max(1, Math.round(tw * ts)); d.height = Math.max(1, Math.round(th * ts));
+    const dx = d.getContext('2d'); dx.imageSmoothingQuality = 'high';
+    for (const [x0, y0] of [[0, 0], [W - tw, 0], [0, H - th], [W - tw, H - th]]) {
+      if (people.length + cand.length >= GROUP * 2) break; // já é grupo com folga
+      dx.drawImage(bmp, x0, y0, tw, th, 0, 0, d.width, d.height);
+      const k = tw / d.width, mx = d.width * 0.02, my = d.height * 0.02;
+      for (const p of await ai.detector.detect(d, 40, PERSON_MIN)) {
+        if (p.class !== 'person') continue;
+        const [bx, by, bw, bh] = p.bbox;
+        // Quem encosta numa borda interna do recorte está cortado: aparece inteiro em outro recorte ou na foto inteira
+        if ((x0 > 0 && bx < mx) || (y0 > 0 && by < my) || (x0 === 0 && bx + bw > d.width - mx) || (y0 === 0 && by + bh > d.height - my)) continue;
+        cand.push({ b: [(x0 + bx * k) / sx, (y0 + by * k) / sx, bw * k / sx, bh * k / sx], s: p.score });
+      }
+    }
+    cand.sort((x, y) => y.s - x.s);
+    for (const c of cand) if (people.every(q => overlap(q, c.b) < 0.45)) people.push(c.b);
+  }
+  return { people: Math.min(people.length, GROUP), tags };
+}
+
+function anRender() {
+  const msg = $('anMsg'), bar = $('anBar');
+  const analyzed = state.items.filter(i => { const m = state.meta.get(i.key); return m && (!aiWanted() || m.ai || m.bad); }).length;
+  const pct = state.items.length ? analyzed / state.items.length : 0;
+  bar.style.width = (pct * 100).toFixed(1) + '%';
+  let t = '';
+  if (scanning) t = 'Procurando imagens novas nas pastas…';
+  else if (an.running) {
+    const el = (performance.now() - an.t0) / 1000, rate = an.done / Math.max(el, 0.001);
+    const rest = an.queue.length / Math.max(rate, 0.01);
+    t = an.paused ? `Pausada: ${fmtNum(analyzed)} de ${fmtNum(state.items.length)} analisadas.`
+      : `Analisando ${fmtNum(analyzed)} de ${fmtNum(state.items.length)} (${Math.floor(pct * 100)}%)` + (an.done > 5 ? ` · faltam ~${fmtDur(rest)}` : '');
+  } else t = `${fmtNum(analyzed)} de ${fmtNum(state.items.length)} imagens analisadas.`;
+  msg.replaceChildren(document.createTextNode(t));
+  const w = document.createElement('div');
+  if (aiWanted()) {
+    if (ai.state === 'loading') w.textContent = 'Carregando modelo de IA…';
+    else if (ai.state === 'erro') { w.textContent = 'IA indisponível neste navegador — o resto da análise continua.'; w.className = 'warn'; }
+    else if (ai.state === 'ok' && ai.backend === 'cpu') { w.textContent = 'Sem aceleração gráfica: a IA vai ficar lenta.'; w.className = 'warn'; }
+  }
+  if (w.textContent) msg.appendChild(w);
+  let unread = 0, heic = 0;
+  for (const i of state.items) { const m = state.meta.get(i.key); if (m && m.err) { if (m.err === 'read' || m.err === 'empty') unread++; else if (m.err === 'heic') heic++; } }
+  if (unread) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas. Se a pasta vem do SharePoint/OneDrive, clique nela com o botão direito → “Sempre manter neste dispositivo” e aguarde o download.`; msg.appendChild(e); }
+  if (heic) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(heic)} fotos em HEIC (iPhone) não abrem neste navegador.`; msg.appendChild(e); }
+  $('anPause').textContent = an.paused ? 'Continuar' : 'Pausar';
+  $('anPause').disabled = !an.running;
+}
+$('anPause').onclick = () => { an.paused = !an.paused; anRender(); };
+$('aiOn').addEventListener('change', async () => {
+  ls.set('bi.ai', $('aiOn').checked);
+  if (aiWanted()) await loadAI();
+  if (state.items.length) { runAnalysis(); apply(true); }
+  anRender();
+});
+$('aiOn').checked = ls.get('bi.ai', true);
+
+/* ================= duplicatas ================= */
+function pop32(x) { x -= (x >>> 1) & 0x55555555; x = (x & 0x33333333) + ((x >>> 2) & 0x33333333); return (((x + (x >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24; }
+function computeDups() {
+  const list = [];
+  for (const it of state.items) { const m = state.meta.get(it.key); if (m && m.hash && m.std > 12) list.push([it.key, m.hash[0], m.hash[1]]); }
+  const parent = list.map((_, i) => i);
+  const find = i => { while (parent[i] !== i) i = parent[i] = parent[parent[i]]; return i; };
+  // Divide o hash em 8 bytes: dois hashes a distância ≤ 7 têm pelo menos um byte igual
+  for (let c = 0; c < 8; c++) {
+    const buckets = new Map();
+    list.forEach((e, i) => { const b = c < 4 ? (e[1] >>> (24 - c * 8)) & 255 : (e[2] >>> (24 - (c - 4) * 8)) & 255; (buckets.get(b) || buckets.set(b, []).get(b)).push(i); });
+    for (const idx of buckets.values()) {
+      if (idx.length > 4000) continue;
+      for (let x = 0; x < idx.length; x++) for (let y = x + 1; y < idx.length; y++) {
+        const A = list[idx[x]], B = list[idx[y]];
+        if (pop32(A[1] ^ B[1]) + pop32(A[2] ^ B[2]) <= DUP_DIST) { const ra = find(idx[x]), rb = find(idx[y]); if (ra !== rb) parent[ra] = rb; }
+      }
+    }
+  }
+  const size = new Map();
+  list.forEach((_, i) => { const r = find(i); size.set(r, (size.get(r) || 0) + 1); });
+  state.dup = new Map(); state.dupSize = new Map();
+  list.forEach((e, i) => { const r = find(i); if (size.get(r) > 1) { state.dup.set(e[0], r); state.dupSize.set(r, size.get(r)); } });
+}
+
+/* ================= filtros ================= */
+const peopleOf = m => !m || !m.ai ? 'Não analisada' : m.people === 0 ? 'Sem pessoas' : m.people === 1 ? '1 pessoa' : m.people < GROUP ? m.people + ' pessoas' : 'Grupo (mais de 3)';
+const orientOf = m => !m || !m.w ? 'Não analisada' : m.w / m.h > 1.05 ? 'Horizontal' : m.w / m.h < 0.95 ? 'Vertical' : 'Quadrada';
+function qualityOf(m) {
+  if (!m || !m.w) return ['Não analisada'];
+  const q = [];
+  if (m.sharp < BLUR_MAX && m.std > 12) q.push('Possivelmente borrada');
+  if (m.lum < DARK_MAX) q.push('Escura');
+  if (Math.max(m.w, m.h) < LOWRES) q.push('Baixa resolução');
+  return q.length ? q : ['Sem problemas'];
+}
+const takenOf = it => { const m = state.meta.get(it.key); return (m && m.taken) || it.date; };
+const facetFns = {
+  city: it => cityLabel(cityOf(it)) || 'Sem local',
+  people: it => peopleOf(state.meta.get(it.key)),
+  tag: it => { const m = state.meta.get(it.key); return m && m.ai ? (m.tags && m.tags.length ? m.tags : ['Nenhum objeto']) : ['Não analisada']; },
+  year: it => String(new Date(takenOf(it)).getFullYear()),
+  orient: it => orientOf(state.meta.get(it.key)),
+  quality: it => qualityOf(state.meta.get(it.key)),
+  ext: it => it.ext.toUpperCase(),
+};
+const ORDER = { people: ['Sem pessoas', '1 pessoa', '2 pessoas', '3 pessoas', 'Grupo (mais de 3)'], quality: ['Sem problemas', 'Possivelmente borrada', 'Escura', 'Baixa resolução'], orient: ['Horizontal', 'Vertical', 'Quadrada'] };
+const match = (fn, it, v) => { const r = fn(it); return Array.isArray(r) ? r.includes(v) : r === v; };
+
+function baseFilter() {
+  const q = norm($('q').value);
+  const f = state.folder, sub = $('subOn').checked;
+  const favOnly = $('favOnly').getAttribute('aria-pressed') === 'true';
+  const dupOn = $('dupOn').checked;
+  return state.items.filter(it =>
+    (!f ? (sub || it.dir === '') : (it.dir === f || (sub && it.dir.startsWith(f + '/')))) &&
+    (!favOnly || favs.has(pathKey(it))) &&
+    (!dupOn || state.dup.has(it.key)) &&
+    (!state.onlyGroup || state.dup.get(it.key) === state.onlyGroup) &&
+    (!q || norm(it.path + ' ' + cityLabel(cityOf(it))).includes(q)));
+}
+
+function apply(keepScroll) {
+  if (!state.items.length) return;
+  const base = baseFilter();
+  const active = Object.keys(F).filter(k => F[k]);
+  const passes = (it, skip) => active.every(k => k === skip || match(facetFns[k], it, F[k]));
+  // Contagens de cada filtro considerando os demais
+  for (const sel of document.querySelectorAll('#facets select')) {
+    const k = sel.dataset.f, counts = new Map();
+    for (const it of base) if (passes(it, k)) { let v = facetFns[k](it); for (const x of Array.isArray(v) ? v : [v]) counts.set(x, (counts.get(x) || 0) + 1); }
+    if (F[k] && !counts.has(F[k])) counts.set(F[k], 0);
+    let keys = [...counts.keys()];
+    const ord = ORDER[k];
+    if (k === 'year') keys.sort((a, b) => b.localeCompare(a));
+    else if (ord) keys.sort((a, b) => (ord.indexOf(a) + 1 || 99) - (ord.indexOf(b) + 1 || 99));
+    else keys.sort((a, b) => counts.get(b) - counts.get(a) || collator.compare(a, b));
+    const special = v => v === 'Não analisada' || v === 'Sem local';
+    keys = keys.filter(v => !special(v)).concat(keys.filter(special));
+    sel.replaceChildren(option('', 'Todas'), ...keys.map(v => option(v, `${v} (${fmtNum(counts.get(v))})`)));
+    sel.value = F[k];
+  }
+  let v = base.filter(it => passes(it, null));
+  const s = $('sort').value, dir = s.startsWith('-') ? -1 : 1, key = s.replace('-', '');
+  const val = key === 'date' ? takenOf : key === 'size' ? (it => it.size) : key === 'people' ? (it => { const m = state.meta.get(it.key); return m && m.ai ? m.people : -1; }) : null;
+  if ($('dupOn').checked || state.onlyGroup) v.sort((a, b) => (state.dup.get(a.key) - state.dup.get(b.key)) || collator.compare(a.path, b.path));
+  else if (!val) v.sort((a, b) => collator.compare(a.path, b.path));
+  else { const c = new Map(v.map(it => [it, val(it)])); v.sort((a, b) => (c.get(a) - c.get(b)) * dir || collator.compare(a.path, b.path)); }
+  state.view = v;
+  const total = v.reduce((n, i) => n + i.size, 0);
+  $('stat').textContent = `${fmtNum(v.length)} de ${fmtNum(state.items.length)} imagens · ${fmtSize(total)}` + (state.onlyGroup ? ' · mostrando um grupo de semelhantes' : '');
+  $('empty').classList.toggle('hidden', v.length > 0);
+  if (!keepScroll) { const top = $('grid').getBoundingClientRect().top + scrollY - 80; if (scrollY > top) scrollTo({ top: Math.max(0, top) }); }
+  renderGrid(true);
+  if (state.lbKey) { const i = v.findIndex(x => x.key === state.lbKey); if (i >= 0) lbIndex = i; }
+}
+
+document.querySelectorAll('#facets select').forEach(sel => sel.addEventListener('change', () => { F[sel.dataset.f] = sel.value; apply(); }));
+$('clearF').onclick = () => { Object.keys(F).forEach(k => F[k] = ''); $('dupOn').checked = false; state.onlyGroup = null; $('q').value = ''; apply(); };
+$('dupOn').addEventListener('change', () => { state.onlyGroup = null; apply(); });
+$('subOn').addEventListener('change', () => apply());
+
+/* ================= árvore de pastas ================= */
+function ready() {
+  progress(0);
+  if (!state.items.length) { $('progress').textContent = 'Nenhuma imagem encontrada nessa pasta.'; return; }
+  $('welcome').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  ['q', 'sort', 'favOnly'].forEach(id => $(id).disabled = false);
+  $('rootName').textContent = '📁 ' + state.root;
+  document.title = state.root + ' — Banco de Imagens';
+  if (innerWidth <= 820) { $('dFolders').open = false; $('dFilters').open = false; }
+  buildTree(); apply(); anRender(); showStorage();
+}
 function buildTree() {
   const root = { name: state.root, path: '', kids: new Map(), count: 0 };
   for (const it of state.items) {
@@ -386,17 +993,15 @@ function buildTree() {
     for (const part of it.dir.split('/')) {
       acc = acc ? acc + '/' + part : part;
       if (!node.kids.has(part)) node.kids.set(part, { name: part, path: acc, kids: new Map(), count: 0 });
-      node = node.kids.get(part);
-      node.count++;
+      node = node.kids.get(part); node.count++;
     }
   }
   const render = n => {
-    const li = document.createElement('li');
-    const b = document.createElement('button');
+    const li = document.createElement('li'), b = document.createElement('button');
     b.dataset.path = n.path;
     b.innerHTML = '<span class="n"></span><span class="c"></span>';
     b.firstChild.textContent = n.path === '' ? 'Todas as imagens' : n.name;
-    b.lastChild.textContent = n.count;
+    b.lastChild.textContent = fmtNum(n.count);
     b.title = n.path || state.root;
     li.appendChild(b);
     if (n.kids.size) {
@@ -406,90 +1011,90 @@ function buildTree() {
     }
     return li;
   };
-  const ul = document.createElement('ul');
-  ul.appendChild(render(root));
-  $('tree').replaceChildren(ul);
-  markTree();
+  const ul = document.createElement('ul'); ul.appendChild(render(root));
+  $('tree').replaceChildren(ul); markTree();
 }
 function markTree() {
-  document.querySelectorAll('#tree button').forEach(b => {
-    const on = b.dataset.path === state.folder;
-    b.classList.toggle('sel', on);
-    b.setAttribute('aria-current', on ? 'true' : 'false');
-  });
+  document.querySelectorAll('#tree button').forEach(b => { const on = b.dataset.path === state.folder; b.classList.toggle('sel', on); b.setAttribute('aria-current', on ? 'true' : 'false'); });
 }
-$('tree').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
-  state.folder = b.dataset.path; markTree(); apply();
-  window.scrollTo({ top: 0 });
-});
+$('tree').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.folder = b.dataset.path; markTree(); apply(); });
 
-function apply() {
-  const q = $('q').value.trim().toLowerCase();
-  const type = $('type').value;
-  const favOnly = $('favOnly').getAttribute('aria-pressed') === 'true';
-  const f = state.folder;
-  let v = state.items.filter(it =>
-    (!f || it.dir === f || it.dir.startsWith(f + '/')) &&
-    (!type || it.ext === type) &&
-    (!favOnly || favs.has(favKey(it))) &&
-    (!q || it.path.toLowerCase().includes(q)));
-  const s = $('sort').value, dir = s.startsWith('-') ? -1 : 1, key = s.replace('-', '');
-  v.sort((a, b) => key === 'name' ? collator.compare(a.path, b.path) : (a[key] - b[key]) * dir || collator.compare(a.path, b.path));
-  state.view = v;
-  state.shown = 0;
-  $('grid').replaceChildren();
-  const total = v.reduce((n, i) => n + i.size, 0);
-  $('stat').textContent = `${v.length} de ${state.items.length} imagens · ${fmtSize(total)}`;
-  more();
+/* ================= grade virtualizada ================= */
+const GAP = 10, CAP = 30;
+const gridCards = new Map(); // key → elemento
+let layout = null;
+function setImg(card, url) {
+  const ph = card.firstChild; let img = ph.querySelector('img');
+  if (!img) { img = document.createElement('img'); img.alt = ''; img.decoding = 'async'; img.onerror = () => { ph.textContent = card.dataset.ext + ' · sem prévia'; }; ph.replaceChildren(img); }
+  img.src = url;
 }
-
-const thumbObs = new IntersectionObserver(entries => {
-  for (const en of entries) {
-    if (!en.isIntersecting) continue;
-    const img = en.target;
-    img.src = urlFor(state.view[+img.dataset.i]);
-    thumbObs.unobserve(img);
+function renderGrid(full) {
+  const grid = $('grid'), W = grid.clientWidth || 800, n = state.view.length;
+  const want = innerWidth <= 820 ? 140 : +$('thumb').value;
+  const cols = Math.max(1, Math.floor((W + GAP) / (want + GAP)));
+  const cw = (W - GAP * (cols - 1)) / cols, rowH = cw + CAP + GAP;
+  const rows = Math.ceil(n / cols);
+  grid.style.height = Math.max(0, rows * rowH - GAP) + 'px';
+  if (full || !layout || layout.cols !== cols || layout.cw !== cw) { gridCards.forEach(c => c.remove()); gridCards.clear(); }
+  layout = { cols, cw, rowH };
+  const top = grid.getBoundingClientRect().top;
+  const r0 = Math.max(0, Math.floor((-top - 600) / rowH)), r1 = Math.min(rows - 1, Math.floor((-top + innerHeight + 600) / rowH));
+  const keep = new Set(), missing = [];
+  for (let i = r0 * cols; i <= Math.min(n - 1, (r1 + 1) * cols - 1); i++) {
+    const it = state.view[i]; keep.add(it.key);
+    let card = gridCards.get(it.key);
+    if (!card) { card = makeCard(it); gridCards.set(it.key, card); grid.appendChild(card); missing.push([it, card]); }
+    card.dataset.i = i;
+    const r = Math.floor(i / cols), c = i % cols;
+    card.style.cssText = `left:${c * (cw + GAP)}px;top:${r * rowH}px;width:${cw}px`;
   }
-}, { rootMargin: '400px' });
-
-function more() {
-  const frag = document.createDocumentFragment();
-  const end = Math.min(state.view.length, state.shown + BATCH);
-  for (let i = state.shown; i < end; i++) {
-    const it = state.view[i];
-    const card = document.createElement('button');
-    card.className = 'card'; card.dataset.i = i;
-    card.title = it.path;
-    card.innerHTML = '<div class="ph"><img alt="" decoding="async"></div><div class="cap"></div>';
-    const img = card.querySelector('img');
-    img.dataset.i = i; img.alt = it.name;
-    img.onload = () => img.classList.add('ok');
-    img.onerror = () => { img.replaceWith(Object.assign(document.createElement('span'), { textContent: it.ext.toUpperCase(), style: 'color:var(--muted);font-size:13px' })); };
-    card.querySelector('.cap').textContent = it.name;
-    if (favs.has(favKey(it))) card.insertAdjacentHTML('beforeend', '<span class="fav" aria-label="Favorita">★</span>');
-    frag.appendChild(card);
-    thumbObs.observe(img);
-  }
-  state.shown = end;
-  $('grid').appendChild(frag);
+  gridCards.forEach((c, k) => { if (!keep.has(k)) { c.remove(); gridCards.delete(k); } });
+  if (missing.length) loadThumbs(missing);
 }
-new IntersectionObserver(en => { if (en[0].isIntersecting && state.shown < state.view.length) more(); }, { rootMargin: '800px' }).observe($('sentinel'));
-
+function makeCard(it) {
+  const card = document.createElement('button');
+  card.className = 'card'; card.title = it.path; card.dataset.ext = it.ext.toUpperCase();
+  card.innerHTML = '<div class="ph"></div><div class="cap"></div>';
+  card.lastChild.textContent = it.name;
+  const m = state.meta.get(it.key);
+  if (m && m.ai && m.people) card.insertAdjacentHTML('beforeend', m.people >= GROUP ? '<span class="ppl" aria-label="Grupo de pessoas">👥 Grupo</span>' : `<span class="ppl" aria-label="${m.people} pessoa(s)">👤 ${m.people}</span>`);
+  if (favs.has(pathKey(it))) card.insertAdjacentHTML('beforeend', '<span class="fav" aria-label="Favorita">★</span>');
+  const g = state.dup.get(it.key);
+  if (g !== undefined) card.insertAdjacentHTML('beforeend', `<span class="grp">${state.dupSize.get(g)} semelhantes</span>`);
+  return card;
+}
+async function loadThumbs(list) {
+  const need = [];
+  for (const [it, card] of list) {
+    const m = state.meta.get(it.key);
+    if (m && m.err) { markCard(it); continue; }
+    const u = urlCache.get('t:' + it.key) || urlCache.get('o:' + it.key);
+    if (u) { setImg(card, u); card.dataset.thumb = 1; } else need.push([it, card]);
+  }
+  if (!need.length) return;
+  const blobs = await idb('thumbs', 'readonly', s => { const out = []; need.forEach(([it]) => { const r = s.get(it.key); r.onsuccess = () => out.push([it.key, r.result]); }); return { result: out }; }) || [];
+  const got = new Map(blobs);
+  for (const [it, card] of need) {
+    const b = got.get(it.key) || memThumbs.get(it.key);
+    if (b) { setImg(card, cacheUrl('t:' + it.key, b)); card.dataset.thumb = 1; continue; }
+    // Ainda sem miniatura: mostra o original (mais pesado) até a análise chegar nela
+    fileOf(it).then(f => { if (gridCards.get(it.key) === card && !card.dataset.thumb) setImg(card, urlCache.get('o:' + it.key) || cacheUrl('o:' + it.key, f)); }).catch(() => { card.firstChild.textContent = ERR.read; });
+  }
+}
+let raf = 0;
+addEventListener('scroll', () => { if (!raf && state.view.length) raf = requestAnimationFrame(() => { raf = 0; renderGrid(false); }); }, { passive: true });
+addEventListener('resize', () => { if (state.view.length) renderGrid(false); });
 $('grid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openLb(+c.dataset.i); });
 
 let qTimer;
-$('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(apply, 150); });
+$('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => apply(), 200); });
 $('sort').addEventListener('change', () => { ls.set('bi.sort', $('sort').value); apply(); });
-$('type').addEventListener('change', apply);
 $('favOnly').addEventListener('click', () => {
   const on = $('favOnly').getAttribute('aria-pressed') !== 'true';
   $('favOnly').setAttribute('aria-pressed', on); $('favOnly').classList.toggle('on', on); apply();
 });
-
-// Preferências
 $('sort').value = ls.get('bi.sort', 'name');
-const setThumb = v => { document.documentElement.style.setProperty('--thumb', v + 'px'); $('thumb').value = v; };
+const setThumb = v => { $('thumb').value = v; if (state.view.length) renderGrid(false); };
 setThumb(ls.get('bi.thumb', 180));
 $('thumb').addEventListener('input', e => { setThumb(e.target.value); ls.set('bi.thumb', +e.target.value); });
 const setFit = on => { document.body.classList.toggle('fit-contain', on); $('fit').setAttribute('aria-pressed', on); $('fit').classList.toggle('on', on); };
@@ -498,76 +1103,121 @@ $('fit').addEventListener('click', () => { const on = !document.body.classList.c
 const theme = ls.get('bi.theme', null);
 if (theme) document.documentElement.dataset.theme = theme;
 $('theme').addEventListener('click', () => {
-  const dark = document.documentElement.dataset.theme
-    ? document.documentElement.dataset.theme === 'dark'
-    : matchMedia('(prefers-color-scheme: dark)').matches;
-  const t = dark ? 'light' : 'dark';
-  document.documentElement.dataset.theme = t; ls.set('bi.theme', t);
+  const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const t = dark ? 'light' : 'dark'; document.documentElement.dataset.theme = t; ls.set('bi.theme', t);
 });
 
-/* ---------- visualizador ---------- */
-let lastFocus = null;
-function openLb(i) {
-  lastFocus = document.activeElement;
-  $('lb').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-  showLb(i);
-  $('lbClose').focus();
-}
+/* ================= exportar planilha ================= */
+$('csv').onclick = () => {
+  const cols = ['caminho', 'arquivo', 'pasta', 'cidade', 'uf', 'origem_local', 'latitude', 'longitude', 'data_foto', 'pessoas', 'objetos', 'formato', 'largura', 'altura', 'tamanho_kb', 'qualidade', 'grupo_semelhantes', 'camera', 'favorita'];
+  const esc = v => { v = v == null ? '' : String(v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const lines = [cols.join(';')];
+  for (const it of state.view) {
+    const m = state.meta.get(it.key) || {}, c = cityOf(it);
+    lines.push([it.path, it.name, it.dir, c ? c.city : '', c ? c.uf : '', c ? c.src : '', m.gps ? String(m.gps[0]).replace('.', ',') : '', m.gps ? String(m.gps[1]).replace('.', ',') : '',
+      fmtDate(takenOf(it)), m.ai ? (m.people >= GROUP ? 'grupo' : m.people) : '', (m.tags || []).join(', '), orientOf(m), m.w || '', m.h || '', Math.round(it.size / 1024),
+      qualityOf(m).join(', '), state.dup.has(it.key) ? state.dup.get(it.key) : '', [m.make, m.model].filter(Boolean).join(' '), favs.has(pathKey(it)) ? 'sim' : ''].map(esc).join(';'));
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = `banco-de-imagens_${state.root}.csv`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+};
+$('wipe').onclick = async () => {
+  if (!confirm(`Apagar miniaturas e resultados da análise salvos para “${state.root}”? As imagens originais não são tocadas.`)) return;
+  an.queue = []; an.queued.clear();
+  await Promise.all(['meta', 'thumbs', 'manual'].map(s => idb(s, 'readwrite', st => st.delete(range(state.root)))));
+  await idb('libs', 'readwrite', s => s.delete(state.root));
+  state.meta.clear(); state.manual.clear(); state.dup.clear();
+  urlCache.forEach(u => URL.revokeObjectURL(u)); urlCache.clear();
+  apply(true); anRender(); showStorage(); toast('Dados apagados');
+};
+
+/* ================= visualizador ================= */
+let lastFocus = null, lbIndex = -1, lbUrl = null;
+function openLb(i) { lastFocus = document.activeElement; $('lb').classList.remove('hidden'); document.body.style.overflow = 'hidden'; showLb(i); $('lbClose').focus(); }
 function closeLb() {
-  $('lb').classList.add('hidden');
-  document.body.style.overflow = '';
-  state.lbIndex = -1;
-  if (lastFocus) lastFocus.focus();
+  $('lb').classList.add('hidden'); document.body.style.overflow = ''; state.lbKey = null; lbIndex = -1;
+  $('lbFix').classList.add('hidden');
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
 }
-function showLb(i) {
-  const n = state.view.length;
-  if (!n) return closeLb();
-  i = (i + n) % n; state.lbIndex = i;
-  const it = state.view[i], u = urlFor(it);
+async function showLb(i) {
+  const n = state.view.length; if (!n) return closeLb();
+  i = (i + n) % n; lbIndex = i;
+  const it = state.view[i]; state.lbKey = it.key;
   const img = $('lbImg');
-  img.src = u; img.alt = it.name;
+  img.src = urlCache.get('t:' + it.key) || ''; img.alt = it.name;
   $('lbName').textContent = it.name;
   $('lbCount').textContent = `${i + 1} / ${n}`;
-  $('lbDown').href = u; $('lbDown').download = it.name;
-  $('lbOpen').href = u;
-  updFavBtn(it);
-  const meta = [['Pasta', it.dir || '(raiz)'], ['Formato', it.ext.toUpperCase()], ['Tamanho', fmtSize(it.size)], ['Modificada', fmtDate(it.date)], ['Dimensões', '…']];
-  renderMeta(meta);
-  img.onload = () => { meta[4][1] = `${img.naturalWidth} × ${img.naturalHeight} px`; renderMeta(meta); };
-  img.onerror = () => { meta[4][1] = 'formato não suportado por este navegador'; renderMeta(meta); };
-  // pré-carrega a próxima
-  if (n > 1) { const nx = new Image(); nx.src = urlFor(state.view[(i + 1) % n]); }
+  $('lbFix').classList.add('hidden');
+  updFavBtn(it); renderInfo(it);
+  try {
+    const f = await fileOf(it);
+    if (state.lbKey !== it.key) return;
+    if (lbUrl) URL.revokeObjectURL(lbUrl);
+    lbUrl = URL.createObjectURL(f);
+    img.src = lbUrl; $('lbDown').href = lbUrl; $('lbDown').download = it.name;
+  } catch { toast(ERR.read); }
 }
-function renderMeta(rows) {
+function renderInfo(it) {
+  const m = state.meta.get(it.key) || {}, c = cityOf(it);
+  const rows = [['Pasta', it.dir || '(raiz)']];
+  const loc = document.createElement('span');
+  if (c) {
+    loc.textContent = cityLabel(c) + ' ';
+    const src = document.createElement('small'); src.textContent = { gps: '(GPS)', pasta: '(pelo nome da pasta)', manual: '(corrigido à mão)' }[c.src] || ''; loc.appendChild(src);
+  } else loc.textContent = m.w ? 'Sem GPS' : 'Sem GPS (ou ainda não analisada)';
+  if (m.gps) { const a = document.createElement('a'); a.href = `https://www.openstreetmap.org/?mlat=${m.gps[0]}&mlon=${m.gps[1]}#map=15/${m.gps[0]}/${m.gps[1]}`; a.target = '_blank'; a.rel = 'noopener'; a.textContent = ' ver no mapa'; loc.append(document.createElement('br'), a); }
+  rows.push(['Local', loc]);
+  rows.push([m.taken ? 'Tirada em' : 'Modificada', fmtDate(takenOf(it))]);
+  if (m.ai) rows.push(['Pessoas', peopleOf(m)]);
+  if (m.ai && m.tags && m.tags.length) rows.push(['Objetos', m.tags.join(', ')]);
+  if (m.w) rows.push(['Dimensões', `${m.w} × ${m.h} px · ${orientOf(m).toLowerCase()}`]);
+  if (m.w) rows.push(['Qualidade', qualityOf(m).join(', ')]);
+  rows.push(['Arquivo', `${it.ext.toUpperCase()} · ${fmtSize(it.size)}`]);
+  if (m.make || m.model) rows.push(['Câmera', [m.make, m.model].filter(Boolean).join(' ')]);
+  if (m.err) rows.push(['Aviso', ERR[m.err]]);
+  const g = state.dup.get(it.key);
+  $('lbSim').classList.toggle('hidden', g === undefined || state.onlyGroup === g);
+  if (g !== undefined) $('lbSim').textContent = `Ver ${state.dupSize.get(g)} semelhantes`;
   $('lbMeta').replaceChildren(...rows.flatMap(([k, v]) => {
     const dt = document.createElement('dt'); dt.textContent = k;
-    const dd = document.createElement('dd'); dd.textContent = v;
+    const dd = document.createElement('dd'); if (typeof v === 'string') dd.textContent = v; else dd.appendChild(v);
     return [dt, dd];
   }));
 }
-function updFavBtn(it) { $('lbFav').textContent = favs.has(favKey(it)) ? '★ Favorita (F)' : '☆ Favoritar (F)'; }
+function updFavBtn(it) { $('lbFav').textContent = favs.has(pathKey(it)) ? '★ Favorita (F)' : '☆ Favoritar (F)'; }
 function toggleFav() {
-  const it = state.view[state.lbIndex]; if (!it) return;
-  const k = favKey(it);
+  const it = state.view[lbIndex]; if (!it) return;
+  const k = pathKey(it);
   favs.has(k) ? favs.delete(k) : favs.add(k);
   saveFavs(); updFavBtn(it);
-  const card = $('grid').querySelector(`.card[data-i="${state.lbIndex}"]`);
-  if (card) {
-    const badge = card.querySelector('.fav');
-    if (favs.has(k) && !badge) card.insertAdjacentHTML('beforeend', '<span class="fav" aria-label="Favorita">★</span>');
-    if (!favs.has(k) && badge) badge.remove();
-  }
+  const card = gridCards.get(it.key);
+  if (card) { card.remove(); gridCards.delete(it.key); renderGrid(false); }
 }
-$('lbPrev').onclick = () => showLb(state.lbIndex - 1);
-$('lbNext').onclick = () => showLb(state.lbIndex + 1);
+$('lbImg').addEventListener('error', () => { if ($('lbImg').getAttribute('src')) toast('Não foi possível exibir esta imagem — veja o aviso ao lado.'); });
+$('lbPrev').onclick = () => showLb(lbIndex - 1);
+$('lbNext').onclick = () => showLb(lbIndex + 1);
 $('lbClose').onclick = closeLb;
 $('lbFav').onclick = toggleFav;
+$('lbSim').onclick = () => { const g = state.dup.get(state.lbKey); state.onlyGroup = g; closeLb(); apply(); toast('Mostrando o grupo de semelhantes — “Limpar filtros” volta ao normal'); };
+$('lbCityBtn').onclick = () => { $('lbFix').classList.toggle('hidden'); const c = cityOf(state.view[lbIndex]); $('lbCity').value = c && c.uf ? cityLabel(c) : ''; $('lbCity').focus(); };
+$('lbCitySave').onclick = async () => {
+  const it = state.view[lbIndex]; if (!it) return;
+  const v = $('lbCity').value.trim(), pk = pathKey(it);
+  if (!v) { state.manual.delete(pk); await idb('manual', 'readwrite', s => s.delete(pk)); }
+  else {
+    const g = GEO && GEO.find(x => x.label === v);
+    const [city, uf] = g ? [g.name, g.uf] : v.split(/\s+[–-]\s+/);
+    const rec = { pk, city: city.trim(), uf: (uf || '').trim().toUpperCase() };
+    state.manual.set(pk, rec); await idb('manual', 'readwrite', s => s.put(rec, pk));
+  }
+  $('lbFix').classList.add('hidden'); renderInfo(it); apply(true); toast('Cidade salva');
+};
+$('lbCity').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbCitySave').click(); e.stopPropagation(); });
 $('lbCopy').onclick = async () => {
-  const it = state.view[state.lbIndex];
-  const text = state.root + '/' + it.path;
-  try { await navigator.clipboard.writeText(text); toast('Caminho copiado'); }
-  catch { prompt('Copie o caminho:', text); }
+  const it = state.view[lbIndex], text = state.root + '/' + it.path;
+  try { await navigator.clipboard.writeText(text); toast('Caminho copiado'); } catch { prompt('Copie o caminho:', text); }
 };
 $('lb').addEventListener('click', e => { if (e.target.classList.contains('stage')) closeLb(); });
 addEventListener('keydown', e => {
@@ -576,24 +1226,26 @@ addEventListener('keydown', e => {
     return;
   }
   if (e.key === 'Escape') closeLb();
-  else if (e.key === 'ArrowLeft') showLb(state.lbIndex - 1);
-  else if (e.key === 'ArrowRight') showLb(state.lbIndex + 1);
+  else if (e.key === 'ArrowLeft') showLb(lbIndex - 1);
+  else if (e.key === 'ArrowRight') showLb(lbIndex + 1);
   else if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) toggleFav();
-  else if (e.key === 'Tab') { // mantém o foco dentro do visualizador
-    const f = [...$('lb').querySelectorAll('button, a[href]')].filter(el => el.offsetParent);
+  else if (e.key === 'Tab') {
+    const f = [...$('lb').querySelectorAll('button, a[href], input')].filter(el => el.offsetParent);
     const first = f[0], last = f[f.length - 1];
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 });
-// Swipe no celular
 let tx0 = null;
 $('lb').addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, { passive: true });
 $('lb').addEventListener('touchend', e => {
   if (tx0 == null) return;
   const dx = e.changedTouches[0].clientX - tx0; tx0 = null;
-  if (Math.abs(dx) > 50) showLb(state.lbIndex + (dx < 0 ? 1 : -1));
+  if (Math.abs(dx) > 50) showLb(lbIndex + (dx < 0 ? 1 : -1));
 });
+
+// Para testes automatizados
+window.__banco = { state, an, ai, geoLookup: (a, b) => { const g = geoLookup(a, b); return g && g.label; }, loadGeo, parseExif };
 })();
 </script>
 </body>
