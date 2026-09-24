@@ -18,14 +18,14 @@
 :root[data-theme="dark"]{--bg:#16181a;--panel:#1d2023;--card:#26292d;--text:#ecebe7;--muted:#a3a7ac;--line:#33373b;--focus:#6cb4ff;--warn:#ffb86b}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:15px}
+body{margin:0;padding-top:var(--topH,60px);font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:15px}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .hidden{display:none!important}
 
 /* Barra superior */
-.top{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+.top{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:19px;white-space:nowrap;margin-right:8px}
 .brand i{width:10px;height:10px;background:var(--accent);display:inline-block}
 .search{flex:1 1 220px;min-width:0;position:relative}
@@ -43,8 +43,8 @@ select,.btn{padding:8px 12px;border:1px solid var(--line);border-radius:8px;back
 .size input{width:90px;accent-color:var(--accent)}
 
 /* Layout */
-.main{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 62px)}
-aside{border-right:1px solid var(--line);background:var(--panel);padding:12px 8px 32px;overflow:auto;max-height:calc(100vh - 62px);position:sticky;top:62px}
+.main{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - var(--topH,60px))}
+aside{border-right:1px solid var(--line);background:var(--panel);padding:12px 8px 32px;overflow:auto;max-height:calc(100vh - var(--topH,60px));position:sticky;top:var(--topH,60px)}
 aside details{margin:0 0 12px}
 aside summary{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:4px 10px 8px;font-weight:600;cursor:pointer}
 .tree ul{list-style:none;margin:0;padding:0 0 0 12px}
@@ -84,6 +84,7 @@ aside summary{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color
 .card .fav{position:absolute;top:6px;right:6px;background:var(--accent);color:var(--accent-ink);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px}
 .card .ppl{position:absolute;top:6px;left:6px;background:rgba(20,22,24,.75);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
 .card .grp{position:absolute;bottom:36px;left:6px;background:rgba(20,22,24,.75);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
+.card .exf{position:absolute;bottom:6px;right:6px;background:#b3261e;color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
 .empty{padding:48px 0;color:var(--muted);text-align:center}
 
 /* Boas-vindas */
@@ -123,7 +124,11 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 .lib .chk{padding:0}
 .lib.hint{border-color:var(--accent)}
 .libsel{max-width:200px}
+.opennotice{margin:0 0 12px;padding:10px 12px;border-radius:8px;background:var(--panel);border:1px solid var(--line);font-size:13px;color:var(--muted)}
+.opennotice b{color:var(--text)}
+.opennotice.warn{background:#fff4d6;color:#5a3b00;border-color:var(--accent)}
 .envwarn{margin:12px 16px 0;padding:12px 14px;border-radius:10px;background:#fff4d6;color:#5a3b00;border:1px solid #f2b705;font-size:14px;line-height:1.5}
+.modal{position:fixed;inset:0;z-index:25;background:var(--overlay);display:flex;justify-content:center;overflow:auto;padding:24px 16px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30}
 
 @media (max-width:820px){
@@ -161,6 +166,15 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
     <button class="btn primary" id="openBtn">Abrir pasta</button>
   </div>
 </header>
+<script>
+// Cabeçalho fixo: mede a altura real (ele quebra linha em telas médias) e empurra o resto da página
+(() => {
+  const top = document.currentScript.previousElementSibling;
+  const set = () => document.documentElement.style.setProperty('--topH', top.offsetHeight + 'px');
+  new ResizeObserver(set).observe(top);
+  set();
+})();
+</script>
 <div class="envwarn hidden" id="envWarn" role="alert"></div>
 
 <div class="main hidden" id="app">
@@ -182,12 +196,16 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
         <label>Cidade<select data-f="city"></select></label>
         <label>Pessoas<select data-f="people"></select></label>
         <label>Objetos<select data-f="tag"></select></label>
+        <label>Tags<select data-f="usertag"></select></label>
+        <label>Pessoas (por nome)<select data-f="person"></select></label>
         <label>Ano<select data-f="year"></select></label>
         <label>Formato da foto<select data-f="orient"></select></label>
         <label>Qualidade<select data-f="quality"></select></label>
         <label>Tipo de arquivo<select data-f="ext"></select></label>
         <label class="chk"><input type="checkbox" id="dupOn"> Só duplicadas / semelhantes</label>
+        <label class="chk"><input type="checkbox" id="hideExOn"> Ocultar fotos com ex-funcionário</label>
         <button class="btn sm" id="clearF">Limpar filtros</button>
+        <button class="btn sm" id="exBtn">Lista de ex-funcionários</button>
       </div>
     </details>
     <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos neste navegador</button><br><button id="diagBtn">Diagnóstico</button> · <span id="ver"></span>
@@ -196,6 +214,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   </aside>
   <section class="content">
     <div class="status"><span id="stat"></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
+    <div class="opennotice hidden" id="openNotice"></div>
     <div class="vgrid" id="grid"></div>
     <div class="empty hidden" id="empty">Nenhuma imagem com esses filtros.</div>
   </section>
@@ -217,11 +236,24 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
     <li><strong>Duplicatas e semelhantes</strong>, fotos <strong>borradas, escuras ou pequenas</strong>, horizontal/vertical, ano da foto.</li>
     <li>A primeira análise leva um tempo (dá para pausar e continuar depois). Com “Compartilhar na pasta”, o resultado é gravado dentro da própria pasta (ex.: sincronizada pelo SharePoint) e a equipe toda aproveita — só fotos novas são analisadas de novo.</li>
     <li>Busca, favoritas, visualizador com setas ← → e exportação para planilha.</li>
-    <li>Use Chrome ou Edge para reabrir a pasta com um clique. Firefox também funciona.</li>
+    <li>Use Chrome ou Edge para abrir a pasta com um clique da próxima vez: marque “Abrir direto ao iniciar” na lista de bibliotecas.</li>
     <li>Pasta do SharePoint não abre? Use o atalho <strong>“Atualizar e abrir.bat”</strong> (na mesma pasta deste arquivo): ele mantém uma cópia local das imagens e troca a análise com a equipe.</li>
+    <li><strong>Tags</strong> e <strong>pessoas identificadas</strong> livres (à mão, sem reconhecimento facial) no visualizador; uma <strong>lista de ex-funcionários</strong> compartilhada marca e permite ocultar fotos com essas pessoas.</li>
   </ul>
 </section>
 
+<div class="modal hidden" id="exModal" role="dialog" aria-modal="true" aria-label="Lista de ex-funcionários">
+  <div style="max-width:520px;margin:8vh auto;background:var(--bg);border-radius:12px;padding:24px;color:var(--text)">
+    <h3 style="font-family:var(--serif);font-weight:400;margin:0 0 8px">Ex-funcionários</h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 14px">Nomes aqui ficam marcados quando aparecem no campo "Pessoas na foto" de alguma imagem. Não há reconhecimento facial: a marcação depende de alguém identificar a pessoa manualmente. Lista compartilhada com a equipe pela pasta.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input id="exInput" placeholder="Nome completo" style="flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text)">
+      <button class="btn primary sm" id="exAdd">Adicionar</button>
+    </div>
+    <div id="exList" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow:auto"></div>
+    <div style="margin-top:16px;text-align:right"><button class="btn sm" id="exClose">Fechar</button></div>
+  </div>
+</div>
 <div class="lb hidden" id="lb" role="dialog" aria-modal="true" aria-label="Visualizador de imagem">
   <div class="stage">
     <span class="count" id="lbCount"></span>
@@ -237,16 +269,27 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <input id="lbCity" list="cityList" placeholder="Cidade – UF" aria-label="Corrigir cidade">
       <button class="btn sm" id="lbCitySave">Salvar</button>
     </div>
+    <div class="fix hidden" id="lbTagFix">
+      <input id="lbTags" placeholder="Tags (separadas por vírgula)" aria-label="Tags">
+      <button class="btn sm" id="lbTagsSave">Salvar</button>
+    </div>
+    <div class="fix hidden" id="lbPplFix">
+      <input id="lbPeopleNames" list="peopleList" placeholder="Pessoas na foto (nomes, por vírgula)" aria-label="Pessoas na foto">
+      <button class="btn sm" id="lbPeopleSave">Salvar</button>
+    </div>
     <div class="acts">
       <a class="btn primary" id="lbDown" download>Baixar cópia</a>
       <button class="btn" id="lbFav">☆ Favoritar (F)</button>
       <button class="btn" id="lbCityBtn">Corrigir cidade</button>
+      <button class="btn" id="lbTagBtn">Editar tags</button>
+      <button class="btn" id="lbPplBtn">Identificar pessoas</button>
       <button class="btn hidden" id="lbSim">Ver semelhantes</button>
       <button class="btn" id="lbCopy">Copiar caminho</button>
     </div>
   </div>
 </div>
 <datalist id="cityList"></datalist>
+<datalist id="peopleList"></datalist>
 
 <input type="file" id="dirInput" webkitdirectory directory multiple class="hidden">
 
@@ -254,7 +297,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.6';
+const APP_VERSION = '2026-09-24.8';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -278,7 +321,7 @@ const state = {
   dupSize: new Map(),  // id do grupo → quantidade
   lbKey: null, onlyGroup: null,
 };
-const F = { city: '', people: '', tag: '', year: '', orient: '', quality: '', ext: '' };
+const F = { city: '', people: '', tag: '', usertag: '', person: '', year: '', orient: '', quality: '', ext: '' };
 
 /* ================= armazenamento ================= */
 const ls = {
@@ -645,6 +688,8 @@ async function setLibrary(root, items, handle) {
   await loadGeo();
   await loadShared();
   applyShared();
+  await loadDesligados();
+  renderPeopleList();
   computeDups();
   ready();
   runAnalysis();
@@ -750,7 +795,13 @@ addEventListener('drop', async e => {
 // Bibliotecas salvas: abre direto a pasta configurada, sem escolher de novo
 async function getLibs() {
   let l = await idb('kv', 'readonly', s => s.get('libraries'));
-  if (!l) { const old = await idb('kv', 'readonly', s => s.get('dir')); l = old ? [{ name: old.name, handle: old, at: Date.now(), auto: true }] : []; }
+  if (!l) {
+    // Versão anterior só guardava 1 pasta (às vezes aberta só para teste). Ela entra na lista,
+    // mas sem abrir sozinha: o primeiro "Abrir" de cada pasta deve ser sempre uma escolha visível.
+    const old = await idb('kv', 'readonly', s => s.get('dir'));
+    l = old ? [{ name: old.name, handle: old, at: Date.now(), auto: false }] : [];
+    if (l.length) await saveLibs(l);
+  }
   return l;
 }
 const saveLibs = l => idb('kv', 'readwrite', s => s.put(l, 'libraries'));
@@ -759,7 +810,7 @@ async function rememberLib(handle) {
   let found = null;
   for (const x of l) { try { if (await x.handle.isSameEntry(handle)) found = x; } catch {} }
   if (found) { found.handle = handle; found.name = handle.name; found.at = Date.now(); }
-  else l.unshift({ name: handle.name, handle, at: Date.now(), auto: !l.some(x => x.auto) });
+  else l.unshift({ name: handle.name, handle, at: Date.now(), auto: false }); // abrir sozinho é sempre uma escolha explícita (marque "Abrir direto ao iniciar")
   l.sort((a, b) => b.at - a.at);
   await saveLibs(l.slice(0, 8));
   renderLibSel();
@@ -895,7 +946,7 @@ function applyShared() {
   }
   for (const [p, c] of shared.manual) {
     const pk = state.root + '|' + p, cur = state.manual.get(pk);
-    if (!cur || (c.at || 0) > (cur.at || 0)) state.manual.set(pk, { pk, city: c.city, uf: c.uf, at: c.at });
+    if (!cur || (c.at || 0) > (cur.at || 0)) state.manual.set(pk, { pk, city: c.city, uf: c.uf, tags: c.tags || [], people: c.people || [], at: c.at });
   }
   return n;
 }
@@ -949,7 +1000,7 @@ async function saveShared(interactive) {
       shared.files.set(name, await writeFile(dir, name, new Blob(parts)));
       for (const [, e, k] of fresh.slice(i, i + 500)) if (e.t) shared.own.set(k, e.t);
     }
-    const manual = [...state.manual.values()].filter(c => c.at).map(c => ({ p: c.pk.slice(state.root.length + 1), city: c.city, uf: c.uf, at: c.at }));
+    const manual = [...state.manual.values()].filter(c => c.at).map(c => ({ p: c.pk.slice(state.root.length + 1), city: c.city || '', uf: c.uf || '', tags: c.tags || [], people: c.people || [], at: c.at }));
     const json = JSON.stringify({ v: ANALYSIS_V, writer: writerId, at: Date.now(), items: entries, manual });
     const name = `indice-${writerId}.json.gz`;
     shared.files.set(name, await writeFile(dir, name, await gzip(json)));
@@ -1282,6 +1333,55 @@ function qualityOf(m) {
   return q.length ? q : ['Sem problemas'];
 }
 const takenOf = it => { const m = state.meta.get(it.key); return (m && m.taken) || it.date; };
+const manualOf = it => state.manual.get(pathKey(it));
+const tagsOf = it => (manualOf(it) || {}).tags || [];
+const peopleNamesOf = it => (manualOf(it) || {}).people || [];
+const desligados = { set: new Set(), list: [] }; // nomes normalizados / originais (compartilhado pela pasta)
+const hasExFuncionario = it => peopleNamesOf(it).some(n => desligados.set.has(norm(n)));
+async function loadDesligados() {
+  let list = ls.get('bi.desligados', []);
+  const f = shared.files.get('desligados.json');
+  if (f) { try { const remote = JSON.parse(await f.text()); if (Array.isArray(remote.names)) list = [...new Set([...list, ...remote.names])]; } catch {} }
+  desligados.list = list; desligados.set = new Set(list.map(norm));
+}
+async function saveDesligados() {
+  ls.set('bi.desligados', desligados.list);
+  if (state.rootHandle && shared.canWrite) {
+    try {
+      const dir = await state.rootHandle.getDirectoryHandle(SHARED_DIR, { create: true });
+      const f = await writeFile(dir, 'desligados.json', new Blob([JSON.stringify({ names: desligados.list, at: Date.now() })], { type: 'application/json' }));
+      shared.files.set('desligados.json', f);
+    } catch (e) { console.warn(e); }
+  }
+}
+function renderExList() {
+  const box = $('exList');
+  if (!desligados.list.length) { box.innerHTML = '<span style="color:var(--muted);font-size:13px">Nenhum nome na lista.</span>'; return; }
+  box.replaceChildren(...[...desligados.list].sort(collator.compare).map(name => {
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px';
+    const nm = document.createElement('span'); nm.textContent = name;
+    const del = document.createElement('button'); del.className = 'btn sm'; del.textContent = 'Remover';
+    del.onclick = async () => { desligados.list = desligados.list.filter(n => n !== name); desligados.set = new Set(desligados.list.map(norm)); await saveDesligados(); renderExList(); apply(true); renderGrid(true); };
+    row.append(nm, del); return row;
+  }));
+}
+$('exBtn').onclick = () => { $('exModal').classList.remove('hidden'); renderExList(); $('exInput').focus(); };
+$('exClose').onclick = () => { $('exModal').classList.add('hidden'); };
+$('exModal').addEventListener('click', e => { if (e.target === $('exModal')) $('exModal').classList.add('hidden'); });
+$('exAdd').onclick = async () => {
+  const v = $('exInput').value.trim(); if (!v) return;
+  if (!desligados.list.some(n => norm(n) === norm(v))) desligados.list.push(v);
+  desligados.set = new Set(desligados.list.map(norm));
+  $('exInput').value = '';
+  await saveDesligados(); renderExList(); apply(true); renderGrid(true);
+};
+$('exInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('exAdd').click(); });
+function renderPeopleList() {
+  const names = new Set(desligados.list);
+  for (const it of state.items) peopleNamesOf(it).forEach(n => names.add(n));
+  $('peopleList').replaceChildren(...[...names].sort(collator.compare).map(n => option(n, '')));
+}
+$('hideExOn').addEventListener('change', () => apply());
 const facetFns = {
   city: it => cityLabel(cityOf(it)) || 'Sem local',
   people: it => peopleOf(state.meta.get(it.key)),
@@ -1290,6 +1390,8 @@ const facetFns = {
   orient: it => orientOf(state.meta.get(it.key)),
   quality: it => qualityOf(state.meta.get(it.key)),
   ext: it => it.ext.toUpperCase(),
+  usertag: it => { const t = tagsOf(it); return t.length ? t : ['Sem tag']; },
+  person: it => { const p = peopleNamesOf(it); return p.length ? p : ['Não identificada']; },
 };
 const ORDER = { people: ['Sem pessoas', '1 pessoa', '2 pessoas', '3 pessoas', 'Grupo (mais de 3)'], quality: ['Sem problemas', 'Possivelmente borrada', 'Escura', 'Baixa resolução'], orient: ['Horizontal', 'Vertical', 'Quadrada'] };
 const match = (fn, it, v) => { const r = fn(it); return Array.isArray(r) ? r.includes(v) : r === v; };
@@ -1304,7 +1406,8 @@ function baseFilter() {
     (!favOnly || favs.has(pathKey(it))) &&
     (!dupOn || state.dup.has(it.key)) &&
     (!state.onlyGroup || state.dup.get(it.key) === state.onlyGroup) &&
-    (!q || norm(it.path + ' ' + cityLabel(cityOf(it))).includes(q)));
+    (!$('hideExOn').checked || !hasExFuncionario(it)) &&
+    (!q || norm([it.path, cityLabel(cityOf(it)), ...tagsOf(it), ...peopleNamesOf(it)].join(' ')).includes(q)));
 }
 
 function apply(keepScroll) {
@@ -1361,6 +1464,19 @@ function ready() {
   document.title = state.root + ' — Banco de Imagens';
   if (innerWidth <= 820) { $('dFolders').open = false; $('dFilters').open = false; }
   buildTree(); apply(); anRender(); showStorage();
+  showOpenNotice();
+}
+function showOpenNotice() {
+  const top = [...new Set(state.items.map(i => i.dir.split('/')[0]).filter(Boolean))];
+  const loose = state.items.filter(i => !i.dir).length;
+  const box = $('openNotice');
+  const many = top.length > 8;
+  box.className = 'opennotice' + (many ? ' warn' : '');
+  const list = top.slice(0, 8).join(', ') + (top.length > 8 ? `… (+${top.length - 8})` : '');
+  box.innerHTML = `Aberto: <b>${state.root}</b> — ${fmtNum(state.items.length)} imagens` +
+    (top.length ? `, em ${top.length} pasta(s) de 1º nível: ${list}` : '') +
+    (loose ? ` · ${fmtNum(loose)} soltas na raiz` : '') +
+    (many ? '<br>Isso é mais pastas do que o esperado — confira se a pasta certa foi escolhida. Se não for, use “Trocar pasta”.' : '');
 }
 function buildTree() {
   const root = { name: state.root, path: '', kids: new Map(), count: 0 };
@@ -1439,6 +1555,7 @@ function makeCard(it) {
   if (favs.has(pathKey(it))) card.insertAdjacentHTML('beforeend', '<span class="fav" aria-label="Favorita">★</span>');
   const g = state.dup.get(it.key);
   if (g !== undefined) card.insertAdjacentHTML('beforeend', `<span class="grp">${state.dupSize.get(g)} semelhantes</span>`);
+  if (hasExFuncionario(it)) card.insertAdjacentHTML('beforeend', '<span class="exf" title="Tem pessoa marcada como ex-funcionário(a)">⚠ Ex-func.</span>');
   return card;
 }
 async function loadThumbs(list) {
@@ -1489,13 +1606,13 @@ $('theme').addEventListener('click', () => {
 
 /* ================= exportar planilha ================= */
 $('csv').onclick = () => {
-  const cols = ['caminho', 'arquivo', 'pasta', 'cidade', 'uf', 'origem_local', 'latitude', 'longitude', 'data_foto', 'pessoas', 'objetos', 'formato', 'largura', 'altura', 'tamanho_kb', 'qualidade', 'grupo_semelhantes', 'camera', 'favorita'];
+  const cols = ['caminho', 'arquivo', 'pasta', 'cidade', 'uf', 'origem_local', 'latitude', 'longitude', 'data_foto', 'pessoas', 'objetos', 'tags', 'pessoas_identificadas', 'ex_funcionario', 'formato', 'largura', 'altura', 'tamanho_kb', 'qualidade', 'grupo_semelhantes', 'camera', 'favorita'];
   const esc = v => { v = v == null ? '' : String(v); return /[";\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
   const lines = [cols.join(';')];
   for (const it of state.view) {
     const m = state.meta.get(it.key) || {}, c = cityOf(it);
     lines.push([it.path, it.name, it.dir, c ? c.city : '', c ? c.uf : '', c ? c.src : '', m.gps ? String(m.gps[0]).replace('.', ',') : '', m.gps ? String(m.gps[1]).replace('.', ',') : '',
-      fmtDate(takenOf(it)), m.ai ? (m.people >= GROUP ? 'grupo' : m.people) : '', (m.tags || []).join(', '), orientOf(m), m.w || '', m.h || '', Math.round(it.size / 1024),
+      fmtDate(takenOf(it)), m.ai ? (m.people >= GROUP ? 'grupo' : m.people) : '', (m.tags || []).join(', '), tagsOf(it).join(', '), peopleNamesOf(it).join(', '), hasExFuncionario(it) ? 'sim' : '', orientOf(m), m.w || '', m.h || '', Math.round(it.size / 1024),
       qualityOf(m).join(', '), state.dup.has(it.key) ? state.dup.get(it.key) : '', [m.make, m.model].filter(Boolean).join(' '), favs.has(pathKey(it)) ? 'sim' : ''].map(esc).join(';'));
   }
   const a = document.createElement('a');
@@ -1518,7 +1635,7 @@ let lastFocus = null, lbIndex = -1, lbUrl = null;
 function openLb(i) { lastFocus = document.activeElement; $('lb').classList.remove('hidden'); document.body.style.overflow = 'hidden'; showLb(i); $('lbClose').focus(); }
 function closeLb() {
   $('lb').classList.add('hidden'); document.body.style.overflow = ''; state.lbKey = null; lbIndex = -1;
-  $('lbFix').classList.add('hidden');
+  ['lbFix', 'lbTagFix', 'lbPplFix'].forEach(id => $(id).classList.add('hidden'));
   if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
 }
 async function showLb(i) {
@@ -1552,6 +1669,13 @@ function renderInfo(it) {
   rows.push([m.taken ? 'Tirada em' : 'Modificada', fmtDate(takenOf(it))]);
   if (m.ai) rows.push(['Pessoas', peopleOf(m)]);
   if (m.ai && m.tags && m.tags.length) rows.push(['Objetos', m.tags.join(', ')]);
+  const tg = tagsOf(it); if (tg.length) rows.push(['Tags', tg.join(', ')]);
+  const ppl = peopleNamesOf(it);
+  if (ppl.length) {
+    const span = document.createElement('span'); span.textContent = ppl.join(', ');
+    if (hasExFuncionario(it)) { const w = document.createElement('div'); w.className = 'warn'; w.textContent = '⚠ Inclui pessoa marcada como ex-funcionário(a)'; span.appendChild(document.createElement('br')); span.appendChild(w); }
+    rows.push(['Pessoas identificadas', span]);
+  }
   if (m.w) rows.push(['Dimensões', `${m.w} × ${m.h} px · ${orientOf(m).toLowerCase()}`]);
   if (m.w) rows.push(['Qualidade', qualityOf(m).join(', ')]);
   rows.push(['Arquivo', `${it.ext.toUpperCase()} · ${fmtSize(it.size)}`]);
@@ -1581,22 +1705,55 @@ $('lbNext').onclick = () => showLb(lbIndex + 1);
 $('lbClose').onclick = closeLb;
 $('lbFav').onclick = toggleFav;
 $('lbSim').onclick = () => { const g = state.dup.get(state.lbKey); state.onlyGroup = g; closeLb(); apply(); toast('Mostrando o grupo de semelhantes — “Limpar filtros” volta ao normal'); };
-$('lbCityBtn').onclick = () => { $('lbFix').classList.toggle('hidden'); const c = cityOf(state.view[lbIndex]); $('lbCity').value = c && c.uf ? cityLabel(c) : ''; $('lbCity').focus(); };
+$('lbCityBtn').onclick = () => { $('lbFix').classList.toggle('hidden'); const c = cityOf(state.view[lbIndex]); $('lbCity').value = c ? cityLabel(c) : ''; $('lbCity').focus(); };
+// Salva um campo manual sem apagar os outros já preenchidos (cidade, tags, pessoas)
+async function saveManualPatch(it, patch) {
+  const pk = pathKey(it);
+  const rec = { ...(state.manual.get(pk) || { pk }), ...patch, pk, at: Date.now() };
+  state.manual.set(pk, rec);
+  await idb('manual', 'readwrite', s => s.put(rec, pk));
+  if (shared.canWrite) saveShared(false);
+  return rec;
+}
+const splitList = v => v.split(',').map(x => x.trim()).filter(Boolean);
 $('lbCitySave').onclick = async () => {
   const it = state.view[lbIndex]; if (!it) return;
-  const v = $('lbCity').value.trim(), pk = pathKey(it);
-  let rec;
-  if (!v) rec = { pk, city: '', uf: '', at: Date.now() }; // remoção também é compartilhada
+  const v = $('lbCity').value.trim();
+  let patch;
+  if (!v) patch = { city: '', uf: '' }; // remoção também é compartilhada
   else {
     const g = GEO && GEO.find(x => x.label === v);
     const [city, uf] = g ? [g.name, g.uf] : v.split(/\s+[–-]\s+/);
-    rec = { pk, city: city.trim(), uf: (uf || '').trim().toUpperCase(), at: Date.now() };
+    patch = { city: city.trim(), uf: (uf || '').trim().toUpperCase() };
   }
-  state.manual.set(pk, rec); await idb('manual', 'readwrite', s => s.put(rec, pk));
-  if (shared.canWrite) saveShared(false);
+  await saveManualPatch(it, patch);
   $('lbFix').classList.add('hidden'); renderInfo(it); apply(true); toast('Cidade salva');
 };
-$('lbCity').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbCitySave').click(); e.stopPropagation(); });
+$('lbTagBtn').onclick = () => {
+  $('lbTagFix').classList.toggle('hidden');
+  const rec = state.manual.get(pathKey(state.view[lbIndex]));
+  $('lbTags').value = (rec && rec.tags || []).join(', ');
+  $('lbTags').focus();
+};
+$('lbTagsSave').onclick = async () => {
+  const it = state.view[lbIndex]; if (!it) return;
+  await saveManualPatch(it, { tags: splitList($('lbTags').value) });
+  $('lbTagFix').classList.add('hidden'); renderInfo(it); apply(true); toast('Tags salvas');
+};
+$('lbTags').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbTagsSave').click(); });
+$('lbPplBtn').onclick = () => {
+  $('lbPplFix').classList.toggle('hidden');
+  const rec = state.manual.get(pathKey(state.view[lbIndex]));
+  $('lbPeopleNames').value = (rec && rec.people || []).join(', ');
+  $('lbPeopleNames').focus();
+};
+$('lbPeopleSave').onclick = async () => {
+  const it = state.view[lbIndex]; if (!it) return;
+  await saveManualPatch(it, { people: splitList($('lbPeopleNames').value) });
+  $('lbPplFix').classList.add('hidden'); renderInfo(it); apply(true); renderGrid(true); toast('Pessoas identificadas salvas');
+};
+$('lbPeopleNames').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbPeopleSave').click(); });
+$('lbCity').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbCitySave').click(); });
 $('lbCopy').onclick = async () => {
   const it = state.view[lbIndex], text = state.root + '/' + it.path;
   try { await navigator.clipboard.writeText(text); toast('Caminho copiado'); } catch { prompt('Copie o caminho:', text); }
@@ -1607,7 +1764,9 @@ addEventListener('keydown', e => {
     if (e.key === '/' && document.activeElement !== $('q') && !$('q').disabled) { e.preventDefault(); $('q').focus(); }
     return;
   }
+  const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement && document.activeElement.tagName);
   if (e.key === 'Escape') closeLb();
+  else if (typing) return; // deixa o campo de texto usar as setas e a tecla F normalmente
   else if (e.key === 'ArrowLeft') showLb(lbIndex - 1);
   else if (e.key === 'ArrowRight') showLb(lbIndex + 1);
   else if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey) toggleFav();
