@@ -56,7 +56,7 @@ echo  [1/3] Copiando imagens novas ou alteradas...
 echo        Na primeira vez pode demorar; depois so copia o que mudou.
 rem /MIR espelha (remove da copia o que foi apagado no SharePoint).
 rem /XD protege a pasta de analise e evita copiar a propria copia (se o app estiver dentro da pasta do SharePoint).
-robocopy "!ORIGEM!" "%DEST%" *.jpg *.jpeg *.jfif *.png *.gif *.webp *.avif *.bmp *.svg *.heic *.heif *.tif *.tiff /MIR /XD "%IDX%" "%DEST%" "%APPDIR%." /R:1 /W:1 /NFL /NDL /NJH /NP
+robocopy "!ORIGEM!" "%DEST%" *.jpg *.jpeg *.jfif *.png *.gif *.webp *.avif *.bmp *.svg *.heic *.heif *.tif *.tiff /MIR /XD "%IDX%" "%DEST%" "%APPDIR:~0,-1%" /R:1 /W:1 /NFL /NDL /NJH /NP
 if %ERRORLEVEL% GEQ 8 (
   echo.
   echo  Houve erro ao copiar algumas imagens ^(codigo %ERRORLEVEL%^). O app vai abrir com o que foi copiado.
