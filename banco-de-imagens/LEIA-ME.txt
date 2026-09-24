@@ -19,4 +19,5 @@ Pastas sincronizadas do SharePoint:
      ele envia a sua analise para o SharePoint e traz a dos colegas.
 
 O atalho nao instala nada e nao apaga nada no SharePoint.
-Para trocar a pasta de origem, apague o arquivo "origem.txt".
+Para trocar a pasta de origem: rode o atalho e aperte T quando ele
+mostrar a pasta salva (ou apague o arquivo "origem.txt").

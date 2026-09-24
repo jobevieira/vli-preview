@@ -21,7 +21,9 @@ if exist "%CFG%" goto ler_origem
 
 :perguntar
 echo.
-echo  Primeira vez: informe a pasta de imagens do SharePoint.
+echo  Informe a pasta de imagens do SharePoint.
+echo  Pode ser a pasta principal: todas as subpastas entram.
+echo  Ao trocar de pasta, a copia local passa a ter so as imagens da nova pasta.
 echo  Dica: no Explorador de Arquivos, abra a pasta, clique na barra de
 echo  endereco, copie o caminho (Ctrl+C) e cole aqui (botao direito).
 echo.
@@ -46,6 +48,10 @@ if not exist "!ORIGEM!\" (
   del "%CFG%" >nul 2>&1
   goto perguntar
 )
+echo.
+echo  Pasta de origem salva: !ORIGEM!
+choice /c UT /n /t 15 /d U /m "  [U] Usar esta pasta   [T] Trocar de pasta   (usa esta em 15 s): "
+if errorlevel 2 goto perguntar
 
 :copiar
 echo.
