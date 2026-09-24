@@ -12,3 +12,10 @@ modelo-pessoas.js — pesos do modelo SSDLite MobileNet v2 (COCO) publicado em
 municipios.js — Malha municipal (qualidade intermediária) e nomes dos municípios,
   Instituto Brasileiro de Geografia e Estatística (IBGE), servicodados.ibge.gov.br.
   Dados públicos; fonte: IBGE.
+
+face-api.min.js e rostos.js — face-api.js 0.22.2 (Vincent Mühler / justadudewhohacks)
+  Licença MIT. Repositório: https://github.com/justadudewhohacks/face-api.js
+  rostos.js contém os pesos oficiais dos modelos tiny_face_detector,
+  face_landmark_68 e face_recognition, publicados no mesmo repositório sob a
+  mesma licença, embutidos sem alteração para funcionar abrindo o app direto
+  do disco (file://).

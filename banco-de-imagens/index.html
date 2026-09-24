@@ -184,6 +184,8 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <div class="msg" id="anMsg">—</div>
       <div class="bar"><i id="anBar"></i></div>
       <label class="chk" style="padding:0"><input type="checkbox" id="aiOn" checked> Detectar pessoas e objetos (IA)</label>
+      <label class="chk" style="padding:0"><input type="checkbox" id="facesOn"> Reconhecer rostos (fica só neste computador)</label>
+      <div class="msg" id="facesMsg" style="margin-top:4px"></div>
       <div class="row"><button class="btn sm" id="anPause">Pausar</button><button class="btn sm" id="reBtn" title="Apaga a análise das fotos que estão na tela (com os filtros atuais) e analisa de novo">Reanalisar seleção</button><button class="btn sm hidden" id="compatBtn">Abrir em modo compatível</button><button class="btn sm hidden" id="shareBtn" title="Grava o resultado dentro da pasta para que outras pessoas não precisem analisar de novo">Compartilhar na pasta</button></div>
       <div class="msg" id="shareMsg" style="margin-top:8px"></div>
     </div>
@@ -198,6 +200,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
         <label>Objetos<select data-f="tag"></select></label>
         <label>Tags<select data-f="usertag"></select></label>
         <label>Pessoas (por nome)<select data-f="person"></select></label>
+        <label class="chk"><input type="checkbox" id="onlyFacesOn"> Só fotos com rosto sugerido a confirmar</label>
         <label>Ano<select data-f="year"></select></label>
         <label>Formato da foto<select data-f="orient"></select></label>
         <label>Qualidade<select data-f="quality"></select></label>
@@ -208,7 +211,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
         <button class="btn sm" id="exBtn">Lista de ex-funcionários</button>
       </div>
     </details>
-    <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos neste navegador</button><br><button id="diagBtn">Diagnóstico</button> · <span id="ver"></span>
+    <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos neste navegador</button><br><button id="wipeFaces">Apagar reconhecimento facial (todas as pastas)</button><br><button id="diagBtn">Diagnóstico</button> · <span id="ver"></span>
       <div id="diag" class="hidden"><pre id="diagTxt" style="white-space:pre-wrap;font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:320px;overflow:auto"></pre><button class="btn sm" id="diagCopy">Copiar diagnóstico</button></div>
     </div>
   </aside>
@@ -231,6 +234,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   <div class="drop">…ou arraste uma pasta para cá</div>
   <div class="progress" id="progress" role="status" aria-live="polite"></div>
   <ul>
+    <li><strong>Reconhecimento facial local</strong> (desligado por padrão): sugere o nome de quem já foi identificado antes numa foto parecida — sempre pedindo confirmação. Os rostos ficam só neste navegador, nunca vão para a pasta compartilhada.</li>
     <li><strong>Cidade</strong> pelos metadados da foto: GPS (malha de municípios do IBGE, sem internet) ou cidade gravada no arquivo (IPTC/XMP). Dá para corrigir à mão.</li>
     <li><strong>Pessoas</strong>: sem pessoas, 1, 2, 3 ou grupo (mais de 3) — e objetos como trem, caminhão e embarcação.</li>
     <li><strong>Duplicatas e semelhantes</strong>, fotos <strong>borradas, escuras ou pequenas</strong>, horizontal/vertical, ano da foto.</li>
@@ -283,6 +287,14 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <button class="btn" id="lbCityBtn">Corrigir cidade</button>
       <button class="btn" id="lbTagBtn">Editar tags</button>
       <button class="btn" id="lbPplBtn">Identificar pessoas</button>
+      <button class="btn hidden" id="lbFaceSearch">Buscar fotos deste rosto</button>
+      <div class="an hidden" id="lbFaceSuggest" style="padding:10px;margin:0 0 10px">
+        <span id="lbFaceSuggestTxt"></span>
+        <div class="row" style="margin-top:8px">
+          <button class="btn sm primary" id="lbFaceYes">É esta pessoa</button>
+          <button class="btn sm" id="lbFaceNo">Não é</button>
+        </div>
+      </div>
       <button class="btn hidden" id="lbSim">Ver semelhantes</button>
       <button class="btn" id="lbCopy">Copiar caminho</button>
     </div>
@@ -297,7 +309,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.8';
+const APP_VERSION = '2026-09-24.9';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -335,8 +347,8 @@ const saveFavs = () => ls.set('bi.favs', [...favs]);
 let dbp = null;
 function db() {
   if (!dbp) dbp = new Promise((res, rej) => {
-    const r = indexedDB.open('banco-imagens', 2);
-    r.onupgradeneeded = () => { for (const s of ['kv', 'meta', 'thumbs', 'libs', 'manual']) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s); };
+    const r = indexedDB.open('banco-imagens', 3);
+    r.onupgradeneeded = () => { for (const s of ['kv', 'meta', 'thumbs', 'libs', 'manual', 'faces']) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s); };
     r.onsuccess = () => res(r.result);
     r.onerror = () => rej(r.error);
   });
@@ -677,7 +689,7 @@ async function fileOf(it) {
 }
 
 async function setLibrary(root, items, handle) {
-  state.root = root; state.rootHandle = handle || null; state.folder = ''; state.onlyGroup = null;
+  state.root = root; state.rootHandle = handle || null; state.folder = ''; state.onlyGroup = null; state.onlyFace = null;
   state.items = items; state.keySet = new Set(items.map(i => i.key));
   const [metas, manual] = await Promise.all([
     idb('meta', 'readonly', s => s.getAll(range(root))),
@@ -690,9 +702,12 @@ async function setLibrary(root, items, handle) {
   applyShared();
   await loadDesligados();
   renderPeopleList();
+  const faceRows = await idb('faces', 'readonly', s => s.getAll());
+  state.faces = new Map((faceRows || []).filter(f => f.v === FACE_V && state.keySet.has(f.k)).map(f => [f.k, f]));
   computeDups();
   ready();
   runAnalysis();
+  runFaceAnalysis();
 }
 function saveListing() {
   idb('libs', 'readwrite', s => s.put({ at: Date.now(), files: state.items.map(i => [i.path, i.size, i.date]) }, state.root));
@@ -1062,6 +1077,7 @@ async function diagnostics() {
     `Erros na análise: ${an.errs}`,
     ...an.lastErrs.map(e => '  - ' + e),
     `Compartilhado: ${[...state.meta.values()].filter(m => m._shared).length} de outras pessoas | arquivos em .banco-imagens: ${shared.files.size}`,
+    `Rostos (local, nunca compartilhado): ${$('facesOn').checked ? 'ligado' : 'desligado'} | estado ${fr.state} | ${state.faces.size} imagens verificadas | ${[...state.faces.values()].reduce((n, f) => n + (f.faces ? f.faces.length : 0), 0)} rostos | ${[...state.faces.values()].filter(f => f.suggest).length} sugestões pendentes`,
   ].join('\n');
 }
 $('diagBtn').onclick = async () => { $('diagTxt').textContent = await diagnostics(); $('diag').classList.toggle('hidden'); };
@@ -1111,7 +1127,147 @@ async function runAnalysis() {
   computeDups(); apply(true); anRender(); showStorage();
   if (shared.canWrite) await saveShared(false);
   if (an.queue.length) runAnalysis();
+  runFaceAnalysis();
 }
+
+/* ================= reconhecimento facial (100% local) =================
+   Os rostos e as "assinaturas" numéricas ficam só neste navegador, na store
+   IndexedDB 'faces'. Eles NUNCA são gravados na pasta compartilhada, no CSV
+   nem em state.meta/state.manual — só o NOME, quando alguém confirma uma
+   sugestão ou digita à mão, entra no fluxo normal (esse sim compartilhado). */
+const FACE_V = 1;
+const FACE_THRESHOLD = 0.6; // abaixo disso, o face-api considera "a mesma pessoa"
+const fr = { state: 'off', running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0 };
+const facesWanted = () => $('facesOn').checked;
+state.faces = new Map(); // key -> { k, v, faces:[{box,desc}], suggest, suggestDist }
+
+async function loadFaceModels() {
+  if (fr.state === 'ok' || fr.state === 'loading') return;
+  fr.state = 'loading'; facesRender();
+  try {
+    if (!window.MODELOS_ROSTO) await loadScript('lib/rostos.js');
+    if (!window.faceapi) {
+      const M = window.MODELOS_ROSTO;
+      const origFetch = fetch.bind(window);
+      window.fetch = async (url, opts) => {
+        const s = typeof url === 'string' ? url : url.url;
+        const m = /^rostos\/(tiny|landmark|recognition)\/(.+)$/.exec(s);
+        if (!m) return origFetch(url, opts);
+        const net = M[m[1]];
+        if (m[2].endsWith('-weights_manifest.json')) return new Response(JSON.stringify(net.manifest), { headers: { 'content-type': 'application/json' } });
+        const bin = atob(net.shards[m[2]]), buf = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        return new Response(buf.buffer);
+      };
+      await loadScript('lib/face-api.min.js');
+    }
+    await faceapi.nets.tinyFaceDetector.loadFromUri('rostos/tiny');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('rostos/landmark');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('rostos/recognition');
+    window.MODELOS_ROSTO = null;
+    fr.state = 'ok';
+  } catch (e) { console.warn(e); fr.state = 'erro'; }
+  facesRender();
+}
+const faceDist = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) { const d = a[i] - b[i]; s += d * d; } return Math.sqrt(s); };
+
+// Referências: uma foto com EXATAMENTE 1 rosto detectado e EXATAMENTE 1 nome já confirmado
+// vira uma "referência" desse nome, usada para sugerir o mesmo nome em outras fotos.
+function faceRefs() {
+  const refs = [];
+  for (const it of state.items) {
+    const f = state.faces.get(it.key), names = peopleNamesOf(it);
+    if (f && f.faces && f.faces.length === 1 && names.length === 1) refs.push({ name: names[0], desc: f.faces[0].desc });
+  }
+  return refs;
+}
+function suggestFor(descs) {
+  const refs = faceRefs();
+  if (!refs.length) return null;
+  let best = null, bestD = Infinity, second = Infinity;
+  for (const desc of descs) for (const r of refs) {
+    const d = faceDist(desc, r.desc);
+    if (d < bestD) { second = bestD; bestD = d; best = r.name; } else if (d < second) second = d;
+  }
+  // só sugere se houver folga clara para o segundo colocado (evita sugestão ambígua entre duas pessoas parecidas)
+  if (best && bestD < FACE_THRESHOLD && second - bestD > 0.07) return { name: best, dist: bestD };
+  return null;
+}
+
+async function analyzeFace(it, cv) {
+  let file;
+  try { file = await fileOf(it); } catch { return; }
+  let bmp;
+  try { bmp = await createImageBitmap(file); } catch { return; }
+  const rec = { k: it.key, v: FACE_V, faces: [] };
+  try {
+    const s = Math.min(1, 640 / Math.max(bmp.width, bmp.height));
+    const c = cv.f; c.width = Math.max(1, Math.round(bmp.width * s)); c.height = Math.max(1, Math.round(bmp.height * s));
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
+    const found = await faceapi.detectAllFaces(c, opts).withFaceLandmarks().withFaceDescriptors();
+    rec.faces = found.map(f => ({ box: [f.detection.box.x / s, f.detection.box.y / s, f.detection.box.width / s, f.detection.box.height / s], desc: Array.from(f.descriptor) }));
+  } catch (e) { console.warn('rosto', it.path, e); } finally { bmp.close(); }
+  if (rec.faces.length && !peopleNamesOf(it).length) {
+    const sug = suggestFor(rec.faces.map(f => f.desc));
+    if (sug) { rec.suggest = sug.name; rec.suggestDist = sug.dist; }
+  }
+  state.faces.set(it.key, rec);
+  await idb('faces', 'readwrite', st => st.put(rec, it.key));
+}
+async function runFaceAnalysis() {
+  if (!facesWanted()) return;
+  for (const it of state.items) if (!state.faces.has(it.key) && !fr.queued.has(it.key)) { fr.queue.push(it); fr.queued.add(it.key); }
+  fr.total = fr.done + fr.queue.length;
+  facesRender();
+  if (fr.running || !fr.queue.length) return;
+  fr.running = true; fr.done = 0; fr.total = fr.queue.length;
+  await loadFaceModels();
+  if (fr.state !== 'ok') { fr.running = false; facesRender(); return; }
+  const cv = { f: document.createElement('canvas') };
+  let lastUi = 0;
+  while (fr.queue.length && facesWanted()) {
+    if (fr.paused) { await sleep(300); continue; }
+    const it = fr.queue.shift(); fr.queued.delete(it.key);
+    if (!state.keySet.has(it.key)) continue;
+    await analyzeFace(it, cv);
+    fr.done++;
+    const now = performance.now();
+    if (now - lastUi > 500) { lastUi = now; facesRender(); renderGrid(true); }
+    await sleep(0);
+  }
+  // Segunda passada: alguém pode ter sido identificado só depois de já processado nesta mesma leva
+  let changed = 0;
+  for (const it of state.items) {
+    const f = state.faces.get(it.key);
+    if (!f || !f.faces || !f.faces.length || f.suggest || peopleNamesOf(it).length) continue;
+    const sug = suggestFor(f.faces.map(x => x.desc));
+    if (sug) { f.suggest = sug.name; f.suggestDist = sug.dist; await idb('faces', 'readwrite', st => st.put(f, it.key)); changed++; }
+  }
+  if (changed) renderGrid(true);
+  fr.running = false; facesRender(); renderGrid(true); apply(true);
+}
+function facesRender() {
+  const msg = $('facesMsg');
+  if (!facesWanted()) { msg.textContent = ''; return; }
+  if (fr.state === 'loading') { msg.textContent = 'Carregando modelo de rostos…'; return; }
+  if (fr.state === 'erro') { msg.innerHTML = '<span class="warn">Reconhecimento facial indisponível neste navegador.</span>'; return; }
+  const analyzed = [...state.faces.values()].length;
+  msg.textContent = fr.running
+    ? `Analisando rostos: ${fmtNum(fr.done)} de ${fmtNum(fr.total)}…`
+    : `${fmtNum(analyzed)} de ${fmtNum(state.items.length)} imagens com rostos verificados. Os rostos ficam só neste navegador.`;
+}
+$('facesOn').addEventListener('change', () => {
+  ls.set('bi.faces', $('facesOn').checked);
+  if ($('facesOn').checked && !ls.get('bi.faces.aviso', false)) {
+    ls.set('bi.faces.aviso', true);
+    alert('Reconhecimento facial local\n\nAs fotos são analisadas neste navegador para sugerir nomes de quem já foi identificado antes. Os rostos e suas assinaturas numéricas ficam só neste computador — nunca são enviados à pasta compartilhada, à internet ou à equipe.\n\nSó o NOME que alguém confirmar entra no campo "Pessoas na foto", que aí sim é compartilhado, como qualquer identificação manual.\n\nComo envolve dado biométrico, confirme com a área responsável pela empresa se o uso está alinhado com a política de privacidade antes de usar em produção.');
+  }
+  if (state.items.length) runFaceAnalysis();
+  facesRender();
+});
+$('facesOn').checked = ls.get('bi.faces', false);
+
 
 async function analyze(it, cv) {
   const old = state.meta.get(it.key);
@@ -1406,6 +1562,8 @@ function baseFilter() {
     (!favOnly || favs.has(pathKey(it))) &&
     (!dupOn || state.dup.has(it.key)) &&
     (!state.onlyGroup || state.dup.get(it.key) === state.onlyGroup) &&
+    (!state.onlyFace || state.onlyFace.has(it.key)) &&
+    (!$('onlyFacesOn').checked || (state.faces.get(it.key) && state.faces.get(it.key).suggest && !peopleNamesOf(it).length)) &&
     (!$('hideExOn').checked || !hasExFuncionario(it)) &&
     (!q || norm([it.path, cityLabel(cityOf(it)), ...tagsOf(it), ...peopleNamesOf(it)].join(' ')).includes(q)));
 }
@@ -1446,7 +1604,8 @@ function apply(keepScroll) {
 }
 
 document.querySelectorAll('#facets select').forEach(sel => sel.addEventListener('change', () => { F[sel.dataset.f] = sel.value; apply(); }));
-$('clearF').onclick = () => { Object.keys(F).forEach(k => F[k] = ''); $('dupOn').checked = false; state.onlyGroup = null; $('q').value = ''; apply(); };
+$('clearF').onclick = () => { Object.keys(F).forEach(k => F[k] = ''); $('dupOn').checked = false; state.onlyGroup = null; state.onlyFace = null; $('onlyFacesOn').checked = false; $('q').value = ''; apply(); };
+$('onlyFacesOn').addEventListener('change', () => apply());
 $('dupOn').addEventListener('change', () => { state.onlyGroup = null; apply(); });
 $('subOn').addEventListener('change', () => apply());
 
@@ -1622,12 +1781,19 @@ $('csv').onclick = () => {
 };
 $('wipe').onclick = async () => {
   if (!confirm(`Apagar miniaturas e resultados da análise salvos para “${state.root}”? As imagens originais não são tocadas.`)) return;
-  an.queue = []; an.queued.clear();
-  await Promise.all(['meta', 'thumbs', 'manual'].map(s => idb(s, 'readwrite', st => st.delete(range(state.root)))));
+  an.queue = []; an.queued.clear(); fr.queue = []; fr.queued.clear();
+  await Promise.all(['meta', 'thumbs', 'manual', 'faces'].map(s => idb(s, 'readwrite', st => st.delete(range(state.root)))));
   await idb('libs', 'readwrite', s => s.delete(state.root));
-  state.meta.clear(); state.manual.clear(); state.dup.clear();
+  state.meta.clear(); state.manual.clear(); state.dup.clear(); state.faces.clear();
   urlCache.forEach(u => URL.revokeObjectURL(u)); urlCache.clear();
-  apply(true); anRender(); showStorage(); toast('Dados apagados');
+  apply(true); anRender(); facesRender(); showStorage(); toast('Dados apagados');
+};
+$('wipeFaces').onclick = async () => {
+  if (!confirm('Apagar todos os rostos e assinaturas faciais salvos neste navegador (todas as pastas)? Os nomes já confirmados em "Pessoas na foto" não são afetados.')) return;
+  fr.queue = []; fr.queued.clear();
+  await idb('faces', 'readwrite', s => s.clear());
+  state.faces.clear();
+  renderGrid(true); facesRender(); toast('Reconhecimento facial apagado deste navegador');
 };
 
 /* ================= visualizador ================= */
@@ -1647,7 +1813,7 @@ async function showLb(i) {
   $('lbName').textContent = it.name;
   $('lbCount').textContent = `${i + 1} / ${n}`;
   $('lbFix').classList.add('hidden');
-  updFavBtn(it); renderInfo(it);
+  updFavBtn(it); renderInfo(it); renderFaceUi(it);
   try {
     const f = await fileOf(it);
     if (state.lbKey !== it.key) return;
@@ -1656,6 +1822,39 @@ async function showLb(i) {
     img.src = lbUrl; $('lbDown').href = lbUrl; $('lbDown').download = it.name;
   } catch { toast(ERR.read); }
 }
+function renderFaceUi(it) {
+  const f = state.faces.get(it.key);
+  const hasFaces = f && f.faces && f.faces.length > 0;
+  $('lbFaceSearch').classList.toggle('hidden', !hasFaces);
+  const box = $('lbFaceSuggest');
+  if (hasFaces && f.suggest && !peopleNamesOf(it).length) {
+    box.classList.remove('hidden');
+    $('lbFaceSuggestTxt').textContent = `🙂 Rosto parecido com fotos já identificadas como “${f.suggest}”. É esta pessoa?`;
+  } else box.classList.add('hidden');
+}
+$('lbFaceYes').onclick = async () => {
+  const it = state.view[lbIndex]; const f = state.faces.get(it.key); if (!it || !f || !f.suggest) return;
+  await saveManualPatch(it, { people: [...peopleNamesOf(it), f.suggest] });
+  delete f.suggest; delete f.suggestDist; await idb('faces', 'readwrite', s => s.put(f, it.key));
+  renderInfo(it); renderFaceUi(it); apply(true); renderGrid(true); toast('Pessoa confirmada');
+};
+$('lbFaceNo').onclick = async () => {
+  const it = state.view[lbIndex]; const f = state.faces.get(it.key); if (!it || !f) return;
+  delete f.suggest; delete f.suggestDist; await idb('faces', 'readwrite', s => s.put(f, it.key));
+  renderFaceUi(it); toast('OK, sugestão removida');
+};
+$('lbFaceSearch').onclick = () => {
+  const it = state.view[lbIndex]; const f = state.faces.get(it.key); if (!it || !f || !f.faces.length) return;
+  // usa o maior rosto da foto (o principal)
+  const main = f.faces.reduce((a, b) => (a.box[2] * a.box[3] > b.box[2] * b.box[3] ? a : b));
+  const matches = new Set();
+  for (const other of state.items) {
+    const of_ = state.faces.get(other.key); if (!of_ || !of_.faces) continue;
+    if (of_.faces.some(x => faceDist(x.desc, main.desc) < FACE_THRESHOLD)) matches.add(other.key);
+  }
+  state.onlyFace = matches; closeLb(); $('onlyFacesOn').checked = false; apply();
+  toast(`Mostrando ${matches.size} foto(s) com este rosto — “Limpar filtros” volta ao normal`);
+};
 function renderInfo(it) {
   const m = state.meta.get(it.key) || {}, c = cityOf(it);
   const rows = [['Pasta', it.dir || '(raiz)']];
@@ -1786,7 +1985,7 @@ $('lb').addEventListener('touchend', e => {
 });
 
 // Para testes automatizados
-window.__banco = { state, an, ai, shared, writerId, openHandle: h => fromHandle(h, false), share: () => saveShared(true), geoLookup: (a, b) => { const g = geoLookup(a, b); return g && g.label; }, loadGeo, parseExif };
+window.__banco = { state, an, ai, fr, shared, writerId, faceDist, openHandle: h => fromHandle(h, false), share: () => saveShared(true), geoLookup: (a, b) => { const g = geoLookup(a, b); return g && g.label; }, loadGeo, parseExif };
 })();
 </script>
 </body>
