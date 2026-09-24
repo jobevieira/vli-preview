@@ -116,6 +116,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 .lb .count{position:absolute;top:16px;left:16px;font-size:13px;color:#a3a7ac}
 .lb .fix{display:flex;gap:6px;margin:0 0 12px}
 .lb .fix input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #33373b;background:#26292d;color:#ecebe7}
+.envwarn{margin:12px 16px 0;padding:12px 14px;border-radius:10px;background:#fff4d6;color:#5a3b00;border:1px solid #f2b705;font-size:14px;line-height:1.5}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30}
 
 @media (max-width:820px){
@@ -151,6 +152,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
     <button class="btn primary" id="openBtn">Abrir pasta</button>
   </div>
 </header>
+<div class="envwarn hidden" id="envWarn" role="alert"></div>
 
 <div class="main hidden" id="app">
   <aside>
@@ -159,7 +161,8 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <div class="msg" id="anMsg">—</div>
       <div class="bar"><i id="anBar"></i></div>
       <label class="chk" style="padding:0"><input type="checkbox" id="aiOn" checked> Detectar pessoas e objetos (IA)</label>
-      <div class="row"><button class="btn sm" id="anPause">Pausar</button></div>
+      <div class="row"><button class="btn sm" id="anPause">Pausar</button><button class="btn sm hidden" id="shareBtn" title="Grava o resultado dentro da pasta para que outras pessoas não precisem analisar de novo">Compartilhar na pasta</button></div>
+      <div class="msg" id="shareMsg" style="margin-top:8px"></div>
     </div>
     <details open id="dFolders"><summary>Pastas</summary>
       <nav class="tree" id="tree" aria-label="Pastas"></nav>
@@ -178,7 +181,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
         <button class="btn sm" id="clearF">Limpar filtros</button>
       </div>
     </details>
-    <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos desta pasta</button></div>
+    <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos neste navegador</button></div>
   </aside>
   <section class="content">
     <div class="status"><span id="stat"></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
@@ -200,7 +203,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
     <li><strong>Cidade</strong> pelo GPS da foto (malha de municípios do IBGE, funciona sem internet) ou pelo nome da pasta.</li>
     <li><strong>Pessoas</strong>: sem pessoas, 1, 2, 3 ou grupo (mais de 3) — e objetos como trem, caminhão e embarcação.</li>
     <li><strong>Duplicatas e semelhantes</strong>, fotos <strong>borradas, escuras ou pequenas</strong>, horizontal/vertical, ano da foto.</li>
-    <li>A primeira análise leva um tempo (dá para pausar e continuar depois); o resultado fica salvo neste navegador e só fotos novas são analisadas de novo.</li>
+    <li>A primeira análise leva um tempo (dá para pausar e continuar depois). Com “Compartilhar na pasta”, o resultado é gravado dentro da própria pasta (ex.: sincronizada pelo SharePoint) e a equipe toda aproveita — só fotos novas são analisadas de novo.</li>
     <li>Busca, favoritas, visualizador com setas ← → e exportação para planilha.</li>
     <li>Use Chrome ou Edge para reabrir a pasta com um clique. Firefox também funciona.</li>
   </ul>
@@ -498,7 +501,7 @@ function cityFromDir(dir) {
 }
 function cityOf(it) {
   const man = state.manual.get(pathKey(it));
-  if (man) return { ...man, src: 'manual' };
+  if (man && man.city) return { ...man, src: 'manual' };
   const m = state.meta.get(it.key);
   if (m && m.city) return { city: m.city, uf: m.uf, src: 'gps' };
   if (m && m.gps && m.city === null) return { city: 'Fora do Brasil', uf: '', src: 'gps' };
@@ -581,6 +584,8 @@ async function setLibrary(root, items, handle) {
   state.meta = new Map((metas || []).filter(m => m.v === ANALYSIS_V).map(m => [m.k, m]));
   state.manual = new Map((manual || []).map(m => [m.pk, m]));
   await loadGeo();
+  await loadShared();
+  applyShared();
   computeDups();
   ready();
   runAnalysis();
@@ -596,6 +601,7 @@ async function fromHandle(handle, useCache) {
     const lib = await idb('libs', 'readonly', s => s.get(handle.name));
     if (lib && lib.files && lib.files.length) {
       const items = lib.files.map(([p, sz, dt]) => mkItem(null, p, sz, dt)).filter(Boolean);
+      await readSharedDir(handle);
       await setLibrary(handle.name, items, handle);
       rescan(handle);
       return;
@@ -604,6 +610,7 @@ async function fromHandle(handle, useCache) {
   progress(0.1);
   const items = [];
   await walkHandle(handle, '', items);
+  await readSharedDir(handle);
   idb('kv', 'readwrite', s => s.put(handle, 'dir'));
   await setLibrary(handle.name, items, handle);
   saveListing();
@@ -613,7 +620,7 @@ function scanMsg(n) { if (scanning) $('anMsg').textContent = `Procurando imagens
 async function rescan(handle) {
   scanning = true; anRender();
   const items = [];
-  try { await walkHandle(handle, '', items); } catch { scanning = false; anRender(); return; }
+  try { await walkHandle(handle, '', items); await readSharedDir(handle); await loadShared(); } catch { scanning = false; anRender(); return; }
   scanning = false;
   if (state.root !== handle.name) return;
   const before = new Set(state.items.map(i => i.key));
@@ -621,6 +628,7 @@ async function rescan(handle) {
   const removed = state.items.length - (items.length - added);
   state.items = items; state.keySet = new Set(items.map(i => i.key)); dirCity.clear();
   saveListing();
+  applyShared();
   buildTree(); computeDups(); apply(true);
   if (added || removed) toast(`Pasta atualizada: ${added} novas, ${removed} removidas`);
   runAnalysis();
@@ -628,7 +636,7 @@ async function rescan(handle) {
 
 async function openFolder() {
   if (window.showDirectoryPicker) {
-    try { const h = await window.showDirectoryPicker({ id: 'banco-imagens', mode: 'read' }); await fromHandle(h, false); return; }
+    try { const h = await window.showDirectoryPicker({ id: 'banco-imagens', mode: 'read' }); shared.canWrite = false; await fromHandle(h, false); return; }
     catch (e) { if (e && e.name === 'AbortError') return; }
   }
   $('dirInput').click();
@@ -639,9 +647,11 @@ $('dirInput').addEventListener('change', e => {
   const root = (files[0].webkitRelativePath || '').split('/')[0] || 'Pasta';
   state.root = root;
   const items = [];
+  shared.files.clear();
   for (const f of files) {
     const rel = (f.webkitRelativePath || f.name).split('/').slice(1).join('/') || f.name;
-    if (isImg(f.name)) { const it = mkItem(f, rel); if (it) items.push(it); }
+    if (rel === SHARED_DIR + '/' + f.name) shared.files.set(f.name, f);
+    else if (isImg(f.name)) { const it = mkItem(f, rel); if (it) items.push(it); }
   }
   e.target.value = '';
   setLibrary(root, items, null);
@@ -659,8 +669,20 @@ addEventListener('drop', async e => {
   state.root = single ? entries[0].name : 'Itens soltos';
   progress(0.1);
   const items = [];
+  shared.files.clear();
   for (const en of entries) {
-    if (single) { const r = en.createReader(); let b; do { b = await readEntries(r); for (const x of b) await walkEntry(x, '', items); } while (b.length); }
+    if (single) {
+      const r = en.createReader(); let b;
+      do {
+        b = await readEntries(r);
+        for (const x of b) {
+          if (x.isDirectory && x.name === SHARED_DIR) {
+            const rr = x.createReader(); let c;
+            do { c = await readEntries(rr); for (const y of c) if (y.isFile) { const f = await new Promise((res, rej) => y.file(res, rej)).catch(() => null); if (f) shared.files.set(y.name, f); } } while (c.length);
+          } else await walkEntry(x, '', items);
+        }
+      } while (b.length);
+    }
     else await walkEntry(en, '', items);
   }
   setLibrary(state.root, items, null);
@@ -674,12 +696,141 @@ addEventListener('drop', async e => {
   btn.textContent = `Reabrir “${h.name}”`;
   btn.classList.remove('hidden');
   btn.onclick = async () => {
-    try { if (await h.requestPermission({ mode: 'read' }) === 'granted') await fromHandle(h, true); }
+    try {
+      const wantWrite = ls.get('bi.share.' + h.name, false);
+      if (await h.requestPermission({ mode: wantWrite ? 'readwrite' : 'read' }) === 'granted') { shared.canWrite = wantWrite; await fromHandle(h, true); }
+    }
     catch { toast('Não foi possível reabrir. Escolha a pasta novamente.'); }
   };
 })();
 $('openBtn').onclick = openFolder;
 $('openBtn2').onclick = openFolder;
+
+/* ================= índice compartilhado dentro da pasta ================= */
+// Cada navegador grava só o próprio arquivo (indice-<id>.json.gz + pacotes de miniaturas),
+// então duas pessoas analisando ao mesmo tempo nunca geram conflito de sincronização.
+const SHARED_DIR = '.banco-imagens';
+const writerId = ls.get('bi.writer', null) || (() => { const id = Math.random().toString(36).slice(2, 10); ls.set('bi.writer', id); return id; })();
+const shared = { files: new Map(), index: new Map(), own: new Map(), manual: new Map(), others: new Set(), canWrite: false, lastSave: 0, saving: false };
+
+async function readSharedDir(handle) {
+  shared.files.clear();
+  try {
+    const d = await handle.getDirectoryHandle(SHARED_DIR);
+    for await (const e of d.values()) if (e.kind === 'file') shared.files.set(e.name, await e.getFile());
+  } catch {}
+}
+const gunzip = async f => new Response(f.stream().pipeThrough(new DecompressionStream('gzip'))).text();
+const gzip = async text => new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).blob();
+
+async function loadShared() {
+  shared.index.clear(); shared.own.clear(); shared.manual.clear(); shared.others.clear();
+  for (const [name, file] of shared.files) {
+    const mm = /^indice-(.+)\.json\.gz$/.exec(name);
+    if (!mm) continue;
+    let data;
+    try { data = JSON.parse(await gunzip(file)); } catch (e) { console.warn('índice ilegível', name, e); continue; }
+    const w = mm[1];
+    if (w !== writerId) shared.others.add(w);
+    if (data.v === ANALYSIS_V) for (const e of data.items || []) {
+      const k = e.p + '|' + e.s, cur = shared.index.get(k);
+      if (!cur || (e.at || 0) > (cur.at || 0)) shared.index.set(k, { ...e, w });
+      if (w === writerId && e.t) shared.own.set(k, e.t);
+    }
+    for (const c of data.manual || []) { const cur = shared.manual.get(c.p); if (!cur || c.at > cur.at) shared.manual.set(c.p, c); }
+  }
+}
+function applyShared() {
+  let n = 0;
+  for (const it of state.items) {
+    const e = shared.index.get(it.path + '|' + it.size);
+    if (!e || state.meta.has(it.key)) continue;
+    state.meta.set(it.key, { ...e.m, k: it.key, v: ANALYSIS_V, at: e.at, _shared: e.w !== writerId ? 1 : 0, _t: e.t });
+    n++;
+  }
+  for (const [p, c] of shared.manual) {
+    const pk = state.root + '|' + p, cur = state.manual.get(pk);
+    if (!cur || (c.at || 0) > (cur.at || 0)) state.manual.set(pk, { pk, city: c.city, uf: c.uf, at: c.at });
+  }
+  return n;
+}
+function sharedThumb(t) {
+  const f = shared.files.get(t[0]);
+  return f && t[1] + t[2] <= f.size ? f.slice(t[1], t[1] + t[2], 'image/jpeg') : null;
+}
+async function thumbBlob(key) {
+  return memThumbs.get(key) || await idb('thumbs', 'readonly', s => s.get(key));
+}
+async function writeFile(dir, name, blob) {
+  const fh = await dir.getFileHandle(name, { create: true });
+  const w = await fh.createWritable();
+  await w.write(blob); await w.close();
+  return fh.getFile();
+}
+async function saveShared(interactive) {
+  if (!state.rootHandle || shared.saving) return;
+  if (interactive) {
+    let perm = 'denied';
+    try { perm = await state.rootHandle.requestPermission({ mode: 'readwrite' }); } catch {}
+    if (perm !== 'granted') { toast('Sem permissão para gravar nesta pasta.'); return; }
+    shared.canWrite = true; ls.set('bi.share.' + state.root, true);
+  }
+  if (!shared.canWrite) return;
+  shared.saving = true; anRender();
+  try {
+    await flush();
+    const dir = await state.rootHandle.getDirectoryHandle(SHARED_DIR, { create: true });
+    const entries = [], fresh = [];
+    for (const it of state.items) {
+      const m = state.meta.get(it.key);
+      if (!m || m._shared || m.err === 'read') continue;
+      const k = it.path + '|' + it.size, { k: _k, v: _v, at, _shared, _t, ...rest } = m;
+      const e = { p: it.path, s: it.size, d: it.date, at: at || Date.now(), m: rest, t: shared.own.get(k) || _t };
+      entries.push(e);
+      if (!e.t && !m.bad) fresh.push([it, e, k]);
+    }
+    // Miniaturas novas vão para pacotes novos; pacotes antigos nunca são reescritos
+    let n = 0;
+    for (const name of shared.files.keys()) { const mm = new RegExp('^miniaturas-' + writerId + '-(\\d+)\\.bin$').exec(name); if (mm) n = Math.max(n, +mm[1]); }
+    for (let i = 0; i < fresh.length; i += 500) {
+      const name = `miniaturas-${writerId}-${String(++n).padStart(4, '0')}.bin`, parts = [];
+      let off = 0;
+      for (const [it, e, k] of fresh.slice(i, i + 500)) {
+        const b = await thumbBlob(it.key);
+        if (!b) continue;
+        parts.push(b); e.t = [name, off, b.size]; off += b.size;
+      }
+      if (!parts.length) { n--; continue; }
+      shared.files.set(name, await writeFile(dir, name, new Blob(parts)));
+      for (const [, e, k] of fresh.slice(i, i + 500)) if (e.t) shared.own.set(k, e.t);
+    }
+    const manual = [...state.manual.values()].filter(c => c.at).map(c => ({ p: c.pk.slice(state.root.length + 1), city: c.city, uf: c.uf, at: c.at }));
+    const json = JSON.stringify({ v: ANALYSIS_V, writer: writerId, at: Date.now(), items: entries, manual });
+    const name = `indice-${writerId}.json.gz`;
+    shared.files.set(name, await writeFile(dir, name, await gzip(json)));
+    shared.lastSave = Date.now();
+  } catch (e) {
+    console.warn(e); toast('Não foi possível gravar na pasta: ' + (e.message || e.name));
+  }
+  shared.saving = false; anRender();
+}
+$('shareBtn').onclick = () => saveShared(true);
+
+// Avisa quando o arquivo foi aberto num visualizador que bloqueia imagens locais
+(function checkEnv() {
+  const warn = t => { const w = $('envWarn'); w.textContent = t; w.classList.remove('hidden'); };
+  let framed = false;
+  try { framed = window.top !== window.self; } catch { framed = true; }
+  if (framed) warn('Este arquivo está aberto dentro de outro aplicativo (pré-visualização do Claude, Teams, SharePoint ou e-mail). Nesses visualizadores as imagens não aparecem. Baixe o .zip, descompacte e abra o index.html direto no Chrome ou no Edge.');
+  const c = document.createElement('canvas'); c.width = c.height = 1;
+  c.toBlob(b => {
+    if (!b) return;
+    const u = URL.createObjectURL(b), im = new Image();
+    im.onload = () => URL.revokeObjectURL(u);
+    im.onerror = () => { URL.revokeObjectURL(u); warn('Este navegador está bloqueando a exibição de imagens locais — por isso as miniaturas ficam em branco. Abra o index.html direto no Chrome ou no Edge, fora de outros aplicativos.'); };
+    im.src = u;
+  });
+})();
 
 /* ================= análise ================= */
 const an = { running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0, t0: 0, rate: 0 };
@@ -706,6 +857,7 @@ async function runAnalysis() {
       const now = performance.now();
       if (now - lastUi > 400) { lastUi = now; anRender(); }
       if (now - lastRefresh > 6000) { lastRefresh = now; apply(true); }
+      if (shared.canWrite && now - shared.lastSave > 180000) saveShared(false);
       await sleep(0);
     }
   };
@@ -713,11 +865,12 @@ async function runAnalysis() {
   await flush();
   an.running = false;
   computeDups(); apply(true); anRender(); showStorage();
+  if (shared.canWrite) await saveShared(false);
   if (an.queue.length) runAnalysis();
 }
 
 async function analyze(it, cv) {
-  const m = { k: it.key, v: ANALYSIS_V };
+  const m = { k: it.key, v: ANALYSIS_V, at: Date.now() };
   let file, head;
   try { file = await fileOf(it); head = await file.slice(0, 262144).arrayBuffer(); }
   catch {
@@ -858,6 +1011,14 @@ function anRender() {
   for (const i of state.items) { const m = state.meta.get(i.key); if (m && m.err) { if (m.err === 'read' || m.err === 'empty') unread++; else if (m.err === 'heic') heic++; } }
   if (unread) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas. Se a pasta vem do SharePoint/OneDrive, clique nela com o botão direito → “Sempre manter neste dispositivo” e aguarde o download.`; msg.appendChild(e); }
   if (heic) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(heic)} fotos em HEIC (iPhone) não abrem neste navegador.`; msg.appendChild(e); }
+  const sm = $('shareMsg'), fromOthers = [...state.meta.values()].filter(m => m._shared).length;
+  const parts = [];
+  if (fromOthers) parts.push(`${fmtNum(fromOthers)} fotos já analisadas por outras pessoas (${shared.others.size} computador${shared.others.size > 1 ? 'es' : ''}).`);
+  if (!state.rootHandle) parts.push(state.items.length ? 'Para gravar a análise na pasta, abra pelo Chrome ou Edge com “Abrir pasta”.' : '');
+  else if (shared.saving) parts.push('Gravando análise na pasta…');
+  else if (shared.canWrite) parts.push(shared.lastSave ? `Análise gravada na pasta às ${new Date(shared.lastSave).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}. Grava sozinho a cada 3 min.` : 'Compartilhamento ativo: grava na pasta durante a análise.');
+  sm.textContent = parts.filter(Boolean).join(' ');
+  $('shareBtn').classList.toggle('hidden', !state.rootHandle || shared.canWrite);
   $('anPause').textContent = an.paused ? 'Continuar' : 'Pausar';
   $('anPause').disabled = !an.running;
 }
@@ -1068,6 +1229,8 @@ async function loadThumbs(list) {
   for (const [it, card] of list) {
     const m = state.meta.get(it.key);
     if (m && m.err) { markCard(it); continue; }
+    const sb = m && m._t && sharedThumb(m._t);
+    if (sb && !urlCache.get('t:' + it.key)) cacheUrl('t:' + it.key, sb);
     const u = urlCache.get('t:' + it.key) || urlCache.get('o:' + it.key);
     if (u) { setImg(card, u); card.dataset.thumb = 1; } else need.push([it, card]);
   }
@@ -1205,13 +1368,15 @@ $('lbCityBtn').onclick = () => { $('lbFix').classList.toggle('hidden'); const c 
 $('lbCitySave').onclick = async () => {
   const it = state.view[lbIndex]; if (!it) return;
   const v = $('lbCity').value.trim(), pk = pathKey(it);
-  if (!v) { state.manual.delete(pk); await idb('manual', 'readwrite', s => s.delete(pk)); }
+  let rec;
+  if (!v) rec = { pk, city: '', uf: '', at: Date.now() }; // remoção também é compartilhada
   else {
     const g = GEO && GEO.find(x => x.label === v);
     const [city, uf] = g ? [g.name, g.uf] : v.split(/\s+[–-]\s+/);
-    const rec = { pk, city: city.trim(), uf: (uf || '').trim().toUpperCase() };
-    state.manual.set(pk, rec); await idb('manual', 'readwrite', s => s.put(rec, pk));
+    rec = { pk, city: city.trim(), uf: (uf || '').trim().toUpperCase(), at: Date.now() };
   }
+  state.manual.set(pk, rec); await idb('manual', 'readwrite', s => s.put(rec, pk));
+  if (shared.canWrite) saveShared(false);
   $('lbFix').classList.add('hidden'); renderInfo(it); apply(true); toast('Cidade salva');
 };
 $('lbCity').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbCitySave').click(); e.stopPropagation(); });
@@ -1245,7 +1410,7 @@ $('lb').addEventListener('touchend', e => {
 });
 
 // Para testes automatizados
-window.__banco = { state, an, ai, geoLookup: (a, b) => { const g = geoLookup(a, b); return g && g.label; }, loadGeo, parseExif };
+window.__banco = { state, an, ai, shared, writerId, openHandle: h => fromHandle(h, false), share: () => saveShared(true), geoLookup: (a, b) => { const g = geoLookup(a, b); return g && g.label; }, loadGeo, parseExif };
 })();
 </script>
 </body>
