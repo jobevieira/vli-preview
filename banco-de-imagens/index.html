@@ -116,6 +116,13 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 .lb .count{position:absolute;top:16px;left:16px;font-size:13px;color:#a3a7ac}
 .lb .fix{display:flex;gap:6px;margin:0 0 12px}
 .lb .fix input{flex:1;min-width:0;padding:7px 9px;border-radius:8px;border:1px solid #33373b;background:#26292d;color:#ecebe7}
+.libs{margin:8px 0 4px;display:flex;flex-direction:column;gap:8px}
+.libs h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:8px 0 2px;font-weight:600}
+.lib{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.lib .nm{font-weight:600;flex:1 1 160px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib .chk{padding:0}
+.lib.hint{border-color:var(--accent)}
+.libsel{max-width:200px}
 .envwarn{margin:12px 16px 0;padding:12px 14px;border-radius:10px;background:#fff4d6;color:#5a3b00;border:1px solid #f2b705;font-size:14px;line-height:1.5}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30}
 
@@ -149,6 +156,8 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
     <label class="size">Tamanho <input id="thumb" type="range" min="110" max="360" step="10" value="180" aria-label="Tamanho das miniaturas"></label>
     <button class="btn" id="fit" aria-pressed="false" title="Alternar recorte/imagem inteira nas miniaturas">⤢ Ajustar</button>
     <button class="btn" id="theme" title="Alternar tema claro/escuro" aria-label="Alternar tema">☾ Tema</button>
+    <select id="libSel" class="libsel hidden" aria-label="Biblioteca aberta"></select>
+    <button class="btn hidden" id="refreshBtn" title="Procura fotos novas, alteradas ou removidas na pasta">↻ Atualizar</button>
     <button class="btn primary" id="openBtn">Abrir pasta</button>
   </div>
 </header>
@@ -161,7 +170,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <div class="msg" id="anMsg">—</div>
       <div class="bar"><i id="anBar"></i></div>
       <label class="chk" style="padding:0"><input type="checkbox" id="aiOn" checked> Detectar pessoas e objetos (IA)</label>
-      <div class="row"><button class="btn sm" id="anPause">Pausar</button><button class="btn sm hidden" id="compatBtn">Abrir em modo compatível</button><button class="btn sm hidden" id="shareBtn" title="Grava o resultado dentro da pasta para que outras pessoas não precisem analisar de novo">Compartilhar na pasta</button></div>
+      <div class="row"><button class="btn sm" id="anPause">Pausar</button><button class="btn sm" id="reBtn" title="Apaga a análise das fotos que estão na tela (com os filtros atuais) e analisa de novo">Reanalisar seleção</button><button class="btn sm hidden" id="compatBtn">Abrir em modo compatível</button><button class="btn sm hidden" id="shareBtn" title="Grava o resultado dentro da pasta para que outras pessoas não precisem analisar de novo">Compartilhar na pasta</button></div>
       <div class="msg" id="shareMsg" style="margin-top:8px"></div>
     </div>
     <details open id="dFolders"><summary>Pastas</summary>
@@ -197,13 +206,13 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   <p>Escolha uma pasta do computador, pen drive ou rede — todas as subpastas entram. As imagens são lidas e analisadas <strong>no seu navegador</strong>: nada é instalado e nada é enviado para a internet.</p>
   <div class="actions">
     <button class="btn primary" id="openBtn2">Abrir pasta de imagens</button>
-    <button class="btn hidden" id="reopenBtn">Reabrir última pasta</button>
     <button class="btn" id="compatBtn2" title="Abre a pasta pelo seletor de arquivos clássico do navegador. Use se as imagens não puderem ser lidas.">Abrir em modo compatível</button>
   </div>
+  <div class="libs" id="libs"></div>
   <div class="drop">…ou arraste uma pasta para cá</div>
   <div class="progress" id="progress" role="status" aria-live="polite"></div>
   <ul>
-    <li><strong>Cidade</strong> pelo GPS da foto (malha de municípios do IBGE, funciona sem internet) ou pelo nome da pasta.</li>
+    <li><strong>Cidade</strong> pelos metadados da foto: GPS (malha de municípios do IBGE, sem internet) ou cidade gravada no arquivo (IPTC/XMP). Dá para corrigir à mão.</li>
     <li><strong>Pessoas</strong>: sem pessoas, 1, 2, 3 ou grupo (mais de 3) — e objetos como trem, caminhão e embarcação.</li>
     <li><strong>Duplicatas e semelhantes</strong>, fotos <strong>borradas, escuras ou pequenas</strong>, horizontal/vertical, ano da foto.</li>
     <li>A primeira análise leva um tempo (dá para pausar e continuar depois). Com “Compartilhar na pasta”, o resultado é gravado dentro da própria pasta (ex.: sincronizada pelo SharePoint) e a equipe toda aproveita — só fotos novas são analisadas de novo.</li>
@@ -245,7 +254,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.5';
+const APP_VERSION = '2026-09-24.6';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -420,6 +429,66 @@ function readTiff(v, t, end) {
   return out;
 }
 
+// Metadados de qualquer formato: EXIF em JPEG, PNG (eXIf) e WebP (EXIF) + XMP (IPTC) em qualquer arquivo
+const META_V = 2; // mude para reler os metadados de todas as fotos (rápido, não refaz a IA)
+function readMeta(buf) {
+  const out = {};
+  try {
+    const v = new DataView(buf), u8 = new Uint8Array(buf), n = v.byteLength;
+    const tiffAt = (d, end) => { if (end - d > 6 && v.getUint32(d) === 0x45786966 && v.getUint16(d + 4) === 0) d += 6; return readTiff(v, d, Math.min(end, n)); };
+    if (n >= 4 && v.getUint16(0) === 0xFFD8) Object.assign(out, parseExif(buf));
+    else if (n >= 8 && v.getUint32(0) === 0x89504E47) {
+      for (let o = 8; o + 12 <= n;) {
+        const len = v.getUint32(o), type = String.fromCharCode(u8[o + 4], u8[o + 5], u8[o + 6], u8[o + 7]), d = o + 8;
+        if (d + len > n) break;
+        if (type === 'eXIf') Object.assign(out, tiffAt(d, d + len));
+        o = d + len + 4;
+      }
+    } else if (n >= 12 && v.getUint32(0) === 0x52494646 && v.getUint32(8) === 0x57454250) {
+      for (let o = 12; o + 8 <= n;) {
+        const type = String.fromCharCode(u8[o], u8[o + 1], u8[o + 2], u8[o + 3]), len = v.getUint32(o + 4, true), d = o + 8;
+        if (d + len > n) break;
+        if (type === 'EXIF') Object.assign(out, tiffAt(d, d + len));
+        o = d + len + (len & 1);
+      }
+    }
+    const x = findXmp(u8);
+    if (x) { const xm = parseXmp(x); for (const k in xm) if (out[k] == null && xm[k] != null && xm[k] !== '') out[k] = xm[k]; }
+  } catch {}
+  return out;
+}
+function findXmp(u8) {
+  const txt = new TextDecoder('latin1').decode(u8);
+  const a = txt.indexOf('<x:xmpmeta'); if (a < 0) return '';
+  const b = txt.indexOf('</x:xmpmeta>', a); if (b < 0) return '';
+  return new TextDecoder('utf-8').decode(u8.subarray(a, b + 12));
+}
+function parseXmp(x) {
+  const ent = t => t.replace(/&#(\d+);/g, (_, c) => String.fromCharCode(+c)).replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const get = name => {
+    const m = new RegExp(name + '\\s*=\\s*"([^"]*)"').exec(x) || new RegExp('<' + name + '>([^<]*)</' + name + '>').exec(x);
+    return m ? ent(m[1]).trim() : '';
+  };
+  const coord = t => { const m = /^(\d+(?:\.\d+)?),(\d+(?:\.\d+)?)(?:,(\d+(?:\.\d+)?))?([NSEW])$/.exec(t.replace(/\s/g, '')); if (!m) return null; const val = +m[1] + m[2] / 60 + (m[3] ? m[3] / 3600 : 0); return /[SW]/.test(m[4]) ? -val : val; };
+  const out = {
+    mcity: get('photoshop:City') || get('Iptc4xmpExt:City'),
+    mstate: get('photoshop:State') || get('Iptc4xmpExt:ProvinceState'),
+    make: get('tiff:Make'), model: get('tiff:Model'),
+  };
+  const lat = coord(get('exif:GPSLatitude')), lon = coord(get('exif:GPSLongitude'));
+  if (lat != null && lon != null && (lat || lon)) out.gps = [+lat.toFixed(6), +lon.toFixed(6)];
+  const d = get('exif:DateTimeOriginal') || get('photoshop:DateCreated') || get('xmp:CreateDate');
+  const t = d ? Date.parse(d.length === 10 ? d + 'T12:00:00' : d) : NaN;
+  if (isFinite(t)) out.taken = t;
+  return out;
+}
+function applyMeta(m, head) {
+  for (const k of ['gps', 'city', 'uf', 'mcity', 'mstate', 'taken', 'make', 'model']) delete m[k];
+  Object.assign(m, readMeta(head));
+  if (m.gps && GEO) { const g = geoLookup(m.gps[0], m.gps[1]); m.city = g ? g.name : null; m.uf = g ? g.uf : ''; }
+  m.mv = META_V;
+}
+
 /* ================= municípios (IBGE) ================= */
 let GEO = null, geoCells = null, nameIndex = null;
 async function loadGeo() {
@@ -477,40 +546,25 @@ function geoLookup(lat, lon) {
     }
   return best;
 }
-// Cidade pelo nome da pasta (ex.: "Obras Tubarão 2025"). Palavras genéricas são ignoradas.
-const STOP = new Set(['porto', 'central', 'planalto', 'terra', 'mar', 'sol', 'luz', 'paz', 'bonito', 'formosa', 'esperanca', 'alianca', 'uniao', 'independencia', 'liberdade', 'progresso', 'triunfo', 'sucesso', 'amparo', 'presidente', 'general', 'fortaleza dos valos', 'campo', 'cruz', 'serra', 'vista', 'feliz', 'jardim', 'ouro', 'palmas', 'pedra', 'ponte', 'rio', 'barra', 'lagoa', 'aurora', 'harmonia', 'vitoria da uniao', 'nova', 'novo', 'santa', 'sao', 'boa', 'bom', 'belo', 'bela', 'natal', 'jesus', 'estrela', 'trindade', 'saudade', 'saudades', 'agua', 'aguas', 'areia', 'guarda', 'iguape', 'viana']);
 const UFS = new Set('ac al ap am ba ce df es go ma mt ms mg pa pb pr pe pi rj rn rs ro rr sc sp se to'.split(' '));
-const dirCity = new Map();
-function cityFromDir(dir) {
-  if (!nameIndex || !dir) return null;
-  if (dirCity.has(dir)) return dirCity.get(dir);
-  const words = norm(dir.replace(/\//g, ' / ')).split(' ');
-  const ufs = new Set(words.filter(w => UFS.has(w)));
-  let best = null;
-  const segs = dir.split('/').map(s => norm(s).split(' ').filter(Boolean));
-  for (let si = segs.length - 1; si >= 0 && !best; si--) {
-    const w = segs[si];
-    for (let n = Math.min(5, w.length); n >= 1 && !best; n--)
-      for (let i = 0; i + n <= w.length; i++) {
-        const k = w.slice(i, i + n).join(' ');
-        if (k.length < 4 || STOP.has(k) || /^\d+$/.test(k)) continue;
-        const c = nameIndex.get(k);
-        if (!c) continue;
-        const pick = c.length === 1 ? c[0] : c.find(g => ufs.has(g.uf.toLowerCase()));
-        best = pick ? { city: pick.name, uf: pick.uf, src: 'pasta' } : { city: c[0].name, uf: '', src: 'pasta' };
-        break;
-      }
-  }
-  dirCity.set(dir, best);
-  return best;
+const UF_NOMES = { acre: 'AC', alagoas: 'AL', amapa: 'AP', amazonas: 'AM', bahia: 'BA', ceara: 'CE', 'distrito federal': 'DF', 'espirito santo': 'ES', goias: 'GO', maranhao: 'MA', 'mato grosso': 'MT', 'mato grosso do sul': 'MS', 'minas gerais': 'MG', para: 'PA', paraiba: 'PB', parana: 'PR', pernambuco: 'PE', piaui: 'PI', 'rio de janeiro': 'RJ', 'rio grande do norte': 'RN', 'rio grande do sul': 'RS', rondonia: 'RO', roraima: 'RR', 'santa catarina': 'SC', 'sao paulo': 'SP', sergipe: 'SE', tocantins: 'TO' };
+const ufOf = st => { const n = norm(st || ''); return UFS.has(n) ? n.toUpperCase() : UF_NOMES[n] || ''; };
+// Cidade escrita nos metadados (IPTC/XMP), conferida com a lista do IBGE
+function cityFromText(city, st) {
+  if (!city) return null;
+  const uf = ufOf(st), c = nameIndex && nameIndex.get(norm(city));
+  if (c) { const g = c.find(x => x.uf === uf) || (c.length === 1 ? c[0] : null); return g ? { city: g.name, uf: g.uf } : { city: c[0].name, uf }; }
+  return { city: city.trim(), uf };
 }
 function cityOf(it) {
   const man = state.manual.get(pathKey(it));
   if (man && man.city) return { ...man, src: 'manual' };
   const m = state.meta.get(it.key);
-  if (m && m.city) return { city: m.city, uf: m.uf, src: 'gps' };
-  if (m && m.gps && m.city === null) return { city: 'Fora do Brasil', uf: '', src: 'gps' };
-  return cityFromDir(it.dir);
+  if (!m) return null;
+  if (m.city) return { city: m.city, uf: m.uf, src: 'gps' };
+  if (m.mcity) { const c = cityFromText(m.mcity, m.mstate); if (c) return { ...c, src: 'metadados' }; }
+  if (m.gps && m.city === null) return { city: 'Fora do Brasil', uf: '', src: 'gps' };
+  return null;
 }
 const cityLabel = c => c ? (c.uf ? c.city + ' – ' + c.uf : c.city) : '';
 
@@ -581,7 +635,7 @@ async function fileOf(it) {
 
 async function setLibrary(root, items, handle) {
   state.root = root; state.rootHandle = handle || null; state.folder = ''; state.onlyGroup = null;
-  state.items = items; state.keySet = new Set(items.map(i => i.key)); dirCity.clear();
+  state.items = items; state.keySet = new Set(items.map(i => i.key));
   const [metas, manual] = await Promise.all([
     idb('meta', 'readonly', s => s.getAll(range(root))),
     idb('manual', 'readonly', s => s.getAll(range(root))),
@@ -601,6 +655,7 @@ function saveListing() {
 
 async function fromHandle(handle, useCache) {
   state.root = handle.name;
+  rememberLib(handle);
   if (useCache) {
     // Abre na hora com a lista salva e atualiza as pastas em segundo plano
     const lib = await idb('libs', 'readonly', s => s.get(handle.name));
@@ -616,13 +671,12 @@ async function fromHandle(handle, useCache) {
   const items = [];
   await walkHandle(handle, '', items);
   await readSharedDir(handle);
-  idb('kv', 'readwrite', s => s.put(handle, 'dir'));
   await setLibrary(handle.name, items, handle);
   saveListing();
 }
 let scanning = false;
 function scanMsg(n) { if (scanning) $('anMsg').textContent = `Procurando imagens novas… ${fmtNum(n)}`; }
-async function rescan(handle) {
+async function rescan(handle, manual) {
   scanning = true; anRender();
   const items = [];
   try { await walkHandle(handle, '', items); await readSharedDir(handle); await loadShared(); } catch { scanning = false; anRender(); return; }
@@ -631,11 +685,11 @@ async function rescan(handle) {
   const before = new Set(state.items.map(i => i.key));
   const added = items.filter(i => !before.has(i.key)).length;
   const removed = state.items.length - (items.length - added);
-  state.items = items; state.keySet = new Set(items.map(i => i.key)); dirCity.clear();
+  state.items = items; state.keySet = new Set(items.map(i => i.key));
   saveListing();
   applyShared();
   buildTree(); computeDups(); apply(true);
-  if (added || removed) toast(`Pasta atualizada: ${added} novas, ${removed} removidas`);
+  if (added || removed || manual) toast(`Pasta atualizada: ${added} novas, ${removed} removidas`);
   runAnalysis();
 }
 
@@ -693,21 +747,104 @@ addEventListener('drop', async e => {
   setLibrary(state.root, items, null);
 });
 
-(async () => {
-  if (!window.showDirectoryPicker) return;
-  const h = await idb('kv', 'readonly', s => s.get('dir'));
-  if (!h) return;
-  const btn = $('reopenBtn');
-  btn.textContent = `Reabrir “${h.name}”`;
-  btn.classList.remove('hidden');
-  btn.onclick = async () => {
-    try {
-      const wantWrite = ls.get('bi.share.' + h.name, false);
-      if (await h.requestPermission({ mode: wantWrite ? 'readwrite' : 'read' }) === 'granted') { shared.canWrite = wantWrite; await fromHandle(h, true); }
-    }
-    catch { toast('Não foi possível reabrir. Escolha a pasta novamente.'); }
+// Bibliotecas salvas: abre direto a pasta configurada, sem escolher de novo
+async function getLibs() {
+  let l = await idb('kv', 'readonly', s => s.get('libraries'));
+  if (!l) { const old = await idb('kv', 'readonly', s => s.get('dir')); l = old ? [{ name: old.name, handle: old, at: Date.now(), auto: true }] : []; }
+  return l;
+}
+const saveLibs = l => idb('kv', 'readwrite', s => s.put(l, 'libraries'));
+async function rememberLib(handle) {
+  const l = await getLibs();
+  let found = null;
+  for (const x of l) { try { if (await x.handle.isSameEntry(handle)) found = x; } catch {} }
+  if (found) { found.handle = handle; found.name = handle.name; found.at = Date.now(); }
+  else l.unshift({ name: handle.name, handle, at: Date.now(), auto: !l.some(x => x.auto) });
+  l.sort((a, b) => b.at - a.at);
+  await saveLibs(l.slice(0, 8));
+  renderLibSel();
+}
+async function openLib(lib, interactive) {
+  const wantWrite = ls.get('bi.share.' + lib.name, false);
+  let mode = wantWrite ? 'readwrite' : 'read';
+  let p = 'prompt';
+  try { p = await lib.handle.queryPermission({ mode }); } catch {}
+  if (p !== 'granted' && interactive) {
+    try { p = await lib.handle.requestPermission({ mode }); } catch { p = 'denied'; }
+    if (p !== 'granted' && mode === 'readwrite') { mode = 'read'; try { p = await lib.handle.requestPermission({ mode }); } catch {} }
+  }
+  if (p !== 'granted') return false;
+  shared.canWrite = mode === 'readwrite';
+  await fromHandle(lib.handle, true);
+  return true;
+}
+async function renderLibs(hintAuto) {
+  const box = $('libs');
+  if (!window.showDirectoryPicker) { box.replaceChildren(); return; }
+  const l = await getLibs();
+  if (!l.length) { box.replaceChildren(); return; }
+  const h = document.createElement('h2'); h.textContent = 'Suas bibliotecas';
+  const rows = l.map(lib => {
+    const row = document.createElement('div'); row.className = 'lib' + (hintAuto && lib.auto ? ' hint' : '');
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = '📁 ' + lib.name; nm.title = lib.name;
+    const open = document.createElement('button'); open.className = 'btn' + (lib.auto ? ' primary' : ''); open.textContent = 'Abrir';
+    open.onclick = async () => { try { if (!await openLib(lib, true)) toast('Sem permissão para abrir essa pasta.'); } catch { toast('Pasta não encontrada. Ela foi movida ou apagada? Use “Abrir pasta”.'); } };
+    const auto = document.createElement('label'); auto.className = 'chk';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!lib.auto;
+    cb.onchange = async () => { l.forEach(x => x.auto = false); lib.auto = cb.checked; await saveLibs(l); renderLibs(); };
+    auto.append(cb, document.createTextNode(' Abrir direto ao iniciar'));
+    const del = document.createElement('button'); del.className = 'btn sm'; del.textContent = 'Remover da lista';
+    del.onclick = async () => { await saveLibs(l.filter(x => x !== lib)); renderLibs(); renderLibSel(); };
+    row.append(nm, open, auto, del);
+    return row;
+  });
+  box.replaceChildren(h, ...rows);
+  if (hintAuto) { const p = document.createElement('div'); p.className = 'progress'; p.textContent = 'Clique em “Abrir” para liberar o acesso à pasta. Se o Chrome oferecer “Permitir em todas as visitas”, escolha essa opção para abrir direto nas próximas vezes.'; box.appendChild(p); }
+}
+async function renderLibSel() {
+  const sel = $('libSel');
+  if (!window.showDirectoryPicker || !state.items.length) { sel.classList.add('hidden'); return; }
+  const l = await getLibs();
+  const opts = l.map((lib, i) => option(String(i), '📁 ' + lib.name));
+  if (!state.rootHandle) opts.unshift(option('cur', '📁 ' + state.root + ' (modo compatível)'));
+  opts.push(option('new', '+ Abrir outra pasta…'));
+  sel.replaceChildren(...opts);
+  const cur = l.findIndex(x => x.name === state.root);
+  sel.value = !state.rootHandle ? 'cur' : cur >= 0 ? String(cur) : 'new';
+  sel.onchange = async () => {
+    const v = sel.value;
+    if (v === 'new') { await openFolder(); renderLibSel(); return; }
+    if (v === 'cur') return;
+    try { if (!await openLib(l[+v], true)) toast('Sem permissão para abrir essa pasta.'); } catch { toast('Pasta não encontrada. Use “Abrir outra pasta…”.'); }
+    renderLibSel();
   };
+  sel.classList.remove('hidden');
+}
+(async () => {
+  await renderLibs();
+  const l = await getLibs(), auto = l.find(x => x.auto);
+  if (!auto) return;
+  try { if (await openLib(auto, false)) return; } catch {}
+  renderLibs(true);
 })();
+$('refreshBtn').onclick = () => {
+  if (state.rootHandle) { if (!scanning) rescan(state.rootHandle, true); }
+  else { toast('Pasta aberta em modo compatível: escolha-a de novo para atualizar.'); openCompat(); }
+};
+$('reBtn').onclick = async () => {
+  const list = state.view;
+  if (!list.length) return;
+  if (!confirm(`Reanalisar ${fmtNum(list.length)} foto(s) que estão na tela agora (com os filtros atuais)? A análise anterior delas é apagada deste navegador.`)) return;
+  await flush();
+  const keys = list.map(i => i.key);
+  await idb('meta', 'readwrite', st => { keys.forEach(k => st.delete(k)); });
+  await idb('thumbs', 'readwrite', st => { keys.forEach(k => st.delete(k)); });
+  for (const it of list) {
+    state.meta.delete(it.key); memThumbs.delete(it.key); shared.own.delete(it.path + '|' + it.size);
+    for (const pfx of ['t:', 'o:']) { const u = urlCache.get(pfx + it.key); if (u) { URL.revokeObjectURL(u); urlCache.delete(pfx + it.key); } }
+  }
+  computeDups(); apply(true); runAnalysis();
+};
 const openCompat = () => $('dirInput').click();
 $('compatBtn').onclick = openCompat;
 $('compatBtn2').onclick = openCompat;
@@ -862,6 +999,7 @@ async function diagnostics() {
     `Navegador: ${navigator.userAgent}`,
     `Endereço: ${location.protocol}//… | dentro de outro app: ${framed ? 'sim' : 'não'}`,
     `Aviso de ambiente: ${$('envWarn').classList.contains('hidden') ? 'nenhum' : $('envWarn').textContent}`,
+    `Pasta aberta: ${state.root} | subpastas no 1º nível: ${[...new Set(state.items.map(i => i.dir.split('/')[0]).filter(Boolean))].slice(0, 12).join(', ') || '(nenhuma)'} | imagens soltas na raiz: ${state.items.filter(i => !i.dir).length}`,
     `Aberta por: ${state.rootHandle ? 'Abrir pasta (acesso direto)' : 'seleção de arquivos / arrastar'} | gravação na pasta: ${shared.canWrite ? 'sim' : 'não'}`,
     `Recursos: WebGL ${gl} | IndexedDB ${idbOk} | createImageBitmap ${typeof createImageBitmap === 'function' ? 'sim' : 'não'} | CompressionStream ${typeof CompressionStream === 'function' ? 'sim' : 'não'}`,
     `Municípios carregados: ${GEO ? 'sim (' + GEO.length + ')' : 'não'}`,
@@ -885,7 +1023,7 @@ window.addEventListener('unhandledrejection', e => { an.lastErrs.push('erro gera
 
 /* ================= análise ================= */
 const an = { running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0, t0: 0, rate: 0, errs: 0, lastErrs: [] };
-const needs = it => { const m = state.meta.get(it.key); return !m || m.err === 'read' || (aiWanted() && ai.state !== 'erro' && !m.ai && !m.bad); };
+const needs = it => { const m = state.meta.get(it.key); return !m || m.err === 'read' || (!m.err && m.mv !== META_V) || (aiWanted() && ai.state !== 'erro' && !m.ai && !m.bad); };
 const aiWanted = () => $('aiOn').checked;
 
 async function runAnalysis() {
@@ -925,6 +1063,14 @@ async function runAnalysis() {
 }
 
 async function analyze(it, cv) {
+  const old = state.meta.get(it.key);
+  if (old && !old.err && old.mv !== META_V && (old.ai || old.bad || !aiWanted())) {
+    // Já analisada: só relê os metadados (rápido)
+    const head = await (await fileOf(it)).slice(0, 262144).arrayBuffer();
+    applyMeta(old, head);
+    state.meta.set(it.key, old); pending.push([old, null]);
+    return;
+  }
   const m = { k: it.key, v: ANALYSIS_V, at: Date.now() };
   let file, head;
   try { file = await fileOf(it); head = await file.slice(0, 262144).arrayBuffer(); }
@@ -940,8 +1086,7 @@ async function analyze(it, cv) {
       state.meta.set(it.key, m); markCard(it); return;
     }
   }
-  if (it.ext === 'jpg' || it.ext === 'jpeg' || it.ext === 'jfif') Object.assign(m, parseExif(head));
-  if (m.gps && GEO) { const g = geoLookup(m.gps[0], m.gps[1]); m.city = g ? g.name : null; m.uf = g ? g.uf : ''; }
+  applyMeta(m, head);
   let bmp;
   try { bmp = await createImageBitmap(file); }
   catch {
@@ -1209,6 +1354,9 @@ function ready() {
   $('welcome').classList.add('hidden');
   $('app').classList.remove('hidden');
   ['q', 'sort', 'favOnly'].forEach(id => $(id).disabled = false);
+  $('refreshBtn').classList.remove('hidden');
+  $('openBtn').textContent = 'Trocar pasta';
+  renderLibSel();
   $('rootName').textContent = '📁 ' + state.root;
   document.title = state.root + ' — Banco de Imagens';
   if (innerWidth <= 820) { $('dFolders').open = false; $('dFilters').open = false; }
@@ -1397,8 +1545,8 @@ function renderInfo(it) {
   const loc = document.createElement('span');
   if (c) {
     loc.textContent = cityLabel(c) + ' ';
-    const src = document.createElement('small'); src.textContent = { gps: '(GPS)', pasta: '(pelo nome da pasta)', manual: '(corrigido à mão)' }[c.src] || ''; loc.appendChild(src);
-  } else loc.textContent = m.w ? 'Sem GPS' : 'Sem GPS (ou ainda não analisada)';
+    const src = document.createElement('small'); src.textContent = { gps: '(GPS da foto)', metadados: '(metadados da foto)', manual: '(corrigido à mão)' }[c.src] || ''; loc.appendChild(src);
+  } else loc.textContent = m.w ? 'Sem local nos metadados' : 'Sem local (ou ainda não analisada)';
   if (m.gps) { const a = document.createElement('a'); a.href = `https://www.openstreetmap.org/?mlat=${m.gps[0]}&mlon=${m.gps[1]}#map=15/${m.gps[0]}/${m.gps[1]}`; a.target = '_blank'; a.rel = 'noopener'; a.textContent = ' ver no mapa'; loc.append(document.createElement('br'), a); }
   rows.push(['Local', loc]);
   rows.push([m.taken ? 'Tirada em' : 'Modificada', fmtDate(takenOf(it))]);
