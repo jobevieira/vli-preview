@@ -62,10 +62,17 @@ echo  [1/3] Copiando imagens novas ou alteradas...
 echo        Na primeira vez pode demorar; depois so copia o que mudou.
 rem /MIR espelha (remove da copia o que foi apagado no SharePoint).
 rem /XD protege a pasta de analise e evita copiar a propria copia (se o app estiver dentro da pasta do SharePoint).
-robocopy "!ORIGEM!" "%DEST%" *.jpg *.jpeg *.jfif *.png *.gif *.webp *.avif *.bmp *.svg *.heic *.heif *.tif *.tiff /MIR /XD "%IDX%" "%DEST%" "%APPDIR:~0,-1%" /R:1 /W:1 /NFL /NDL /NJH /NP
+robocopy "!ORIGEM!" "%DEST%" *.jpg *.jpeg *.jfif *.png *.gif *.webp *.avif *.bmp *.svg *.heic *.heif *.tif *.tiff /MIR /XD "%IDX%" "%DEST%" "%APPDIR:~0,-1%" /R:0 /W:0 /NFL /NDL /NJH /NP /TEE /UNILOG:"%APPDIR%copia-log.txt"
 if %ERRORLEVEL% GEQ 8 (
   echo.
-  echo  Houve erro ao copiar algumas imagens ^(codigo %ERRORLEVEL%^). O app vai abrir com o que foi copiado.
+  echo  ATENCAO: algumas imagens nao foram copiadas. Veja a linha "Falha" no resumo acima.
+  echo  Motivo mais comum: a imagem esta so na nuvem do OneDrive ^(erro 380^).
+  echo  Solucao: no Explorador, clique com o botao direito na pasta de origem,
+  echo  escolha "Sempre manter neste dispositivo", espere os icones ficarem com o
+  echo  check verde cheio e rode este atalho de novo ^(so copia o que faltou^).
+  echo  Lista completa dos erros: %APPDIR%copia-log.txt
+  echo.
+  pause
 )
 
 echo  [2/3] Trocando analise compartilhada com o SharePoint...
