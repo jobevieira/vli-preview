@@ -124,9 +124,12 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 .lib .chk{padding:0}
 .lib.hint{border-color:var(--accent)}
 .libsel{max-width:200px}
-.opennotice{margin:0 0 12px;padding:10px 12px;border-radius:8px;background:var(--panel);border:1px solid var(--line);font-size:13px;color:var(--muted)}
-.opennotice b{color:var(--text)}
-.opennotice.warn{background:#fff4d6;color:#5a3b00;border-color:var(--accent)}
+.opennotice{margin:0 0 14px;padding:14px 16px;border-radius:10px;background:#fff4d6;border:1.5px solid var(--accent);display:flex;gap:12px;align-items:flex-start;font-size:14px;color:#5a3b00;line-height:1.5}
+:root[data-theme="dark"] .opennotice, @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opennotice{background:#3a2c00;color:#ffd88a;border-color:#a97400}}
+.opennotice .ic{font-size:20px;line-height:1;flex:none}
+.opennotice b{color:inherit}
+.opennotice .act{margin-top:10px}
+.opennotice .act .btn{background:var(--accent);border-color:var(--accent);color:#22262a;font-weight:600}
 .envwarn{margin:12px 16px 0;padding:12px 14px;border-radius:10px;background:#fff4d6;color:#5a3b00;border:1px solid #f2b705;font-size:14px;line-height:1.5}
 .modal{position:fixed;inset:0;z-index:25;background:var(--overlay);display:flex;justify-content:center;overflow:auto;padding:24px 16px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30}
@@ -217,7 +220,6 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   </aside>
   <section class="content">
     <div class="status"><span id="stat"></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
-    <div class="opennotice hidden" id="openNotice"></div>
     <div class="vgrid" id="grid"></div>
     <div class="empty hidden" id="empty">Nenhuma imagem com esses filtros.</div>
   </section>
@@ -309,7 +311,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.9';
+const APP_VERSION = '2026-09-24.10';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -688,13 +690,16 @@ async function fileOf(it) {
   return it.file;
 }
 
-async function setLibrary(root, items, handle) {
+let openGen = 0;
+async function setLibrary(root, items, handle, gen) {
+  if (gen == null) gen = ++openGen;
   state.root = root; state.rootHandle = handle || null; state.folder = ''; state.onlyGroup = null; state.onlyFace = null;
   state.items = items; state.keySet = new Set(items.map(i => i.key));
   const [metas, manual] = await Promise.all([
     idb('meta', 'readonly', s => s.getAll(range(root))),
     idb('manual', 'readonly', s => s.getAll(range(root))),
   ]);
+  if (gen !== openGen) return; // outra pasta foi aberta enquanto esta carregava: desiste, sem sobrescrever a tela
   state.meta = new Map((metas || []).filter(m => m.v === ANALYSIS_V).map(m => [m.k, m]));
   state.manual = new Map((manual || []).map(m => [m.pk, m]));
   await loadGeo();
@@ -702,7 +707,9 @@ async function setLibrary(root, items, handle) {
   applyShared();
   await loadDesligados();
   renderPeopleList();
+  if (gen !== openGen) return;
   const faceRows = await idb('faces', 'readonly', s => s.getAll());
+  if (gen !== openGen) return;
   state.faces = new Map((faceRows || []).filter(f => f.v === FACE_V && state.keySet.has(f.k)).map(f => [f.k, f]));
   computeDups();
   ready();
@@ -714,34 +721,40 @@ function saveListing() {
 }
 
 async function fromHandle(handle, useCache) {
+  const gen = ++openGen;
   state.root = handle.name;
   rememberLib(handle);
   if (useCache) {
     // Abre na hora com a lista salva e atualiza as pastas em segundo plano
     const lib = await idb('libs', 'readonly', s => s.get(handle.name));
+    if (gen !== openGen) return;
     if (lib && lib.files && lib.files.length) {
       const items = lib.files.map(([p, sz, dt]) => mkItem(null, p, sz, dt)).filter(Boolean);
       await readSharedDir(handle);
-      await setLibrary(handle.name, items, handle);
-      rescan(handle);
+      if (gen !== openGen) return;
+      await setLibrary(handle.name, items, handle, gen);
+      if (gen === openGen) rescan(handle);
       return;
     }
   }
   progress(0.1);
   const items = [];
   await walkHandle(handle, '', items);
+  if (gen !== openGen) return; // uma pasta mais nova foi aberta enquanto esta varredura (podia ser bem longa) rodava
   await readSharedDir(handle);
-  await setLibrary(handle.name, items, handle);
-  saveListing();
+  if (gen !== openGen) return;
+  await setLibrary(handle.name, items, handle, gen);
+  if (gen === openGen) saveListing();
 }
 let scanning = false;
 function scanMsg(n) { if (scanning) $('anMsg').textContent = `Procurando imagens novas… ${fmtNum(n)}`; }
 async function rescan(handle, manual) {
+  const gen = openGen;
   scanning = true; anRender();
   const items = [];
   try { await walkHandle(handle, '', items); await readSharedDir(handle); await loadShared(); } catch { scanning = false; anRender(); return; }
   scanning = false;
-  if (state.root !== handle.name) return;
+  if (gen !== openGen || state.root !== handle.name) return;
   const before = new Set(state.items.map(i => i.key));
   const added = items.filter(i => !before.has(i.key)).length;
   const removed = state.items.length - (items.length - added);
@@ -760,11 +773,12 @@ async function openFolder() {
   }
   $('dirInput').click();
 }
-$('dirInput').addEventListener('change', e => {
+$('dirInput').addEventListener('change', async e => {
   const files = [...e.target.files];
   if (!files.length) return;
+  const gen = ++openGen;
   const root = (files[0].webkitRelativePath || '').split('/')[0] || 'Pasta';
-  state.root = root;
+  state.root = root; state.rootHandle = null;
   const items = [];
   shared.files.clear();
   for (const f of files) {
@@ -773,7 +787,8 @@ $('dirInput').addEventListener('change', e => {
     else if (isImg(f.name)) { const it = mkItem(f, rel); if (it) items.push(it); }
   }
   e.target.value = '';
-  setLibrary(root, items, null);
+  if (gen !== openGen) return;
+  setLibrary(root, items, null, gen);
 });
 
 let dragDepth = 0;
@@ -784,6 +799,7 @@ addEventListener('drop', async e => {
   e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
   const entries = [...(e.dataTransfer.items || [])].filter(i => i.kind === 'file').map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
   if (!entries.length) return;
+  const gen = ++openGen;
   const single = entries.length === 1 && entries[0].isDirectory;
   state.root = single ? entries[0].name : 'Itens soltos';
   progress(0.1);
@@ -804,7 +820,8 @@ addEventListener('drop', async e => {
     }
     else await walkEntry(en, '', items);
   }
-  setLibrary(state.root, items, null);
+  if (gen !== openGen) return;
+  setLibrary(state.root, items, null, gen);
 });
 
 // Bibliotecas salvas: abre direto a pasta configurada, sem escolher de novo
@@ -1137,7 +1154,7 @@ async function runAnalysis() {
    sugestão ou digita à mão, entra no fluxo normal (esse sim compartilhado). */
 const FACE_V = 1;
 const FACE_THRESHOLD = 0.6; // abaixo disso, o face-api considera "a mesma pessoa"
-const fr = { state: 'off', running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0 };
+const fr = { state: 'off', running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0, t0: 0 };
 const facesWanted = () => $('facesOn').checked;
 state.faces = new Map(); // key -> { k, v, faces:[{box,desc}], suggest, suggestDist }
 
@@ -1221,7 +1238,7 @@ async function runFaceAnalysis() {
   fr.total = fr.done + fr.queue.length;
   facesRender();
   if (fr.running || !fr.queue.length) return;
-  fr.running = true; fr.done = 0; fr.total = fr.queue.length;
+  fr.running = true; fr.done = 0; fr.total = fr.queue.length; fr.t0 = performance.now();
   await loadFaceModels();
   if (fr.state !== 'ok') { fr.running = false; facesRender(); return; }
   const cv = { f: document.createElement('canvas') };
@@ -1230,7 +1247,7 @@ async function runFaceAnalysis() {
     if (fr.paused) { await sleep(300); continue; }
     const it = fr.queue.shift(); fr.queued.delete(it.key);
     if (!state.keySet.has(it.key)) continue;
-    await analyzeFace(it, cv);
+    await Promise.race([analyzeFace(it, cv), sleep(20000)]); // uma foto travada nunca mais trava a fila inteira
     fr.done++;
     const now = performance.now();
     if (now - lastUi > 500) { lastUi = now; facesRender(); renderGrid(true); }
@@ -1253,9 +1270,13 @@ function facesRender() {
   if (fr.state === 'loading') { msg.textContent = 'Carregando modelo de rostos…'; return; }
   if (fr.state === 'erro') { msg.innerHTML = '<span class="warn">Reconhecimento facial indisponível neste navegador.</span>'; return; }
   const analyzed = [...state.faces.values()].length;
-  msg.textContent = fr.running
-    ? `Analisando rostos: ${fmtNum(fr.done)} de ${fmtNum(fr.total)}…`
-    : `${fmtNum(analyzed)} de ${fmtNum(state.items.length)} imagens com rostos verificados. Os rostos ficam só neste navegador.`;
+  if (fr.running) {
+    const el = (performance.now() - fr.t0) / 1000, rate = fr.done / Math.max(el, 0.001);
+    const rest = (fr.total - fr.done) / Math.max(rate, 0.01);
+    msg.textContent = `Analisando rostos: ${fmtNum(fr.done)} de ${fmtNum(fr.total)} (${fr.total ? Math.floor(fr.done / fr.total * 100) : 0}%)` + (fr.done > 3 ? ` · faltam ~${fmtDur(rest)}` : ' · calculando tempo…');
+  } else {
+    msg.textContent = `${fmtNum(analyzed)} de ${fmtNum(state.items.length)} imagens com rostos verificados. Os rostos ficam só neste navegador.`;
+  }
 }
 $('facesOn').addEventListener('change', () => {
   ls.set('bi.faces', $('facesOn').checked);
@@ -1623,20 +1644,8 @@ function ready() {
   document.title = state.root + ' — Banco de Imagens';
   if (innerWidth <= 820) { $('dFolders').open = false; $('dFilters').open = false; }
   buildTree(); apply(); anRender(); showStorage();
-  showOpenNotice();
 }
-function showOpenNotice() {
-  const top = [...new Set(state.items.map(i => i.dir.split('/')[0]).filter(Boolean))];
-  const loose = state.items.filter(i => !i.dir).length;
-  const box = $('openNotice');
-  const many = top.length > 8;
-  box.className = 'opennotice' + (many ? ' warn' : '');
-  const list = top.slice(0, 8).join(', ') + (top.length > 8 ? `… (+${top.length - 8})` : '');
-  box.innerHTML = `Aberto: <b>${state.root}</b> — ${fmtNum(state.items.length)} imagens` +
-    (top.length ? `, em ${top.length} pasta(s) de 1º nível: ${list}` : '') +
-    (loose ? ` · ${fmtNum(loose)} soltas na raiz` : '') +
-    (many ? '<br>Isso é mais pastas do que o esperado — confira se a pasta certa foi escolhida. Se não for, use “Trocar pasta”.' : '');
-}
+
 function buildTree() {
   const root = { name: state.root, path: '', kids: new Map(), count: 0 };
   for (const it of state.items) {
