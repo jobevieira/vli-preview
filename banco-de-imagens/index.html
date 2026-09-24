@@ -161,7 +161,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <div class="msg" id="anMsg">—</div>
       <div class="bar"><i id="anBar"></i></div>
       <label class="chk" style="padding:0"><input type="checkbox" id="aiOn" checked> Detectar pessoas e objetos (IA)</label>
-      <div class="row"><button class="btn sm" id="anPause">Pausar</button><button class="btn sm hidden" id="shareBtn" title="Grava o resultado dentro da pasta para que outras pessoas não precisem analisar de novo">Compartilhar na pasta</button></div>
+      <div class="row"><button class="btn sm" id="anPause">Pausar</button><button class="btn sm hidden" id="compatBtn">Abrir em modo compatível</button><button class="btn sm hidden" id="shareBtn" title="Grava o resultado dentro da pasta para que outras pessoas não precisem analisar de novo">Compartilhar na pasta</button></div>
       <div class="msg" id="shareMsg" style="margin-top:8px"></div>
     </div>
     <details open id="dFolders"><summary>Pastas</summary>
@@ -198,6 +198,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   <div class="actions">
     <button class="btn primary" id="openBtn2">Abrir pasta de imagens</button>
     <button class="btn hidden" id="reopenBtn">Reabrir última pasta</button>
+    <button class="btn" id="compatBtn2" title="Abre a pasta pelo seletor de arquivos clássico do navegador. Use se as imagens não puderem ser lidas.">Abrir em modo compatível</button>
   </div>
   <div class="drop">…ou arraste uma pasta para cá</div>
   <div class="progress" id="progress" role="status" aria-live="polite"></div>
@@ -243,7 +244,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.3';
+const APP_VERSION = '2026-09-24.4';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -706,6 +707,9 @@ addEventListener('drop', async e => {
     catch { toast('Não foi possível reabrir. Escolha a pasta novamente.'); }
   };
 })();
+const openCompat = () => $('dirInput').click();
+$('compatBtn').onclick = openCompat;
+$('compatBtn2').onclick = openCompat;
 $('openBtn').onclick = openFolder;
 $('openBtn2').onclick = openFolder;
 
@@ -844,7 +848,12 @@ async function diagnostics() {
   let framed = false; try { framed = window.top !== window.self; } catch { framed = true; }
   const errs = {};
   let analyzed = 0, withAi = 0;
-  for (const it of state.items) { const m = state.meta.get(it.key); if (!m) continue; analyzed++; if (m.ai) withAi++; if (m.err) errs[m.err] = (errs[m.err] || 0) + 1; }
+  const samples = new Map();
+  for (const it of state.items) {
+    const m = state.meta.get(it.key); if (!m) continue;
+    analyzed++; if (m.ai) withAi++;
+    if (m.err) { errs[m.err] = (errs[m.err] || 0) + 1; if (m.errMsg && samples.size < 4 && !samples.has(m.errMsg)) samples.set(m.errMsg, it.ext); }
+  }
   const exts = {};
   for (const it of state.items) exts[it.ext] = (exts[it.ext] || 0) + 1;
   return [
@@ -859,6 +868,7 @@ async function diagnostics() {
     `Imagens: ${state.items.length} | por tipo: ${Object.entries(exts).map(([k, v]) => k + ' ' + v).join(', ')}`,
     `Analisadas: ${analyzed} (com IA: ${withAi}) | fila: ${an.queue.length} | rodando: ${an.running ? 'sim' : 'não'}${an.paused ? ' (pausada)' : ''}`,
     `Problemas por imagem: ${Object.entries(errs).map(([k, v]) => k + ' ' + v).join(', ') || 'nenhum'}`,
+    ...[...samples].map(([msg, ext]) => `  - leitura (${ext}): ${msg}`),
     `Erros na análise: ${an.errs}`,
     ...an.lastErrs.map(e => '  - ' + e),
     `Compartilhado: ${[...state.meta.values()].filter(m => m._shared).length} de outras pessoas | arquivos em .banco-imagens: ${shared.files.size}`,
@@ -917,9 +927,17 @@ async function analyze(it, cv) {
   const m = { k: it.key, v: ANALYSIS_V, at: Date.now() };
   let file, head;
   try { file = await fileOf(it); head = await file.slice(0, 262144).arrayBuffer(); }
-  catch {
-    // Não salva: o arquivo pode ficar disponível depois (ex.: baixado pelo OneDrive)
-    m.bad = 1; m.err = 'read'; state.meta.set(it.key, m); markCard(it); return;
+  catch (e1) {
+    let e = e1;
+    // A "foto" do arquivo tirada ao abrir a pasta pode ter ficado velha (ex.: o OneDrive mexeu nele): pega de novo
+    if (state.rootHandle) {
+      try { it.file = null; file = await fileOf(it); head = await file.slice(0, 262144).arrayBuffer(); e = null; } catch (e2) { e = e2; }
+    }
+    if (e) {
+      // Não salva: o arquivo pode ficar disponível depois
+      m.bad = 1; m.err = 'read'; m.errMsg = `${e.name || 'Erro'}: ${e.message || e}`;
+      state.meta.set(it.key, m); markCard(it); return;
+    }
   }
   if (it.ext === 'jpg' || it.ext === 'jpeg' || it.ext === 'jfif') Object.assign(m, parseExif(head));
   if (m.gps && GEO) { const g = geoLookup(m.gps[0], m.gps[1]); m.city = g ? g.name : null; m.uf = g ? g.uf : ''; }
@@ -1053,7 +1071,12 @@ function anRender() {
   if (w.textContent) msg.appendChild(w);
   let unread = 0, heic = 0;
   for (const i of state.items) { const m = state.meta.get(i.key); if (m && m.err) { if (m.err === 'read' || m.err === 'empty') unread++; else if (m.err === 'heic') heic++; } }
-  if (unread) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas. Se a pasta vem do SharePoint/OneDrive, clique nela com o botão direito → “Sempre manter neste dispositivo” e aguarde o download.`; msg.appendChild(e); }
+  if (unread) {
+    const e = document.createElement('div'); e.className = 'warn';
+    e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas.` + (state.rootHandle ? ' Tente “Abrir em modo compatível” abaixo.' : ' Veja “Diagnóstico” no fim da barra lateral.');
+    msg.appendChild(e);
+  }
+  $('compatBtn').classList.toggle('hidden', !(unread && state.rootHandle));
   if (an.errs) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(an.errs)} imagens deram erro na análise (${an.lastErrs[an.lastErrs.length - 1]}). Use “Diagnóstico” no fim da barra lateral e envie o texto.`; msg.appendChild(e); }
   if (heic) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(heic)} fotos em HEIC (iPhone) não abrem neste navegador.`; msg.appendChild(e); }
   const sm = $('shareMsg'), fromOthers = [...state.meta.values()].filter(m => m._shared).length;
@@ -1384,7 +1407,7 @@ function renderInfo(it) {
   if (m.w) rows.push(['Qualidade', qualityOf(m).join(', ')]);
   rows.push(['Arquivo', `${it.ext.toUpperCase()} · ${fmtSize(it.size)}`]);
   if (m.make || m.model) rows.push(['Câmera', [m.make, m.model].filter(Boolean).join(' ')]);
-  if (m.err) rows.push(['Aviso', ERR[m.err]]);
+  if (m.err) rows.push(['Aviso', ERR[m.err] + (m.errMsg ? ` (${m.errMsg})` : '')]);
   const g = state.dup.get(it.key);
   $('lbSim').classList.toggle('hidden', g === undefined || state.onlyGroup === g);
   if (g !== undefined) $('lbSim').textContent = `Ver ${state.dupSize.get(g)} semelhantes`;
