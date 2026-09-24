@@ -181,7 +181,9 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
         <button class="btn sm" id="clearF">Limpar filtros</button>
       </div>
     </details>
-    <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos neste navegador</button></div>
+    <div class="foot"><span id="storage"></span><br><button id="wipe">Apagar dados salvos neste navegador</button><br><button id="diagBtn">Diagnóstico</button> · <span id="ver"></span>
+      <div id="diag" class="hidden"><pre id="diagTxt" style="white-space:pre-wrap;font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:320px;overflow:auto"></pre><button class="btn sm" id="diagCopy">Copiar diagnóstico</button></div>
+    </div>
   </aside>
   <section class="content">
     <div class="status"><span id="stat"></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
@@ -241,6 +243,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
+const APP_VERSION = '2026-09-24.3';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -832,8 +835,45 @@ $('shareBtn').onclick = () => saveShared(true);
   });
 })();
 
+/* ================= diagnóstico ================= */
+$('ver').textContent = 'versão ' + APP_VERSION;
+async function diagnostics() {
+  const gl = (() => { try { const c = document.createElement('canvas'); return c.getContext('webgl2') ? 'webgl2' : c.getContext('webgl') ? 'webgl' : 'não'; } catch { return 'erro'; } })();
+  let idbOk = 'não';
+  try { await db(); idbOk = 'sim'; } catch {}
+  let framed = false; try { framed = window.top !== window.self; } catch { framed = true; }
+  const errs = {};
+  let analyzed = 0, withAi = 0;
+  for (const it of state.items) { const m = state.meta.get(it.key); if (!m) continue; analyzed++; if (m.ai) withAi++; if (m.err) errs[m.err] = (errs[m.err] || 0) + 1; }
+  const exts = {};
+  for (const it of state.items) exts[it.ext] = (exts[it.ext] || 0) + 1;
+  return [
+    `Versão do app: ${APP_VERSION}`,
+    `Navegador: ${navigator.userAgent}`,
+    `Endereço: ${location.protocol}//… | dentro de outro app: ${framed ? 'sim' : 'não'}`,
+    `Aviso de ambiente: ${$('envWarn').classList.contains('hidden') ? 'nenhum' : $('envWarn').textContent}`,
+    `Aberta por: ${state.rootHandle ? 'Abrir pasta (acesso direto)' : 'seleção de arquivos / arrastar'} | gravação na pasta: ${shared.canWrite ? 'sim' : 'não'}`,
+    `Recursos: WebGL ${gl} | IndexedDB ${idbOk} | createImageBitmap ${typeof createImageBitmap === 'function' ? 'sim' : 'não'} | CompressionStream ${typeof CompressionStream === 'function' ? 'sim' : 'não'}`,
+    `Municípios carregados: ${GEO ? 'sim (' + GEO.length + ')' : 'não'}`,
+    `IA: ${$('aiOn').checked ? 'ligada' : 'desligada'} | estado ${ai.state} | processamento ${ai.backend || '-'}`,
+    `Imagens: ${state.items.length} | por tipo: ${Object.entries(exts).map(([k, v]) => k + ' ' + v).join(', ')}`,
+    `Analisadas: ${analyzed} (com IA: ${withAi}) | fila: ${an.queue.length} | rodando: ${an.running ? 'sim' : 'não'}${an.paused ? ' (pausada)' : ''}`,
+    `Problemas por imagem: ${Object.entries(errs).map(([k, v]) => k + ' ' + v).join(', ') || 'nenhum'}`,
+    `Erros na análise: ${an.errs}`,
+    ...an.lastErrs.map(e => '  - ' + e),
+    `Compartilhado: ${[...state.meta.values()].filter(m => m._shared).length} de outras pessoas | arquivos em .banco-imagens: ${shared.files.size}`,
+  ].join('\n');
+}
+$('diagBtn').onclick = async () => { $('diagTxt').textContent = await diagnostics(); $('diag').classList.toggle('hidden'); };
+$('diagCopy').onclick = async () => {
+  const t = await diagnostics();
+  try { await navigator.clipboard.writeText(t); toast('Diagnóstico copiado — cole na conversa'); } catch { prompt('Copie o diagnóstico:', t); }
+};
+window.addEventListener('error', e => { an.lastErrs.push('erro geral: ' + e.message); if (an.lastErrs.length > 8) an.lastErrs.shift(); });
+window.addEventListener('unhandledrejection', e => { an.lastErrs.push('erro geral: ' + ((e.reason && e.reason.message) || e.reason)); if (an.lastErrs.length > 8) an.lastErrs.shift(); });
+
 /* ================= análise ================= */
-const an = { running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0, t0: 0, rate: 0 };
+const an = { running: false, paused: false, queue: [], queued: new Set(), done: 0, total: 0, t0: 0, rate: 0, errs: 0, lastErrs: [] };
 const needs = it => { const m = state.meta.get(it.key); return !m || m.err === 'read' || (aiWanted() && ai.state !== 'erro' && !m.ai && !m.bad); };
 const aiWanted = () => $('aiOn').checked;
 
@@ -851,7 +891,11 @@ async function runAnalysis() {
       if (an.paused) { await sleep(300); continue; }
       const it = an.queue.shift(); an.queued.delete(it.key);
       if (!state.keySet.has(it.key)) continue;
-      try { await analyze(it, cv); } catch (e) { console.warn(it.path, e); }
+      try { await analyze(it, cv); }
+      catch (e) {
+        console.warn(it.path, e); an.errs++;
+        an.lastErrs.push(`${it.path}: ${(e && (e.message || e.name)) || e}`); if (an.lastErrs.length > 8) an.lastErrs.shift();
+      }
       an.done++;
       if (pending.length >= 25) await flush();
       const now = performance.now();
@@ -1010,6 +1054,7 @@ function anRender() {
   let unread = 0, heic = 0;
   for (const i of state.items) { const m = state.meta.get(i.key); if (m && m.err) { if (m.err === 'read' || m.err === 'empty') unread++; else if (m.err === 'heic') heic++; } }
   if (unread) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas. Se a pasta vem do SharePoint/OneDrive, clique nela com o botão direito → “Sempre manter neste dispositivo” e aguarde o download.`; msg.appendChild(e); }
+  if (an.errs) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(an.errs)} imagens deram erro na análise (${an.lastErrs[an.lastErrs.length - 1]}). Use “Diagnóstico” no fim da barra lateral e envie o texto.`; msg.appendChild(e); }
   if (heic) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(heic)} fotos em HEIC (iPhone) não abrem neste navegador.`; msg.appendChild(e); }
   const sm = $('shareMsg'), fromOthers = [...state.meta.values()].filter(m => m._shared).length;
   const parts = [];
