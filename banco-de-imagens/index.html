@@ -311,7 +311,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.11';
+const APP_VERSION = '2026-09-24.12';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -395,9 +395,16 @@ const fmtNum = n => n.toLocaleString('pt-BR');
 const fmtDur = s => s < 90 ? Math.round(s) + ' s' : s < 5400 ? Math.round(s / 60) + ' min' : (s / 3600).toFixed(1).replace('.', ',') + ' h';
 const collator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
 const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-function toast(msg) {
+function toast(msg, sticky) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 2200);
+  if (sticky) {
+    t.style.cssText += 'padding-right:36px;max-width:min(560px,90vw);text-align:left;white-space:pre-wrap';
+    const x = document.createElement('button'); x.textContent = '×';
+    x.style.cssText = 'position:absolute;top:4px;right:8px;background:none;border:0;color:inherit;font-size:18px;cursor:pointer;line-height:1';
+    x.onclick = () => t.remove();
+    t.style.position = 'relative'; t.appendChild(x);
+  } else setTimeout(() => t.remove(), 2200);
+  document.body.appendChild(t);
 }
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -659,9 +666,13 @@ async function walkHandle(dir, prefix, out) {
   for await (const entry of dir.values()) {
     if (entry.name.startsWith('.')) continue;
     const p = prefix ? prefix + '/' + entry.name : entry.name;
-    if (entry.kind === 'directory') await walkHandle(entry, p, out);
+    if (entry.kind === 'directory') {
+      // Uma subpasta ilegível (ex.: caminho longo demais no Windows) não derruba a varredura inteira —
+      // mas se for a PRÓPRIA pasta escolhida que falhar, isso propaga pra quem chamou (fromHandle), como antes.
+      try { await walkHandle(entry, p, out); } catch (e) { walkErrs.push([p, e]); }
+    }
     else if (isImg(entry.name)) {
-      try { const it = mkItem(await entry.getFile(), p); if (it) out.push(it); } catch {}
+      try { const f = mkItem(await entry.getFile(), p); if (f) out.push(f); } catch (e) { walkErrs.push([p, e]); }
       if (out.length % 250 === 0) { progress(out.length); scanMsg(out.length); }
     }
   }
@@ -738,7 +749,7 @@ async function fromHandle(handle, useCache) {
     }
   }
   progress(0.1);
-  const items = [];
+  const items = []; walkErrs = [];
   await walkHandle(handle, '', items);
   if (gen !== openGen) return; // uma pasta mais nova foi aberta enquanto esta varredura (podia ser bem longa) rodava
   await readSharedDir(handle);
@@ -746,13 +757,15 @@ async function fromHandle(handle, useCache) {
   await setLibrary(handle.name, items, handle, gen);
   if (gen === openGen) saveListing();
 }
+let walkErrs = [];
 let scanning = false;
 function scanMsg(n) { if (scanning) $('anMsg').textContent = `Procurando imagens novas… ${fmtNum(n)}`; }
 async function rescan(handle, manual) {
   const gen = openGen;
   scanning = true; anRender();
-  const items = [];
-  try { await walkHandle(handle, '', items); await readSharedDir(handle); await loadShared(); } catch { scanning = false; anRender(); return; }
+  const items = []; walkErrs = [];
+  try { await walkHandle(handle, '', items); await readSharedDir(handle); await loadShared(); }
+  catch (e) { scanning = false; anRender(); toast(`Não foi possível atualizar "${state.root}": ${(e && (e.name || e.message)) || e}`, true); return; }
   scanning = false;
   if (gen !== openGen || state.root !== handle.name) return;
   const before = new Set(state.items.map(i => i.key));
@@ -891,7 +904,7 @@ async function renderLibs(hintAuto) {
         renderLibs();
         toast(`“${lib.name}” não é mais a mesma pasta (foi apagada e recriada, ou movida) — removida da lista. Use “Abrir pasta” para escolhê-la de novo.`);
       } else if (r === 'error') {
-        toast(`Não foi possível abrir “${lib.name}”: ${lastOpenErr}. Veja “Diagnóstico”.`);
+        toast(`Não foi possível abrir "${lib.name}": ${lastOpenErr}`, true);
       }
     };
     const auto = document.createElement('label'); auto.className = 'chk';
@@ -926,7 +939,7 @@ async function renderLibSel() {
       await saveLibs((await getLibs()).filter(x => x.name !== lib.name || x.at !== lib.at));
       toast(`“${lib.name}” não é mais a mesma pasta (foi apagada e recriada, ou movida) — removida da lista. Use “Abrir outra pasta…”.`);
     } else if (r === 'error') {
-      toast(`Não foi possível abrir “${lib.name}”: ${lastOpenErr}. Veja “Diagnóstico”.`);
+      toast(`Não foi possível abrir "${lib.name}": ${lastOpenErr}`, true);
     }
     renderLibSel();
   };
@@ -1127,6 +1140,8 @@ async function diagnostics() {
     `Compartilhado: ${[...state.meta.values()].filter(m => m._shared).length} de outras pessoas | arquivos em .banco-imagens: ${shared.files.size}`,
     `Rostos (local, nunca compartilhado): ${$('facesOn').checked ? 'ligado' : 'desligado'} | estado ${fr.state}${fr.errMsg ? ' (' + fr.errMsg + ')' : ''} | ${state.faces.size} imagens verificadas | ${[...state.faces.values()].reduce((n, f) => n + (f.faces ? f.faces.length : 0), 0)} rostos | ${[...state.faces.values()].filter(f => f.suggest).length} sugestões pendentes`,
     ...(lastOpenErr ? [`Último erro ao abrir uma biblioteca: ${lastOpenErr}`] : []),
+    `Subpastas puladas por erro de leitura nesta pasta: ${walkErrs.length}`,
+    ...walkErrs.slice(0, 6).map(([p, e]) => `  - ${p}: ${(e && (e.name || e.message)) || e}`),
   ].join('\n');
 }
 $('diagBtn').onclick = async () => { $('diagTxt').textContent = await diagnostics(); $('diag').classList.toggle('hidden'); };
