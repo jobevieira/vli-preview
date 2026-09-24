@@ -209,6 +209,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
     <li>A primeira análise leva um tempo (dá para pausar e continuar depois). Com “Compartilhar na pasta”, o resultado é gravado dentro da própria pasta (ex.: sincronizada pelo SharePoint) e a equipe toda aproveita — só fotos novas são analisadas de novo.</li>
     <li>Busca, favoritas, visualizador com setas ← → e exportação para planilha.</li>
     <li>Use Chrome ou Edge para reabrir a pasta com um clique. Firefox também funciona.</li>
+    <li>Pasta do SharePoint não abre? Use o atalho <strong>“Atualizar e abrir.bat”</strong> (na mesma pasta deste arquivo): ele mantém uma cópia local das imagens e troca a análise com a equipe.</li>
   </ul>
 </section>
 
@@ -244,7 +245,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.4';
+const APP_VERSION = '2026-09-24.5';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -1073,7 +1074,7 @@ function anRender() {
   for (const i of state.items) { const m = state.meta.get(i.key); if (m && m.err) { if (m.err === 'read' || m.err === 'empty') unread++; else if (m.err === 'heic') heic++; } }
   if (unread) {
     const e = document.createElement('div'); e.className = 'warn';
-    e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas.` + (state.rootHandle ? ' Tente “Abrir em modo compatível” abaixo.' : ' Veja “Diagnóstico” no fim da barra lateral.');
+    e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas. Se a pasta é sincronizada do SharePoint, a empresa pode bloquear a leitura pelo navegador: use o atalho “Atualizar e abrir.bat” que vem junto do app (ele mantém uma cópia local) e abra a pasta “imagens” criada por ele.`;
     msg.appendChild(e);
   }
   $('compatBtn').classList.toggle('hidden', !(unread && state.rootHandle));

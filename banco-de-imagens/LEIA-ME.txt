@@ -1,0 +1,22 @@
+BANCO DE IMAGENS VLI - como usar
+================================
+
+Pastas comuns do computador:
+  De dois cliques em index.html (Chrome ou Edge) e clique em "Abrir pasta".
+
+Pastas sincronizadas do SharePoint:
+  O navegador e bloqueado de ler essas pastas. Use o atalho:
+
+  1. De dois cliques em "Atualizar e abrir.bat".
+  2. Na primeira vez, cole o caminho da pasta do SharePoint
+     (copie da barra de endereco do Explorador de Arquivos).
+  3. Ele copia as imagens para a pasta "imagens" (ao lado deste arquivo)
+     e abre o app. Na primeira vez a copia demora; depois so copia o que mudou.
+  4. No app, clique em "Abrir pasta" e escolha a pasta "imagens".
+     Nas proximas vezes, use "Reabrir".
+  5. Para compartilhar a analise com a equipe: no app, clique em
+     "Compartilhar na pasta". Depois de analisar, rode o atalho de novo:
+     ele envia a sua analise para o SharePoint e traz a dos colegas.
+
+O atalho nao instala nada e nao apaga nada no SharePoint.
+Para trocar a pasta de origem, apague o arquivo "origem.txt".
