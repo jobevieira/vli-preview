@@ -243,7 +243,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
     </div>
   </aside>
   <section class="content" id="content">
-    <div class="status"><span id="stat"></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
+    <div class="status"><span class="r"><button class="btn sm hidden" id="backBtn">← Voltar</button><span id="stat"></span></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
     <div class="vgrid" id="grid"></div>
     <div class="empty hidden" id="empty">Nenhuma imagem com esses filtros.</div>
   </section>
@@ -347,7 +347,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-25.3';
+const APP_VERSION = '2026-09-25.4';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -369,7 +369,7 @@ const state = {
   manual: new Map(),   // root|path → {city, uf}
   dup: new Map(),      // key → id do grupo de semelhantes
   dupSize: new Map(),  // id do grupo → quantidade
-  lbKey: null, onlyGroup: null,
+  lbKey: null, onlyGroup: null, prevView: null, // estado antes de entrar em "ver semelhantes" / "buscar por rosto", pro botão Voltar
   selected: new Set(), // chaves selecionadas para edição em massa (cidade, tags, pessoas, favoritas)
 };
 const F = { city: '', people: '', tag: '', usertag: '', person: '', year: '', orient: '', quality: '', ext: '' };
@@ -1716,7 +1716,7 @@ function apply(keepScroll) {
 }
 
 document.querySelectorAll('#facets select').forEach(sel => sel.addEventListener('change', () => { F[sel.dataset.f] = sel.value; apply(); }));
-$('clearF').onclick = () => { Object.keys(F).forEach(k => F[k] = ''); $('dupOn').checked = false; state.onlyGroup = null; state.onlyFace = null; $('onlyFacesOn').checked = false; $('q').value = ''; apply(); };
+$('clearF').onclick = () => { Object.keys(F).forEach(k => F[k] = ''); $('dupOn').checked = false; state.onlyGroup = null; state.onlyFace = null; $('onlyFacesOn').checked = false; $('q').value = ''; state.prevView = null; $('backBtn').classList.add('hidden'); apply(); };
 $('onlyFacesOn').addEventListener('change', () => apply());
 $('dupOn').addEventListener('change', () => { state.onlyGroup = null; apply(); });
 $('subOn').addEventListener('change', () => apply());
@@ -1790,7 +1790,7 @@ function buildTree() {
 function markTree() {
   document.querySelectorAll('#tree button').forEach(b => { const on = b.dataset.path === state.folder; b.classList.toggle('sel', on); b.setAttribute('aria-current', on ? 'true' : 'false'); });
 }
-$('tree').addEventListener('click', e => { const b = e.target.closest('button.node'); if (!b) return; state.folder = b.dataset.path; markTree(); apply(); });
+$('tree').addEventListener('click', e => { const b = e.target.closest('button.node'); if (!b) return; state.folder = b.dataset.path; markTree(); state.prevView = null; $('backBtn').classList.add('hidden'); apply(); });
 $('treeExpand').onclick = () => { treeClosed.clear(); document.querySelectorAll('#tree ul.kids').forEach(u => u.classList.remove('closed')); document.querySelectorAll('#tree .tw').forEach(t => { if (!t.classList.contains('leaf')) { t.textContent = '▾'; t.setAttribute('aria-label', 'Recolher'); } }); [...document.querySelectorAll('#tree button.node')].forEach(b => treeOpen.add(b.dataset.path)); };
 $('treeCollapse').onclick = () => { treeOpen.clear(); document.querySelectorAll('#tree ul.kids').forEach(u => u.classList.add('closed')); document.querySelectorAll('#tree .tw').forEach(t => { if (!t.classList.contains('leaf')) { t.textContent = '▸'; t.setAttribute('aria-label', 'Expandir'); } }); [...document.querySelectorAll('#tree button.node')].forEach(b => treeClosed.add(b.dataset.path)); };
 
@@ -2158,8 +2158,9 @@ $('lbFaceSearch').onclick = () => {
     const of_ = state.faces.get(other.key); if (!of_ || !of_.faces) continue;
     if (of_.faces.some(x => faceDist(x.desc, main.desc) < FACE_THRESHOLD)) matches.add(other.key);
   }
+  snapshotView();
   state.onlyFace = matches; closeLb(); $('onlyFacesOn').checked = false; apply();
-  toast(`Mostrando ${matches.size} foto(s) com este rosto — “Limpar filtros” volta ao normal`);
+  toast(`Mostrando ${matches.size} foto(s) com este rosto — “Voltar” retorna de onde você estava`);
 };
 function renderInfo(it) {
   const m = state.meta.get(it.key) || {}, c = cityOf(it);
@@ -2209,7 +2210,19 @@ $('lbPrev').onclick = () => showLb(lbIndex - 1);
 $('lbNext').onclick = () => showLb(lbIndex + 1);
 $('lbClose').onclick = closeLb;
 $('lbFav').onclick = toggleFav;
-$('lbSim').onclick = () => { const g = state.dup.get(state.lbKey); state.onlyGroup = g; closeLb(); apply(); toast('Mostrando o grupo de semelhantes — “Limpar filtros” volta ao normal'); };
+function snapshotView() {
+  state.prevView = { folder: state.folder, F: { ...F }, q: $('q').value, sort: $('sort').value, dupOn: $('dupOn').checked, onlyFacesOn: $('onlyFacesOn').checked, scrollY: scrollY };
+  $('backBtn').classList.remove('hidden');
+}
+$('backBtn').onclick = () => {
+  const v = state.prevView; if (!v) return;
+  state.onlyGroup = null; state.onlyFace = null;
+  state.folder = v.folder; Object.assign(F, v.F); $('q').value = v.q; $('sort').value = v.sort; $('dupOn').checked = v.dupOn; $('onlyFacesOn').checked = v.onlyFacesOn;
+  state.prevView = null; $('backBtn').classList.add('hidden');
+  markTree(); apply();
+  scrollTo({ top: v.scrollY });
+};
+$('lbSim').onclick = () => { snapshotView(); const g = state.dup.get(state.lbKey); state.onlyGroup = g; closeLb(); apply(); toast('Mostrando o grupo de semelhantes — “Voltar” retorna de onde você estava'); };
 $('lbCityBtn').onclick = () => { $('lbFix').classList.toggle('hidden'); const c = cityOf(state.view[lbIndex]); $('lbCity').value = c ? cityLabel(c) : ''; $('lbCity').focus(); };
 // Salva um campo manual sem apagar os outros já preenchidos (cidade, tags, pessoas)
 async function saveManualPatch(it, patch) {
