@@ -93,6 +93,21 @@ aside summary{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color
 .card .ppl{position:absolute;top:6px;left:6px;background:rgba(20,22,24,.75);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
 .card .grp{position:absolute;bottom:36px;left:6px;background:rgba(20,22,24,.75);color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
 .card .exf{position:absolute;bottom:6px;right:6px;background:#b3261e;color:#fff;border-radius:10px;padding:2px 7px;font-size:11px}
+.card.selected{outline:3px solid var(--accent);outline-offset:-3px}
+.card .selchk{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#22262a;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.marquee{position:absolute;border:1.5px solid var(--accent);background:rgba(242,183,5,.15);pointer-events:none;z-index:3}
+.selbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:15;display:flex;gap:8px;align-items:center;background:var(--text);color:var(--bg);padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.25);flex-wrap:wrap;max-width:calc(100vw - 32px)}
+.selbar b{font-weight:600}
+.selbar .btn{background:var(--bg);color:var(--text);border-color:var(--bg)}
+.ctxmenu{position:fixed;z-index:30;background:var(--bg);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.3);padding:6px;min-width:200px}
+.ctxmenu button{all:unset;box-sizing:border-box;display:block;width:100%;padding:9px 12px;border-radius:6px;font-size:14px;cursor:pointer}
+.ctxmenu button:hover{background:var(--card)}
+.bulkbody{max-width:420px;width:100%;margin:8vh auto;background:var(--bg);border-radius:12px;padding:24px;color:var(--text)}
+.bulkbody h3{font-family:var(--serif);font-weight:400;margin:0 0 6px}
+.bulkbody p{color:var(--muted);font-size:13px;margin:0 0 14px;line-height:1.5}
+.bulkbody .row2{display:flex;gap:8px}
+.bulkbody input{flex:1;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text)}
+.bulkbody .acts{margin-top:16px;display:flex;justify-content:flex-end;gap:8px}
 .empty{padding:48px 0;color:var(--muted);text-align:center}
 
 /* Boas-vindas */
@@ -227,7 +242,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <div id="diag" class="hidden"><pre id="diagTxt" style="white-space:pre-wrap;font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:320px;overflow:auto"></pre><button class="btn sm" id="diagCopy">Copiar diagnóstico</button></div>
     </div>
   </aside>
-  <section class="content">
+  <section class="content" id="content">
     <div class="status"><span id="stat"></span><span class="r"><span id="rootName"></span><button class="btn sm" id="csv">Exportar planilha</button></span></div>
     <div class="vgrid" id="grid"></div>
     <div class="empty hidden" id="empty">Nenhuma imagem com esses filtros.</div>
@@ -246,6 +261,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   <div class="progress" id="progress" role="status" aria-live="polite"></div>
   <ul>
     <li><strong>Reconhecimento facial local</strong> (desligado por padrão): sugere o nome de quem já foi identificado antes numa foto parecida — sempre pedindo confirmação. Os rostos ficam só neste navegador, nunca vão para a pasta compartilhada.</li>
+    <li><strong>Seleção múltipla:</strong> arraste o mouse sobre várias fotos (ou Ctrl/Shift+clique) e aplique cidade, tags, pessoas ou favoritas em todas de uma vez, pelo botão direito ou pela barrinha que aparece embaixo.</li>
     <li><strong>Cidade</strong> pelos metadados da foto: GPS (malha de municípios do IBGE, sem internet) ou cidade gravada no arquivo (IPTC/XMP). Dá para corrigir à mão.</li>
     <li><strong>Pessoas</strong>: sem pessoas, 1, 2, 3 ou grupo (mais de 3) — e objetos como trem, caminhão e embarcação.</li>
     <li><strong>Duplicatas e semelhantes</strong>, fotos <strong>borradas, escuras ou pequenas</strong>, horizontal/vertical, ano da foto.</li>
@@ -257,6 +273,17 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
   </ul>
 </section>
 
+<div class="modal hidden" id="bulkModal" role="dialog" aria-modal="true" aria-label="Editar várias fotos">
+  <div class="bulkbody">
+    <h3 id="bulkTitle">Definir cidade</h3>
+    <p id="bulkDesc"></p>
+    <div class="row2">
+      <input id="bulkInput" list="cityList" placeholder="Cidade – UF">
+    </div>
+    <div class="acts"><button class="btn" id="bulkCancel">Cancelar</button><button class="btn primary" id="bulkSave">Aplicar</button></div>
+  </div>
+</div>
+<div class="ctxmenu hidden" id="ctxMenu" role="menu"></div>
 <div class="modal hidden" id="exModal" role="dialog" aria-modal="true" aria-label="Lista de ex-funcionários">
   <div style="max-width:520px;margin:8vh auto;background:var(--bg);border-radius:12px;padding:24px;color:var(--text)">
     <h3 style="font-family:var(--serif);font-weight:400;margin:0 0 8px">Ex-funcionários</h3>
@@ -320,7 +347,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-25.2';
+const APP_VERSION = '2026-09-25.3';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -343,6 +370,7 @@ const state = {
   dup: new Map(),      // key → id do grupo de semelhantes
   dupSize: new Map(),  // id do grupo → quantidade
   lbKey: null, onlyGroup: null,
+  selected: new Set(), // chaves selecionadas para edição em massa (cidade, tags, pessoas, favoritas)
 };
 const F = { city: '', people: '', tag: '', usertag: '', person: '', year: '', orient: '', quality: '', ext: '' };
 
@@ -1653,6 +1681,7 @@ function baseFilter() {
 
 function apply(keepScroll) {
   if (!state.items.length) return;
+  if (state.selected.size) { let changed = false; for (const k of state.selected) if (!state.keySet.has(k)) { state.selected.delete(k); changed = true; } if (changed) renderSelBar(); }
   const base = baseFilter();
   const active = Object.keys(F).filter(k => F[k]);
   const passes = (it, skip) => active.every(k => k === skip || match(facetFns[k], it, F[k]));
@@ -1808,8 +1837,185 @@ function makeCard(it) {
   const g = state.dup.get(it.key);
   if (g !== undefined) card.insertAdjacentHTML('beforeend', `<span class="grp">${state.dupSize.get(g)} semelhantes</span>`);
   if (hasExFuncionario(it)) card.insertAdjacentHTML('beforeend', '<span class="exf" title="Tem pessoa marcada como ex-funcionário(a)">⚠ Ex-func.</span>');
+  updateCardSel(card, it);
   return card;
 }
+
+/* ================= seleção múltipla (edição em massa) =================
+   Clique simples sempre abre a foto — nunca é usado para selecionar.
+   Seleciona por: arrastar o mouse sobre as fotos, Ctrl/Cmd+clique (uma a
+   uma) ou Shift+clique (um intervalo). Com fotos selecionadas, aparece uma
+   barrinha com as ações, e clicar com o botão direito numa foto selecionada
+   também abre o mesmo menu. */
+let selAnchor = null; // índice do último clique de seleção, para o Shift+clique
+function updateCardSel(card, it) {
+  const on = state.selected.has(it.key);
+  card.classList.toggle('selected', on);
+  let chk = card.querySelector('.selchk');
+  if (on && !chk) { chk = document.createElement('span'); chk.className = 'selchk'; chk.textContent = '✓'; card.appendChild(chk); }
+  else if (!on && chk) chk.remove();
+}
+function setSelection(next) {
+  state.selected = next;
+  gridCards.forEach((card, key) => { const it = state.view.find(x => x.key === key); if (it) updateCardSel(card, it); });
+  renderSelBar();
+}
+function toggleSel(i) {
+  const key = state.view[i].key, s = new Set(state.selected);
+  s.has(key) ? s.delete(key) : s.add(key);
+  setSelection(s); selAnchor = i;
+}
+function rangeSel(i) {
+  const a = selAnchor == null ? i : selAnchor, b = i, s = new Set(state.selected);
+  for (let k = Math.min(a, b); k <= Math.max(a, b); k++) s.add(state.view[k].key);
+  setSelection(s);
+}
+function renderSelBar() {
+  let bar = document.getElementById('selBar');
+  const n = state.selected.size;
+  if (!n) { if (bar) bar.remove(); return; }
+  if (!bar) {
+    bar = document.createElement('div'); bar.className = 'selbar'; bar.id = 'selBar';
+    bar.innerHTML = '<b></b>' +
+      '<button class="btn sm" id="selCity">Definir cidade</button>' +
+      '<button class="btn sm" id="selTags">Adicionar tags</button>' +
+      '<button class="btn sm" id="selPeople">Identificar pessoas</button>' +
+      '<button class="btn sm" id="selFavOn">★ Favoritar</button>' +
+      '<button class="btn sm" id="selFavOff">☆ Remover favorita</button>' +
+      '<button class="btn sm" id="selClear">Limpar seleção (Esc)</button>';
+    document.body.appendChild(bar);
+    bar.querySelector('#selCity').onclick = () => openBulkModal('city');
+    bar.querySelector('#selTags').onclick = () => openBulkModal('tags');
+    bar.querySelector('#selPeople').onclick = () => openBulkModal('people');
+    bar.querySelector('#selFavOn').onclick = () => bulkFav(true);
+    bar.querySelector('#selFavOff').onclick = () => bulkFav(false);
+    bar.querySelector('#selClear').onclick = () => setSelection(new Set());
+  }
+  bar.querySelector('b').textContent = `${fmtNum(n)} foto${n > 1 ? 's' : ''} selecionada${n > 1 ? 's' : ''}`;
+}
+function bulkFav(on) {
+  for (const it of state.items) if (state.selected.has(it.key)) { on ? favs.add(pathKey(it)) : favs.delete(pathKey(it)); }
+  saveFavs(); renderGrid(true); toast(on ? 'Favoritadas' : 'Removidas dos favoritos');
+}
+async function bulkApply(patchFn) {
+  const byKey = new Map(state.items.map(it => [it.key, it]));
+  const recs = [];
+  for (const key of state.selected) {
+    const it = byKey.get(key); if (!it) continue;
+    const pk = pathKey(it);
+    const rec = patchFn({ ...(state.manual.get(pk) || { pk }) }, it);
+    rec.pk = pk; rec.at = Date.now();
+    state.manual.set(pk, rec); recs.push(rec);
+  }
+  await idb('manual', 'readwrite', s => { for (const rec of recs) s.put(rec, rec.pk); });
+  if (shared.canWrite) saveShared(false);
+  renderGrid(true); renderPeopleList(); apply(true);
+  return recs.length;
+}
+function openBulkModal(kind) {
+  const n = state.selected.size;
+  const cfg = {
+    city: { title: 'Definir cidade', desc: `Aplica a mesma cidade às ${fmtNum(n)} fotos selecionadas, substituindo a cidade atual de cada uma.`, ph: 'Cidade – UF', list: 'cityList' },
+    tags: { title: 'Adicionar tags', desc: `Acrescenta essas tags às ${fmtNum(n)} fotos selecionadas, sem apagar as tags que já tinham.`, ph: 'Tags (separadas por vírgula)', list: '' },
+    people: { title: 'Identificar pessoas', desc: `Acrescenta esses nomes às ${fmtNum(n)} fotos selecionadas, sem apagar quem já estava identificado.`, ph: 'Nomes (separados por vírgula)', list: 'peopleList' },
+  }[kind];
+  $('bulkTitle').textContent = cfg.title; $('bulkDesc').textContent = cfg.desc;
+  $('bulkInput').setAttribute('list', cfg.list); $('bulkInput').placeholder = cfg.ph; $('bulkInput').value = '';
+  $('bulkModal').dataset.kind = kind;
+  $('bulkModal').classList.remove('hidden');
+  $('bulkInput').focus();
+}
+$('bulkCancel').onclick = () => $('bulkModal').classList.add('hidden');
+$('bulkModal').addEventListener('click', e => { if (e.target === $('bulkModal')) $('bulkModal').classList.add('hidden'); });
+$('bulkInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('bulkSave').click(); });
+$('bulkSave').onclick = async () => {
+  const kind = $('bulkModal').dataset.kind, v = $('bulkInput').value.trim();
+  if (!v) { $('bulkModal').classList.add('hidden'); return; }
+  let n = 0;
+  if (kind === 'city') {
+    const g = GEO && GEO.find(x => x.label === v);
+    const [city, uf] = g ? [g.name, g.uf] : v.split(/\s+[–-]\s+/);
+    n = await bulkApply(rec => ({ ...rec, city: city.trim(), uf: (uf || '').trim().toUpperCase() }));
+  } else if (kind === 'tags') {
+    const add = splitList(v);
+    n = await bulkApply(rec => ({ ...rec, tags: [...new Set([...(rec.tags || []), ...add])] }));
+  } else if (kind === 'people') {
+    const add = splitList(v);
+    n = await bulkApply(rec => ({ ...rec, people: [...new Set([...(rec.people || []), ...add])] }));
+  }
+  $('bulkModal').classList.add('hidden');
+  toast(`Aplicado em ${fmtNum(n)} foto(s)`);
+};
+
+// Menu de clique com o botão direito
+function showCtxMenu(x, y, items) {
+  const m = $('ctxMenu');
+  m.replaceChildren(...items.map(([label, fn]) => { const b = document.createElement('button'); b.textContent = label; b.onclick = () => { hideCtxMenu(); fn(); }; return b; }));
+  m.style.left = Math.min(x, innerWidth - 220) + 'px'; m.style.top = Math.min(y, innerHeight - items.length * 38 - 20) + 'px';
+  m.classList.remove('hidden');
+}
+function hideCtxMenu() { $('ctxMenu').classList.add('hidden'); }
+addEventListener('click', e => { if (!e.target.closest('#ctxMenu')) hideCtxMenu(); });
+addEventListener('scroll', hideCtxMenu, { passive: true });
+
+// Arrastar o mouse sobre a grade para selecionar várias de uma vez
+let drag = null; // {x0,y0,moved}
+function itemsInRect(x0, y0, x1, y1) {
+  if (!layout) return [];
+  const { cols, cw, rowH } = layout;
+  const left = Math.min(x0, x1), right = Math.max(x0, x1), top = Math.min(y0, y1), bottom = Math.max(y0, y1);
+  const c0 = Math.max(0, Math.floor(left / (cw + GAP))), c1 = Math.min(cols - 1, Math.floor(right / (cw + GAP)));
+  const r0 = Math.max(0, Math.floor(top / rowH)), r1 = Math.min(Math.ceil(state.view.length / cols) - 1, Math.floor(bottom / rowH));
+  const out = [];
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    const i = r * cols + c; if (i >= state.view.length) continue;
+    const cx0 = c * (cw + GAP), cy0 = r * rowH;
+    if (cx0 < right && cx0 + cw > left && cy0 < bottom && cy0 + cw + CAP > top) out.push(i);
+  }
+  return out;
+}
+$('content').addEventListener('mousedown', e => {
+  if (e.button !== 0 || e.target.closest('button, select, input, a')) return;
+  e.preventDefault(); // evita selecionar texto da página ao arrastar sobre as fotos
+  const rect = $('grid').getBoundingClientRect();
+  drag = { x0: e.clientX - rect.left, y0: e.clientY - rect.top, moved: false, shift: e.shiftKey, ctrl: e.ctrlKey || e.metaKey, base: e.shiftKey || (e.ctrlKey || e.metaKey) ? new Set(state.selected) : null };
+});
+addEventListener('mousemove', e => {
+  if (!drag) return;
+  const rect = $('grid').getBoundingClientRect();
+  const x1 = e.clientX - rect.left, y1 = e.clientY - rect.top;
+  if (!drag.moved && Math.hypot(x1 - drag.x0, y1 - drag.y0) < 5) return;
+  drag.moved = true;
+  let box = document.getElementById('marquee');
+  if (!box) { box = document.createElement('div'); box.className = 'marquee'; box.id = 'marquee'; $('grid').appendChild(box); }
+  box.style.left = Math.min(drag.x0, x1) + 'px'; box.style.top = Math.min(drag.y0, y1) + 'px';
+  box.style.width = Math.abs(x1 - drag.x0) + 'px'; box.style.height = Math.abs(y1 - drag.y0) + 'px';
+  const idx = itemsInRect(drag.x0, drag.y0, x1, y1);
+  const s = new Set(drag.base || []);
+  if (drag.ctrl) idx.forEach(i => { const k = state.view[i].key; drag.base.has(k) ? s.delete(k) : s.add(k); });
+  else idx.forEach(i => s.add(state.view[i].key));
+  setSelection(s);
+});
+addEventListener('mouseup', () => {
+  if (drag && drag.moved) { const b = document.getElementById('marquee'); if (b) b.remove(); justDragged = true; setTimeout(() => justDragged = false, 0); }
+  drag = null;
+});
+let justDragged = false;
+$('grid').addEventListener('contextmenu', e => {
+  const c = e.target.closest('.card'); if (!c) return;
+  e.preventDefault();
+  const i = +c.dataset.i;
+  if (!state.selected.has(state.view[i].key)) setSelection(new Set([state.view[i].key]));
+  showCtxMenu(e.clientX, e.clientY, [
+    [`Definir cidade (${state.selected.size})`, () => openBulkModal('city')],
+    [`Adicionar tags (${state.selected.size})`, () => openBulkModal('tags')],
+    [`Identificar pessoas (${state.selected.size})`, () => openBulkModal('people')],
+    ['★ Favoritar', () => bulkFav(true)],
+    ['☆ Remover favorita', () => bulkFav(false)],
+    ['Limpar seleção', () => setSelection(new Set())],
+  ]);
+});
+
 async function loadThumbs(list) {
   const need = [];
   for (const [it, card] of list) {
@@ -1833,7 +2039,14 @@ async function loadThumbs(list) {
 let raf = 0;
 addEventListener('scroll', () => { if (!raf && state.view.length) raf = requestAnimationFrame(() => { raf = 0; renderGrid(false); }); }, { passive: true });
 addEventListener('resize', () => { if (state.view.length) renderGrid(false); });
-$('grid').addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openLb(+c.dataset.i); });
+$('grid').addEventListener('click', e => {
+  const c = e.target.closest('.card'); if (!c) return;
+  if (justDragged) return; // o clique que sobra depois de soltar o arraste não deve abrir a foto
+  const i = +c.dataset.i;
+  if (e.shiftKey) { rangeSel(i); return; }
+  if (e.ctrlKey || e.metaKey) { toggleSel(i); return; }
+  openLb(i); // clique simples sempre abre a foto, mesmo com outras já selecionadas
+});
 
 let qTimer;
 $('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => apply(), 200); });
@@ -2054,6 +2267,7 @@ $('lb').addEventListener('click', e => { if (e.target.classList.contains('stage'
 addEventListener('keydown', e => {
   if ($('lb').classList.contains('hidden')) {
     if (e.key === '/' && document.activeElement !== $('q') && !$('q').disabled) { e.preventDefault(); $('q').focus(); }
+    else if (e.key === 'Escape' && state.selected.size) setSelection(new Set());
     return;
   }
   const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement && document.activeElement.tagName);
