@@ -47,7 +47,15 @@ select,.btn{padding:8px 12px;border:1px solid var(--line);border-radius:8px;back
 aside{border-right:1px solid var(--line);background:var(--panel);padding:12px 8px 32px;overflow:auto;max-height:calc(100vh - var(--topH,60px));position:sticky;top:var(--topH,60px)}
 aside details{margin:0 0 12px}
 aside summary{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:4px 10px 8px;font-weight:600;cursor:pointer}
-.tree ul{list-style:none;margin:0;padding:0 0 0 12px}
+.tree ul{list-style:none;margin:0;padding:0 0 0 4px}
+.tree li{display:flex;flex-direction:column}
+.tree .row{display:flex;align-items:center;gap:2px}
+.tree .tw{all:unset;box-sizing:border-box;width:18px;height:26px;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:11px;border-radius:4px}
+.tree .tw:hover{background:var(--card)}
+.tree .tw.leaf{visibility:hidden}
+.tree .row button.node{flex:1;min-width:0}
+.tree ul.kids{padding-left:16px}
+.tree ul.kids.closed{display:none}
 .tree>ul{padding-left:0}
 .tree button{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;gap:8px;width:100%;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px}
 .tree button:hover{background:var(--card)}
@@ -193,6 +201,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
       <div class="msg" id="shareMsg" style="margin-top:8px"></div>
     </div>
     <details open id="dFolders"><summary>Pastas</summary>
+      <div class="row" style="padding:0 10px 6px"><button class="btn sm" id="treeExpand">Expandir tudo</button><button class="btn sm" id="treeCollapse">Recolher tudo</button></div>
       <nav class="tree" id="tree" aria-label="Pastas"></nav>
       <label class="chk"><input type="checkbox" id="subOn" checked> Incluir subpastas</label>
     </details>
@@ -311,7 +320,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-25.1';
+const APP_VERSION = '2026-09-25.2';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -1699,6 +1708,13 @@ function ready() {
   buildTree(); apply(); anRender(); showStorage();
 }
 
+const treeOpen = new Set(); // caminhos expandidos manualmente (positivo) — ver treeIsOpen()
+const treeClosed = new Set(); // caminhos recolhidos manualmente (negativo)
+function treeIsOpen(path, depth) {
+  if (treeOpen.has(path)) return true;
+  if (treeClosed.has(path)) return false;
+  return depth < 2; // por padrão: raiz e o 1º nível abertos, o resto começa recolhido
+}
 function buildTree() {
   const root = { name: state.root, path: '', kids: new Map(), count: 0 };
   for (const it of state.items) {
@@ -1711,28 +1727,43 @@ function buildTree() {
       node = node.kids.get(part); node.count++;
     }
   }
-  const render = n => {
-    const li = document.createElement('li'), b = document.createElement('button');
+  const render = (n, depth) => {
+    const li = document.createElement('li');
+    const row = document.createElement('div'); row.className = 'row';
+    const open = treeIsOpen(n.path, depth);
+    const tw = document.createElement('button'); tw.className = 'tw' + (n.kids.size ? '' : ' leaf'); tw.type = 'button';
+    tw.textContent = n.kids.size ? (open ? '▾' : '▸') : '';
+    tw.setAttribute('aria-label', open ? 'Recolher' : 'Expandir');
+    const b = document.createElement('button'); b.className = 'node';
     b.dataset.path = n.path;
     b.innerHTML = '<span class="n"></span><span class="c"></span>';
     b.firstChild.textContent = n.path === '' ? 'Todas as imagens' : n.name;
     b.lastChild.textContent = fmtNum(n.count);
     b.title = n.path || state.root;
-    li.appendChild(b);
+    row.append(tw, b); li.appendChild(row);
+    let ul = null;
     if (n.kids.size) {
-      const ul = document.createElement('ul');
-      [...n.kids.values()].sort((a, c) => collator.compare(a.name, c.name)).forEach(k => ul.appendChild(render(k)));
+      ul = document.createElement('ul'); ul.className = 'kids' + (open ? '' : ' closed');
+      [...n.kids.values()].sort((a, c) => collator.compare(a.name, c.name)).forEach(k => ul.appendChild(render(k, depth + 1)));
       li.appendChild(ul);
+      tw.onclick = () => {
+        const nowOpen = ul.classList.contains('closed');
+        ul.classList.toggle('closed', !nowOpen);
+        tw.textContent = nowOpen ? '▾' : '▸'; tw.setAttribute('aria-label', nowOpen ? 'Recolher' : 'Expandir');
+        (nowOpen ? treeOpen : treeClosed).add(n.path); (nowOpen ? treeClosed : treeOpen).delete(n.path);
+      };
     }
     return li;
   };
-  const ul = document.createElement('ul'); ul.appendChild(render(root));
+  const ul = document.createElement('ul'); ul.appendChild(render(root, 0));
   $('tree').replaceChildren(ul); markTree();
 }
 function markTree() {
   document.querySelectorAll('#tree button').forEach(b => { const on = b.dataset.path === state.folder; b.classList.toggle('sel', on); b.setAttribute('aria-current', on ? 'true' : 'false'); });
 }
-$('tree').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.folder = b.dataset.path; markTree(); apply(); });
+$('tree').addEventListener('click', e => { const b = e.target.closest('button.node'); if (!b) return; state.folder = b.dataset.path; markTree(); apply(); });
+$('treeExpand').onclick = () => { treeClosed.clear(); document.querySelectorAll('#tree ul.kids').forEach(u => u.classList.remove('closed')); document.querySelectorAll('#tree .tw').forEach(t => { if (!t.classList.contains('leaf')) { t.textContent = '▾'; t.setAttribute('aria-label', 'Recolher'); } }); [...document.querySelectorAll('#tree button.node')].forEach(b => treeOpen.add(b.dataset.path)); };
+$('treeCollapse').onclick = () => { treeOpen.clear(); document.querySelectorAll('#tree ul.kids').forEach(u => u.classList.add('closed')); document.querySelectorAll('#tree .tw').forEach(t => { if (!t.classList.contains('leaf')) { t.textContent = '▸'; t.setAttribute('aria-label', 'Expandir'); } }); [...document.querySelectorAll('#tree button.node')].forEach(b => treeClosed.add(b.dataset.path)); };
 
 /* ================= grade virtualizada ================= */
 const GAP = 10, CAP = 30;
