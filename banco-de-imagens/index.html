@@ -311,7 +311,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-24.12';
+const APP_VERSION = '2026-09-25.1';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -368,6 +368,9 @@ async function idb(store, mode, fn) {
 }
 const range = root => IDBKeyRange.bound(root + '|', root + '|￿');
 let pending = [];
+// Rede de segurança: grava o que estiver pendente ao minimizar a aba, trocar de aba ou fechar o navegador
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+addEventListener('pagehide', flush);
 async function flush() {
   if (!pending.length) return;
   const batch = pending; pending = [];
@@ -1138,7 +1141,8 @@ async function diagnostics() {
     `Erros na análise: ${an.errs}`,
     ...an.lastErrs.map(e => '  - ' + e),
     `Compartilhado: ${[...state.meta.values()].filter(m => m._shared).length} de outras pessoas | arquivos em .banco-imagens: ${shared.files.size}`,
-    `Rostos (local, nunca compartilhado): ${$('facesOn').checked ? 'ligado' : 'desligado'} | estado ${fr.state}${fr.errMsg ? ' (' + fr.errMsg + ')' : ''} | ${state.faces.size} imagens verificadas | ${[...state.faces.values()].reduce((n, f) => n + (f.faces ? f.faces.length : 0), 0)} rostos | ${[...state.faces.values()].filter(f => f.suggest).length} sugestões pendentes`,
+    `Rostos (local, nunca compartilhado): ${$('facesOn').checked ? 'ligado' : 'desligado'} | estado ${fr.state}${fr.errMsg ? ' (' + fr.errMsg + ')' : ''} | processamento ${fr.backend || '-'} | ${state.faces.size} imagens verificadas | ${[...state.faces.values()].reduce((n, f) => n + (f.faces ? f.faces.length : 0), 0)} rostos | ${[...state.faces.values()].filter(f => f.suggest).length} sugestões pendentes`,
+    ...(fr.backend === 'cpu' ? ['Aviso: reconhecimento de rostos rodando sem aceleração gráfica (bem mais lento).'] : []),
     ...(lastOpenErr ? [`Último erro ao abrir uma biblioteca: ${lastOpenErr}`] : []),
     `Subpastas puladas por erro de leitura nesta pasta: ${walkErrs.length}`,
     ...walkErrs.slice(0, 6).map(([p, e]) => `  - ${p}: ${(e && (e.name || e.message)) || e}`),
@@ -1177,7 +1181,7 @@ async function runAnalysis() {
         an.lastErrs.push(`${it.path}: ${(e && (e.message || e.name)) || e}`); if (an.lastErrs.length > 8) an.lastErrs.shift();
       }
       an.done++;
-      if (pending.length >= 25) await flush();
+      if (pending.length >= 3) await flush(); // salva rápido: no máximo 2 fotos ficam em risco se o computador desligar de repente
       const now = performance.now();
       if (now - lastUi > 400) { lastUi = now; anRender(); }
       if (now - lastRefresh > 6000) { lastRefresh = now; apply(true); }
@@ -1229,6 +1233,7 @@ async function loadFaceModels() {
     await faceapi.nets.faceLandmark68Net.loadFromUri('rostos/landmark');
     await faceapi.nets.faceRecognitionNet.loadFromUri('rostos/recognition');
     window.MODELOS_ROSTO = null;
+    try { await faceapi.tf.ready(); fr.backend = faceapi.tf.getBackend(); } catch { fr.backend = '?'; }
     fr.state = 'ok';
   } catch (e) { console.warn(e); fr.state = 'erro'; fr.errMsg = `${e.name || 'Erro'}: ${e.message || e}`; }
   facesRender();
@@ -1320,10 +1325,11 @@ function facesRender() {
   if (fr.running) {
     const el = (performance.now() - fr.t0) / 1000, rate = fr.done / Math.max(el, 0.001);
     const rest = (fr.total - fr.done) / Math.max(rate, 0.01);
-    msg.textContent = `Analisando rostos: ${fmtNum(fr.done)} de ${fmtNum(fr.total)} (${fr.total ? Math.floor(fr.done / fr.total * 100) : 0}%)` + (fr.done > 3 ? ` · faltam ~${fmtDur(rest)}` : ' · calculando tempo…');
+    msg.textContent = `Analisando rostos: ${fmtNum(fr.done)} de ${fmtNum(fr.total)} (${fr.total ? Math.floor(fr.done / fr.total * 100) : 0}%)` + (fr.done > 20 ? ` · faltam ~${fmtDur(rest)}` : ' · calculando tempo (mais confiável depois de ~20 fotos)…');
   } else {
     msg.textContent = `${fmtNum(analyzed)} de ${fmtNum(state.items.length)} imagens com rostos verificados. Os rostos ficam só neste navegador.`;
   }
+  if (fr.state === 'ok' && fr.backend === 'cpu') { const w = document.createElement('div'); w.className = 'warn'; w.textContent = 'Sem aceleração gráfica: os rostos vão ficar bem mais lentos.'; msg.appendChild(w); }
 }
 $('facesOn').addEventListener('change', () => {
   ls.set('bi.faces', $('facesOn').checked);
