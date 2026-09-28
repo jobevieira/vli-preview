@@ -62,7 +62,8 @@ echo  [1/3] Copiando imagens novas ou alteradas...
 echo        Na primeira vez pode demorar; depois so copia o que mudou.
 rem /MIR espelha (remove da copia o que foi apagado no SharePoint).
 rem /XD protege a pasta de analise e evita copiar a propria copia (se o app estiver dentro da pasta do SharePoint).
-robocopy "!ORIGEM!" "%DEST%" *.jpg *.jpeg *.jfif *.png *.gif *.webp *.avif *.bmp *.svg *.heic *.heif *.tif *.tiff /MIR /XD "%IDX%" "%DEST%" "%APPDIR:~0,-1%" /R:0 /W:0 /NFL /NDL /NJH /NP /TEE /UNILOG:"%APPDIR%copia-log.txt"
+rem /R:2 /W:3 da ao OneDrive um tempinho pra baixar arquivos que ainda so existem na nuvem (evita falha so por demorar a chegar).
+robocopy "!ORIGEM!" "%DEST%" *.jpg *.jpeg *.jfif *.png *.gif *.webp *.avif *.bmp *.svg *.heic *.heif *.tif *.tiff /MIR /XD "%IDX%" "%DEST%" "%APPDIR:~0,-1%" /R:2 /W:3 /NFL /NDL /NJH /NP /TEE /UNILOG:"%APPDIR%copia-log.txt"
 if %ERRORLEVEL% GEQ 8 (
   echo.
   echo  ATENCAO: algumas imagens nao foram copiadas. Veja a linha "Falha" no resumo acima.
