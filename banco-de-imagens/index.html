@@ -347,7 +347,7 @@ body.dragging .drop{border-color:var(--accent);color:var(--text)}
 (() => {
 'use strict';
 const EXT = ['jpg','jpeg','jfif','png','gif','webp','avif','svg','bmp','ico','heic','heif','tif','tiff'];
-const APP_VERSION = '2026-09-25.4';
+const APP_VERSION = '2026-09-28.1';
 const ANALYSIS_V = 3;          // mude para reanalisar tudo quando os critérios mudarem
 const THUMB = 384;             // lado maior da miniatura salva
 const DETECT = 640;            // lado maior da imagem enviada à IA
@@ -1475,6 +1475,23 @@ const ERR = {
   tiff: 'TIFF: este navegador não exibe esse formato',
   format: 'Formato não suportado ou arquivo corrompido',
 };
+// Rótulos curtos usados no filtro "Qualidade", para achar e reanalisar só as que falharam
+const ERRQ = {
+  read: 'Erro: não pôde ler (nuvem ou permissão)',
+  empty: 'Erro: não pôde ler (nuvem ou permissão)',
+  heic: 'Erro: HEIC não suportado pelo navegador',
+  tiff: 'Erro: TIFF não suportado pelo navegador',
+  format: 'Erro: formato não suportado',
+};
+// Isola no filtro Qualidade só as fotos com o erro indicado, guardando a tela atual para o "Voltar"
+function showErr(errKey) {
+  snapshotView();
+  Object.keys(F).forEach(k => F[k] = '');
+  F.quality = ERRQ[errKey];
+  state.folder = ''; $('subOn').checked = true; $('q').value = '';
+  $('dupOn').checked = false; state.onlyGroup = null; state.onlyFace = null; $('onlyFacesOn').checked = false; $('hideExOn').checked = false;
+  markTree(); apply();
+}
 function markCard(it) {
   const card = gridCards.get(it.key), m = state.meta.get(it.key);
   if (card && m && m.err) { card.firstChild.textContent = ERR[m.err]; card.dataset.thumb = 1; }
@@ -1537,12 +1554,24 @@ function anRender() {
   for (const i of state.items) { const m = state.meta.get(i.key); if (m && m.err) { if (m.err === 'read' || m.err === 'empty') unread++; else if (m.err === 'heic') heic++; } }
   if (unread) {
     const e = document.createElement('div'); e.className = 'warn';
-    e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas. Se a pasta é sincronizada do SharePoint, a empresa pode bloquear a leitura pelo navegador: use o atalho “Atualizar e abrir.bat” que vem junto do app (ele mantém uma cópia local) e abra a pasta “imagens” criada por ele.`;
+    e.textContent = `${fmtNum(unread)} imagens não puderam ser lidas. Se a pasta é sincronizada do SharePoint, a empresa pode bloquear a leitura pelo navegador: use o atalho “Atualizar e abrir.bat” que vem junto do app (ele mantém uma cópia local) e abra a pasta “imagens” criada por ele. `;
+    const b = document.createElement('button'); b.className = 'btn sm'; b.textContent = 'Ver só essas';
+    b.title = 'Filtra a tela para mostrar só as imagens com erro de leitura, sem mexer no que já foi analisado';
+    b.onclick = () => { showErr('read'); toast('Mostrando só as imagens com erro de leitura — “Reanalisar seleção” tenta de novo só estas; “Voltar” sai daqui'); };
+    e.appendChild(b);
     msg.appendChild(e);
   }
   $('compatBtn').classList.toggle('hidden', !(unread && state.rootHandle));
   if (an.errs) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(an.errs)} imagens deram erro na análise (${an.lastErrs[an.lastErrs.length - 1]}). Use “Diagnóstico” no fim da barra lateral e envie o texto.`; msg.appendChild(e); }
-  if (heic) { const e = document.createElement('div'); e.className = 'warn'; e.textContent = `${fmtNum(heic)} fotos em HEIC (iPhone) não abrem neste navegador.`; msg.appendChild(e); }
+  if (heic) {
+    const e = document.createElement('div'); e.className = 'warn';
+    e.textContent = `${fmtNum(heic)} fotos em HEIC (iPhone) não abrem neste navegador. `;
+    const b = document.createElement('button'); b.className = 'btn sm'; b.textContent = 'Ver essas';
+    b.title = 'Mostra só as fotos HEIC (reanalisar não resolve; é preciso convertê-las para JPEG)';
+    b.onclick = () => showErr('heic');
+    e.appendChild(b);
+    msg.appendChild(e);
+  }
   const sm = $('shareMsg'), fromOthers = [...state.meta.values()].filter(m => m._shared).length;
   const parts = [];
   if (fromOthers) parts.push(`${fmtNum(fromOthers)} fotos já analisadas por outras pessoas (${shared.others.size} computador${shared.others.size > 1 ? 'es' : ''}).`);
@@ -1592,6 +1621,7 @@ function computeDups() {
 const peopleOf = m => !m || !m.ai ? 'Não analisada' : m.people === 0 ? 'Sem pessoas' : m.people === 1 ? '1 pessoa' : m.people < GROUP ? m.people + ' pessoas' : 'Grupo (mais de 3)';
 const orientOf = m => !m || !m.w ? 'Não analisada' : m.w / m.h > 1.05 ? 'Horizontal' : m.w / m.h < 0.95 ? 'Vertical' : 'Quadrada';
 function qualityOf(m) {
+  if (m && m.err) return [ERRQ[m.err] || 'Erro ao ler'];
   if (!m || !m.w) return ['Não analisada'];
   const q = [];
   if (m.sharp < BLUR_MAX && m.std > 12) q.push('Possivelmente borrada');
