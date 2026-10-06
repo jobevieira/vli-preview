@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pesquisa de Comunicação Interna | Pré-visualização do formulário</title>
+<meta name="description" content="Pré-visualização interativa do formulário da pesquisa de Comunicação Interna VLI. Nenhuma resposta é enviada.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0e74ba;--blue-dark:#0a4e79;--ink:#1c2429;--muted:#5a6672;--line:#d4dce2;--sand:#f1f4f7;
+  --orange:#ef7a1d;--green:#1d7a54;--red:#9f342b;--warn:#fff4c2;--warn-line:#e0b400;
+  --serif:'IBM Plex Serif',Georgia,serif;--sans:'IBM Plex Sans',-apple-system,Segoe UI,Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#e9eef2;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5}
+.preview{position:sticky;top:0;z-index:20;background:var(--blue-dark);color:#fff;font-size:13px;padding:9px 16px;text-align:center}
+.preview a{color:#fff}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:3px;padding:24px 26px;margin-bottom:16px}
+h1{font-family:var(--serif);font-weight:500;font-size:26px;line-height:1.2;margin:0 0 10px}
+h2{font-family:var(--serif);font-weight:500;font-size:18px;margin:0 0 4px}
+p{margin:0 0 10px}
+.muted{color:var(--muted);font-size:14px}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.eyebrow:before{content:"";width:24px;height:2px;background:var(--orange)}
+.progress{height:6px;background:var(--line);border-radius:3px;margin:0 0 16px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--blue);transition:width .25s}
+.q{padding:18px 0;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0;padding-top:4px}
+.q legend,.q .lab{font-weight:600;font-size:16px;padding:0;margin-bottom:8px;display:block}
+.q .num{color:var(--blue-dark);font-family:var(--serif);margin-right:6px}
+.req{color:var(--red);margin-left:3px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:3px;cursor:pointer;font-size:15px}
+.opt:hover{border-color:var(--blue)}
+.opt input{margin-top:3px;accent-color:var(--blue-dark);width:17px;height:17px;flex:none}
+.opt:has(input:checked){border-color:var(--blue-dark);background:#eaf3fa}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.scale label{display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:3px;padding:10px 0;cursor:pointer;font-weight:600;min-height:46px}
+.scale label:hover{border-color:var(--blue)}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale label:has(input:checked){background:var(--blue-dark);border-color:var(--blue-dark);color:#fff}
+.scale label:has(input:focus-visible){outline:3px solid var(--orange);outline-offset:1px}
+.anch{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:5px}
+.na{margin-top:8px}
+.na .opt{font-size:14px;padding:8px 12px}
+.ph{background:var(--warn);border-bottom:2px dotted var(--warn-line);padding:0 3px;border-radius:2px}
+.channel{padding:12px 0;border-top:1px dashed var(--line)}
+.channel:first-of-type{border-top:0}
+.channel .nm{font-weight:600;font-size:15px;margin-bottom:6px}
+.err{color:var(--red);font-size:13px;font-weight:600;margin-top:6px;display:none}
+.q.bad .err{display:block}
+.q.bad{outline:2px solid var(--red);outline-offset:4px}
+textarea{width:100%;min-height:90px;font:inherit;border:1px solid var(--line);border-radius:3px;padding:10px;resize:vertical}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:10px 22px;background:var(--blue-dark);color:#fff;border:0;font:inherit;font-weight:600;border-radius:2px;cursor:pointer;font-size:15px}
+.btn:hover{background:var(--blue)}
+.btn.sec{background:#fff;color:var(--blue-dark);border:1px solid var(--line)}
+.todo{background:var(--warn);border:1px solid var(--warn-line);border-radius:3px;padding:14px 18px;font-size:14px}
+.todo ul{margin:6px 0 0;padding-left:20px}
+.hidden{display:none!important}
+.sim table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+.sim th,.sim td{text-align:left;padding:8px 6px;border-top:1px solid var(--line);vertical-align:top}
+.sim th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-top:0}
+.ok{color:var(--green);font-weight:600}.no{color:var(--red);font-weight:600}
+pre{background:var(--sand);padding:12px;font-size:12px;overflow:auto;border-radius:3px;max-height:260px}
+@media (max-width:520px){.card{padding:18px 16px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="preview">PRÉ-VISUALIZAÇÃO · Nenhuma resposta é enviada ou salva · <a href="../">← Voltar à apresentação</a></div>
+<div class="wrap">
+
+<div class="card" id="intro">
+  <div class="eyebrow">Comunicação Interna · VLI</div>
+  <h1>A Comunicação Interna te ajuda a entender o negócio e como você pode contribuir com a VLI?</h1>
+  <p>A VLI está em transformação e, junto com ela, a forma como nos comunicamos também precisa evoluir. Queremos aprender com você: por isso, contamos com a sua resposta.</p>
+  <p class="muted"><b>Tempo médio:</b> cerca de 3 minutos. <b>Confidencialidade:</b> as respostas são tratadas de forma agregada, sem identificação individual <span class="ph">[texto de privacidade/LGPD a validar com o Jurídico]</span>.</p>
+  <p class="muted">— Gerência de Comunicação e Gestão de Mudanças</p>
+</div>
+
+<div class="todo" style="margin-bottom:16px">
+  <b>Itens marcados em amarelo ainda dependem de definição antes do campo:</b>
+  <ul>
+    <li>lista oficial dos novos canais (pergunta 5) e dos canais face a face (pergunta 7);</li>
+    <li>mensagens principais validadas pela GA de Comunicação e seu gabarito (pergunta 6);</li>
+    <li>lista final de corredores e de cargos; texto de privacidade.</li>
+  </ul>
+</div>
+
+<div class="progress" aria-hidden="true"><i id="bar"></i></div>
+
+<form id="f" novalidate>
+<div class="card">
+  <h2>Sobre você</h2>
+  <p class="muted">Usado apenas para análise por grupo.</p>
+
+  <div class="q" data-req="corredor">
+    <fieldset><legend><span class="req">*</span> Qual é o seu corredor?</legend>
+    <div class="opts" id="o-corredor"></div></fieldset>
+    <div class="err">Selecione uma opção.</div>
+  </div>
+  <div class="q" data-req="cargo">
+    <fieldset><legend><span class="req">*</span> Qual é a sua posição?</legend>
+    <div class="opts" id="o-cargo"></div></fieldset>
+    <div class="err">Selecione uma opção.</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Estratégia e Cultura</h2>
+  <p class="muted">Indique o quanto você concorda com cada frase (1 = discordo totalmente, 5 = concordo totalmente).</p>
+  <div id="likert"></div>
+</div>
+
+<div class="card">
+  <h2>Canais de comunicação</h2>
+  <div class="q" data-req="q5">
+    <fieldset><legend><span class="num">5.</span><span class="req">*</span> Qual o seu nível de satisfação com os canais de Comunicação Interna da VLI? <span class="ph">[lista da nova matriz de canais: Giro de Notícias, Plantão VLI… nomes a definir]</span> Pense em frequência, formatos, tipo de conteúdos, visual das peças etc.</legend>
+    <div class="scale" id="s-q5"></div>
+    <div class="anch"><span>1 = nada satisfeito</span><span>5 = muito satisfeito</span></div>
+    <div class="na"><label class="opt"><input type="radio" name="q5" value="na"> Ainda não conheço / não uso esses canais</label></div></fieldset>
+    <div class="err">Selecione uma opção.</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Mensagens da companhia</h2>
+  <div class="q" data-req="q6">
+    <fieldset><legend><span class="num">6.</span><span class="req">*</span> Quais destas são as principais mensagens da VLI hoje? Marque todas que se aplicam.</legend>
+    <div class="opts" id="o-q6"></div></fieldset>
+    <div class="err">Marque pelo menos uma opção.</div>
+  </div>
+</div>
+
+<div class="card hidden" id="lead">
+  <h2>Canais face a face (para quem lidera pessoas)</h2>
+  <div class="q" data-req="q7">
+    <fieldset><legend><span class="num">7.</span><span class="req">*</span> Qual o seu nível de satisfação com cada canal de desdobramento face a face que contribui para a sua atuação de líder comunicador?</legend>
+    <div id="ff"></div></fieldset>
+    <div class="err">Avalie todos os canais (ou marque “não conheço / não uso”).</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="q" style="border:0;padding-top:0">
+    <label class="lab" for="aberta">Quer deixar uma sugestão para melhorar a comunicação na VLI? <span class="muted">(opcional)</span></label>
+    <textarea id="aberta" name="aberta"></textarea>
+  </div>
+  <button type="submit" class="btn">Enviar (simulação)</button>
+</div>
+</form>
+
+<div class="card sim hidden" id="done">
+  <div class="eyebrow">Simulação</div>
+  <h1>Obrigado! Resposta registrada.</h1>
+  <p class="muted">Este é um preview: nada foi enviado. Abaixo, como <b>esta única resposta</b> entraria no cálculo da meta (regras do slide 4 da apresentação). Em campo, o cálculo é feito sobre todos os respondentes.</p>
+  <div id="sim"></div>
+  <details><summary class="muted" style="cursor:pointer">Ver dados da resposta (JSON)</summary><pre id="json"></pre></details>
+  <p style="margin-top:14px"><button class="btn sec" id="again" type="button">Preencher novamente</button></p>
+</div>
+
+</div>
+<script>
+(function(){
+  var CORREDORES=["Norte","Leste","Sudeste","Minas Rio/Minas Bahia"];
+  var CARGOS=[["colab","Não tenho equipe sob a minha gestão (staff ou operação)"],["sup","Lidero pessoas: supervisor(a)"],["ger","Lidero pessoas: gerente"],["outro","Lidero pessoas: outro cargo (coordenador(a), gerente executivo(a), diretor(a)…)"]];
+    var LIK=[
+    {id:"q1",t:"Eu entendo por que a VLI precisa seguir a estratégia do Conexão 2030.",c:"EST-A"},
+    {id:"q2",t:"Eu quero contribuir para que a VLI alcance a sua estratégia.",c:"EST-D"},
+    {id:"q3",t:"Eu entendo por que colocar o cliente no centro é importante para o resultado da VLI.",c:"CUL-A"},
+    {id:"q4",t:"Eu quero colocar o cliente no centro nas minhas decisões do dia a dia.",c:"CUL-D"}
+  ];
+  // EXEMPLO: substituir pelas mensagens validadas pela GA (c = gabarito)
+  var MSG=[
+    {id:"m1",t:"Mensagem prioritária 1 da GA [a definir]",c:true},
+    {id:"m2",t:"Mensagem prioritária 2 da GA [a definir]",c:true},
+    {id:"m3",t:"Mensagem prioritária 3 da GA [a definir]",c:true},
+    {id:"m4",t:"Alternativa distratora 1 [a definir]",c:false},
+    {id:"m5",t:"Alternativa distratora 2 [a definir]",c:false},
+    {id:"m6",t:"Alternativa distratora 3 [a definir]",c:false}
+  ];
+  var FF=["Impulsiona Líder","Diálogos de Negócio","CCF","Outro canal face a face da nova matriz [a definir]"];
+  var $=function(s){return document.querySelector(s)};
+  function esc(s){return s.replace(/\[([^\]]+)\]/g,'<span class="ph">[$1]</span>')}
+  function radios(el,name,items){el.innerHTML=items.map(function(i){var v=Array.isArray(i)?i[0]:i,l=Array.isArray(i)?i[1]:i;return '<label class="opt"><input type="radio" name="'+name+'" value="'+v+'"> '+l+'</label>'}).join("")}
+  function scale(name){var h="";for(var i=1;i<=5;i++)h+='<label><input type="radio" name="'+name+'" value="'+i+'">'+i+'</label>';return h}
+  radios($("#o-corredor"),"corredor",CORREDORES);
+  radios($("#o-cargo"),"cargo",CARGOS);
+  $("#likert").innerHTML=LIK.map(function(q,i){return '<div class="q" data-req="'+q.id+'"><fieldset><legend><span class="num">'+(i+1)+'.</span><span class="req">*</span> '+q.t+'</legend><div class="scale">'+scale(q.id)+'</div><div class="anch"><span>1 = discordo totalmente</span><span>5 = concordo totalmente</span></div></fieldset><div class="err">Selecione uma opção.</div></div>'}).join("");
+  $("#s-q5").innerHTML=scale("q5");
+  $("#o-q6").innerHTML=MSG.map(function(m){return '<label class="opt"><input type="checkbox" name="q6" value="'+m.id+'"> <span>'+esc(m.t)+'</span></label>'}).join("");
+  $("#ff").innerHTML=FF.map(function(c,i){return '<div class="channel"><div class="nm">'+esc(c)+'</div><div class="scale">'+scale("ff"+i)+'</div><div class="anch"><span>1 = nada satisfeito</span><span>5 = muito satisfeito</span></div><div class="na"><label class="opt"><input type="radio" name="ff'+i+'" value="na"> Não conheço / não uso</label></div></div>'}).join("");
+
+  var f=$("#f");
+  function val(n){var e=f.querySelector('input[name="'+n+'"]:checked');return e?e.value:null}
+  // qualquer cargo que lidere pessoas vê a pergunta 7; só "colab" não vê
+  function isLeader(){var c=val("cargo");return !!c&&c!=="colab"}
+  function sync(){$("#lead").classList.toggle("hidden",!isLeader());progress()}
+  function required(){var r=["corredor","cargo","q1","q2","q3","q4","q5"];return r}
+  function progress(){
+    var total=required().length+1+(isLeader()?1:0),done=0;
+    required().forEach(function(n){if(val(n))done++});
+    if(f.querySelector('input[name="q6"]:checked'))done++;
+    if(isLeader()&&FF.every(function(_,i){return val("ff"+i)}))done++;
+    $("#bar").style.width=Math.round(done/total*100)+"%";
+  }
+  f.addEventListener("change",function(e){var q=e.target.closest(".q");if(q)q.classList.remove("bad");sync()});
+
+  f.addEventListener("submit",function(e){
+    e.preventDefault();
+    var bad=[];
+    document.querySelectorAll(".q.bad").forEach(function(q){q.classList.remove("bad")});
+    required().forEach(function(n){if(!val(n))bad.push(f.querySelector('[data-req="'+n+'"]'))});
+    if(!f.querySelector('input[name="q6"]:checked'))bad.push(f.querySelector('[data-req="q6"]'));
+    if(isLeader()&&!FF.every(function(_,i){return val("ff"+i)}))bad.push(f.querySelector('[data-req="q7"]'));
+    if(bad.length){bad.forEach(function(q){q.classList.add("bad")});bad[0].scrollIntoView({behavior:"smooth",block:"center"});return}
+    finish();
+  });
+
+  function finish(){
+    var d={corredor:val("corredor"),cargo:val("cargo"),lider:isLeader()};
+    LIK.forEach(function(q){d[q.id]=+val(q.id)});
+    d.q5=val("q5")==="na"?"nao_conheco":+val("q5");
+    d.q6=[].map.call(f.querySelectorAll('input[name="q6"]:checked'),function(i){return i.value});
+    if(isLeader()){d.q7={};FF.forEach(function(c,i){var v=val("ff"+i);d.q7[c]=v==="na"?"nao_conheco":+v})}
+    d.aberta=$("#aberta").value.trim()||null;
+    // simulação de apuração
+    var rows=[];
+    function pil(nome,id,marco){var v=d[id];rows.push([nome,marco,"nota "+v,v>=3?'<span class="ok">≥ 3 ✓</span>':'<span class="no">&lt; 3</span>'])}
+    pil("Estratégia · Awareness","q1","Marco 2");pil("Estratégia · Desire","q2","Marco 2");
+    pil("Cultura · Awareness","q3","Marco 1");pil("Cultura · Desire","q4","Marco 1");
+    rows.push(["Satisfação com os canais","Marco 3",d.q5==="nao_conheco"?"não conheço (fora do denominador)":"nota "+d.q5,d.q5==="nao_conheco"?'<span class="muted">excluída</span>':(d.q5>=4?'<span class="ok">satisfeito (4–5) ✓</span>':'<span class="no">não satisfeito</span>')]);
+    var hit=MSG.filter(function(m){return (d.q6.indexOf(m.id)>-1)===m.c}).length;
+    var pct=Math.round(hit/MSG.length*100);
+    rows.push(["Compreensão das mensagens","Marco 3",hit+" de "+MSG.length+" alternativas classificadas corretamente (gabarito de exemplo)",pct+"%"]);
+    if(isLeader()){
+      var vals=Object.keys(d.q7).map(function(k){return d.q7[k]}).filter(function(v){return v!=="nao_conheco"});
+      var sat=vals.filter(function(v){return v>=4}).length;
+      rows.push(["Face a face (líder)","Meta 2",vals.length?sat+" de "+vals.length+" canais com nota 4–5":"nenhum canal avaliado",vals.length?Math.round(sat/vals.length*100)+"%":"—"]);
+    }
+    $("#sim").innerHTML='<table><tr><th>Item</th><th>Marco</th><th>Esta resposta</th><th>Resultado</th></tr>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td></tr>'}).join("")+'</table><p class="muted">Corredor registrado: <b>'+d.corredor+'</b> — habilita o gatilho da Meta 2 (cada corredor ≥ 70%). Regra de pontuação do quiz (pergunta 6) a validar.</p>';
+    $("#json").textContent=JSON.stringify(d,null,2);
+    f.classList.add("hidden");$("#intro").classList.add("hidden");$("#done").classList.remove("hidden");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  $("#again").addEventListener("click",function(){
+    f.reset();document.querySelectorAll(".q.bad").forEach(function(q){q.classList.remove("bad")});
+    f.classList.remove("hidden");$("#intro").classList.remove("hidden");$("#done").classList.add("hidden");sync();window.scrollTo({top:0});
+  });
+  sync();
+})();
+</script>
+</body>
+</html>
