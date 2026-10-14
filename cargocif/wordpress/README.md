@@ -1,11 +1,15 @@
 # CargoCIF — pacote para o WordPress (Elementor)
 
-Dois arquivos, mesmo conteúdo:
+Três arquivos, mesmo conteúdo:
 
 | Arquivo | Para quê | Imagens |
 |---|---|---|
-| `cargocif-elementor-template.json` | **Importar** em Elementor → Templates → Importar | **Embutidas no arquivo** (nada externo) |
+| `cargocif-elementor-template.json` | **Importar** como template (seção + coluna, estrutura clássica) | **Embutidas no arquivo** |
+| `cargocif-elementor-template-container.json` | **Importar** como template (container, padrão do Elementor recente) | **Embutidas no arquivo** |
 | `cargocif-elementor.html` | **Colar** num widget HTML do Elementor | Buscadas de uma pasta (`ASSETS`) |
+
+Os dois `.json` têm **o mesmo widget, byte a byte**; só muda o invólucro. Teste
+primeiro o de **container**; se o seu Elementor o recusar, use o de seção e coluna.
 
 Em ambos, todo o conteúdo vive dentro de um **Shadow DOM**, então o isolamento
 vale nos dois sentidos:
@@ -19,11 +23,19 @@ vez de editar à mão.
 
 ## Importar o template (.json)
 
-1. No WordPress: **Templates → Biblioteca de templates → Importar templates**
-   (ou, dentro do editor, o ícone de pasta → Importar).
-2. Selecione `cargocif-elementor-template.json`.
-3. Crie uma página, abra no Elementor, **Adicionar template** → aba **Meus
-   templates** → CargoCIF → **Inserir**.
+1. No painel do WordPress, **fora do editor**: **Templates → Templates salvos**
+   (*Saved Templates*) → botão **Importar templates** no topo.
+2. Selecione um dos `.json`.
+3. Crie uma página, abra no Elementor, ícone de pasta → aba **Meus templates**
+   → CargoCIF → **Inserir**.
+
+> **Não importe pelo ícone de pasta dentro do editor.** Se a aba ativa não for
+> *Meus templates* (por exemplo Cloud ou a Biblioteca do Elementor), o Elementor
+> responde **"This source does not support import"** sem ler o arquivo: é a
+> resposta padrão de qualquer fonte de template que não implementa importação.
+> Há também um [relato no GitHub](https://github.com/elementor/elementor/issues/35416)
+> desse erro ao importar pelo editor no Elementor 4.0.x, com o mesmo arquivo
+> funcionando pelo painel.
 
 O template é uma seção de largura total, sem padding, com um widget HTML dentro.
 As cinco imagens (4 fotos + logo) vão **dentro do arquivo**, como `data:` URIs:
