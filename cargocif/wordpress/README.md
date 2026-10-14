@@ -23,27 +23,42 @@ vez de editar à mão.
 
 ## Importar o template (.json)
 
-1. No painel do WordPress, **fora do editor**: **Templates → Templates salvos**
-   (*Saved Templates*) → botão **Importar templates** no topo.
-2. Selecione um dos `.json`.
-3. Crie uma página, abra no Elementor, ícone de pasta → aba **Meus templates**
-   → CargoCIF → **Inserir**.
+Use `cargocif-elementor-template-container.json` (container) ou, se o seu
+Elementor ainda usa a estrutura clássica, `cargocif-elementor-template.json`.
 
-> **Sobre o erro "This source does not support import".** Pelo código do
-> Elementor, das três origens de template (`local`, `cloud`, `remote`) só a
-> `remote` (a Biblioteca do Elementor, abas Páginas/Blocos) não implementa
-> importação, e o servidor devolve esse erro **antes de ler o arquivo**. No
-> editor, a origem enviada é a da aba ativa no momento do upload
-> (`elementor.templates.getFilter('source')`). Ou seja: o erro não depende do
-> conteúdo do `.json`.
->
-> Há ainda um [bug aberto no Elementor 4.0.x](https://github.com/elementor/elementor/issues/35416)
-> em que o import pelo editor falha com essa mesma mensagem mesmo com arquivo
-> exportado pelo próprio Elementor, enquanto o mesmo arquivo importa pelo painel.
-> Se acontecer: (1) limpe o cache do site e da CDN e recarregue o editor;
-> (2) importe pelo painel (Templates → Templates salvos → Importar templates) e
-> depois insira pelo editor, em Meus templates; (3) via WP-CLI:
-> `wp elementor library import caminho/arquivo.json --returnType=ids`.
+**Pelo editor, na própria página:**
+
+1. Abra a página no Elementor e clique no **ícone de pasta**.
+2. **A biblioteca abre na aba "Blocks". Clique na terceira aba, "Templates"
+   (Meus templates), ANTES de importar.** Este é o passo que evita o erro
+   *"This source does not support import"* (explicação abaixo).
+3. Clique na **seta de importar** e escolha o `.json`.
+4. O Elementor avisa que arquivos JSON podem ser inseguros: **Continue**. Em
+   seguida pergunta sobre arquivos não filtrados: **Import Without Enabling**
+   basta, porque as imagens deste template vão dentro do HTML.
+5. Na lista de Meus templates, passe o mouse sobre **CargoCIF** e clique em
+   **Insert**.
+
+**Pelo painel do WordPress** (alternativa, não depende de aba): **Templates →
+Templates salvos → Importar templates**, escolha o `.json`, **Continue**,
+**Import Without Enabling**. Depois, insira pelo editor, em Meus templates.
+
+### Por que dava "This source does not support import"
+
+Reproduzido e confirmado num WordPress limpo, com **Elementor 4.0.1 e 4.3.5**:
+
+- a biblioteca **abre na aba Blocks**, cuja origem de dados é `remote`;
+- o pedido de importação leva a origem da aba ativa
+  (`elementor.templates.getFilter('source')`), então sai com `remote`;
+- das três origens do Elementor (`local`, `cloud`, `remote`), só a `remote` não
+  implementa importação, e o servidor responde com esse erro **antes de ler o
+  arquivo**. Por isso falha até com um template exportado pelo próprio site, e
+  um arquivo de 637 bytes falha igual.
+- com a aba **Templates** ativa a origem vira `local` e o mesmo arquivo importa.
+
+Se mesmo assim falhar no seu site, o `.json` não é a causa. Alternativas:
+importar pelo painel (acima) ou via WP-CLI:
+`wp elementor library import caminho/arquivo.json --returnType=ids`.
 
 ## Colar o bloco (.html), com imagens na Biblioteca de Mídia
 
@@ -99,20 +114,31 @@ Há dois caminhos para ligá-lo de verdade:
 
 ## Conferência feita
 
-Tudo abaixo foi medido num **simulador** de tema WordPress (HTML e CSS escritos
-para provocar conflito), em Chromium. **Não foi testado num WordPress com
-Elementor de verdade** — a importação do `.json` em si e o comportamento do
-widget HTML do Elementor são os dois pontos a conferir no primeiro uso.
+**1. Num WordPress real, com Elementor real** (WordPress Playground, tema
+padrão do WordPress, Elementor **4.0.1** e **4.3.5**, Chromium):
 
-Comparação da versão encapsulada, dentro de um tema deliberadamente hostil
-(resets globais, `!important`, colisão das classes `.btn`/`.wrap`/`.stat` e dos
-elementos `header`/`nav`/`footer`, container do Elementor com 1140px e padding),
-contra a página publicada:
+- reproduzido o erro *"This source does not support import"* ao importar com a
+  aba Blocks ativa, e confirmado que com a aba **Templates** ativa o mesmo
+  arquivo importa, nas duas versões;
+- importação pelo painel (Templates salvos → Importar templates) também
+  funciona;
+- o template completo (`cargocif-elementor-template-container.json`) importou
+  e, aberto no site, renderizou com o Shadow DOM íntegro, o título correto e
+  **0 erros de JavaScript**; **224 elementos com a mesma caixa e 0 estilos
+  computados diferentes** da página publicada, em 1440 e 390px.
+
+**2. Num tema deliberadamente hostil** (resets globais, `!important`, colisão
+das classes `.btn`/`.wrap`/`.stat` e dos elementos `header`/`nav`/`footer`,
+container do Elementor com 1140px e padding), contra a página publicada:
 
 - **0 pixels de diferença** em 320, 360, 390, 430, 600, 768, 801, 1024, 1280,
   1440, 1600 e 1920px;
-- 224 elementos com a mesma caixa e os mesmos estilos computados;
 - header e rodapé do tema inalterados pela presença do bloco;
 - âncoras, menu mobile e formulário funcionando, sem erro de JavaScript;
 - o `.json`, renderizado com o GitHub Pages **bloqueado na rede**, deu 0 pixels
   de diferença em 1440, 1024 e 390px e fez 0 requisições externas de imagem.
+
+**O que não foi testado:** o site real da VLI (seus plugins e tema), o editor do
+Elementor com a aba Templates carregada (na sandbox ela fica em "LOADING" por
+não alcançar os servidores do Elementor, então a inserção foi conferida abrindo
+o template importado direto no site), e o Elementor Pro.
