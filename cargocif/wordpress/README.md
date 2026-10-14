@@ -1,17 +1,46 @@
-# CargoCIF — bloco para o WordPress (Elementor)
+# CargoCIF — pacote para o WordPress (Elementor)
 
-`cargocif-elementor.html` é a página do CargoCIF empacotada para ser colada em
-**um único widget HTML do Elementor**. Todo o conteúdo vive dentro de um
-**Shadow DOM**, então o isolamento vale nos dois sentidos:
+Dois arquivos, mesmo conteúdo:
+
+| Arquivo | Para quê | Imagens |
+|---|---|---|
+| `cargocif-elementor-template.json` | **Importar** em Elementor → Templates → Importar | **Embutidas no arquivo** (nada externo) |
+| `cargocif-elementor.html` | **Colar** num widget HTML do Elementor | Buscadas de uma pasta (`ASSETS`) |
+
+Em ambos, todo o conteúdo vive dentro de um **Shadow DOM**, então o isolamento
+vale nos dois sentidos:
 
 - o CSS do tema e do Elementor **não entra** no bloco;
 - o CSS do bloco **não vaza** para o header, o rodapé ou qualquer outra parte do site.
 
 A página original continua sendo `cargocif/index.html` + `cargocif/mobile.css`.
-Este arquivo é gerado a partir deles — ao alterar a página, gere o bloco de novo
-em vez de editar os dois à mão.
+Estes arquivos são gerados a partir deles — ao alterar a página, gere de novo em
+vez de editar à mão.
 
-## Instalar
+## Importar o template (.json)
+
+1. No WordPress: **Templates → Biblioteca de templates → Importar templates**
+   (ou, dentro do editor, o ícone de pasta → Importar).
+2. Selecione `cargocif-elementor-template.json`.
+3. Crie uma página, abra no Elementor, **Adicionar template** → aba **Meus
+   templates** → CargoCIF → **Inserir**.
+
+O template é uma seção de largura total, sem padding, com um widget HTML dentro.
+As cinco imagens (4 fotos + logo) vão **dentro do arquivo**, como `data:` URIs:
+não há dependência do GitHub Pages nem da Biblioteca de Mídia, e o importador do
+Elementor não precisa baixar nada.
+
+**O que essa escolha custa** (738 KB de arquivo):
+
+- as imagens **não aparecem na Biblioteca de Mídia**, então plugins de CDN, de
+  conversão de formato e de lazy-load do WordPress não as enxergam;
+- o HTML da página fica ~750 KB mais pesado e as imagens não têm cache separado;
+- a foto do topo não pode ser pré-carregada (`preload`) pelo navegador.
+
+Se isso pesar mais que a conveniência, use a opção de colar o bloco `.html`,
+hospedando as imagens na Biblioteca de Mídia (próxima seção).
+
+## Colar o bloco (.html), com imagens na Biblioteca de Mídia
 
 1. **Envie as 9 imagens** de `cargocif/assets/` para a Biblioteca de Mídia.
 2. No Elementor, crie um **Container** com largura **Full Width** e **padding 0**
@@ -46,6 +75,13 @@ Há dois caminhos para ligá-lo de verdade:
 
 ## Cuidados
 
+- **Permissão `unfiltered_html`.** O widget HTML só guarda `<script>` e `<style>`
+  para quem tem essa permissão. Administradores têm; em **Multisite** só o
+  Super Admin. Sem ela, o WordPress remove o script e o bloco aparece sem
+  menu, âncoras e formulário.
+- **Limites de upload / firewall.** O `.json` tem 738 KB. Hospedagens com
+  `upload_max_filesize` baixo ou WAF (ModSecurity, Cloudflare) podem recusá-lo;
+  nesse caso use o bloco `.html`.
 - **Plugins de minificação/otimização** (Autoptimize, WP Rocket, LiteSpeed):
   excluam este bloco do processamento. Minificadores que reescrevem HTML podem
   quebrar o `<template>` ou o `<style>` interno.
@@ -58,6 +94,11 @@ Há dois caminhos para ligá-lo de verdade:
 
 ## Conferência feita
 
+Tudo abaixo foi medido num **simulador** de tema WordPress (HTML e CSS escritos
+para provocar conflito), em Chromium. **Não foi testado num WordPress com
+Elementor de verdade** — a importação do `.json` em si e o comportamento do
+widget HTML do Elementor são os dois pontos a conferir no primeiro uso.
+
 Comparação da versão encapsulada, dentro de um tema deliberadamente hostil
 (resets globais, `!important`, colisão das classes `.btn`/`.wrap`/`.stat` e dos
 elementos `header`/`nav`/`footer`, container do Elementor com 1140px e padding),
@@ -67,4 +108,6 @@ contra a página publicada:
   1440, 1600 e 1920px;
 - 224 elementos com a mesma caixa e os mesmos estilos computados;
 - header e rodapé do tema inalterados pela presença do bloco;
-- âncoras, menu mobile e formulário funcionando, sem erro de JavaScript.
+- âncoras, menu mobile e formulário funcionando, sem erro de JavaScript;
+- o `.json`, renderizado com o GitHub Pages **bloqueado na rede**, deu 0 pixels
+  de diferença em 1440, 1024 e 390px e fez 0 requisições externas de imagem.
