@@ -29,28 +29,21 @@ vez de editar à mão.
 3. Crie uma página, abra no Elementor, ícone de pasta → aba **Meus templates**
    → CargoCIF → **Inserir**.
 
-> **Não importe pelo ícone de pasta dentro do editor.** Se a aba ativa não for
-> *Meus templates* (por exemplo Cloud ou a Biblioteca do Elementor), o Elementor
-> responde **"This source does not support import"** sem ler o arquivo: é a
-> resposta padrão de qualquer fonte de template que não implementa importação.
-> Há também um [relato no GitHub](https://github.com/elementor/elementor/issues/35416)
-> desse erro ao importar pelo editor no Elementor 4.0.x, com o mesmo arquivo
-> funcionando pelo painel.
-
-O template é uma seção de largura total, sem padding, com um widget HTML dentro.
-As cinco imagens (4 fotos + logo) vão **dentro do arquivo**, como `data:` URIs:
-não há dependência do GitHub Pages nem da Biblioteca de Mídia, e o importador do
-Elementor não precisa baixar nada.
-
-**O que essa escolha custa** (738 KB de arquivo):
-
-- as imagens **não aparecem na Biblioteca de Mídia**, então plugins de CDN, de
-  conversão de formato e de lazy-load do WordPress não as enxergam;
-- o HTML da página fica ~750 KB mais pesado e as imagens não têm cache separado;
-- a foto do topo não pode ser pré-carregada (`preload`) pelo navegador.
-
-Se isso pesar mais que a conveniência, use a opção de colar o bloco `.html`,
-hospedando as imagens na Biblioteca de Mídia (próxima seção).
+> **Sobre o erro "This source does not support import".** Pelo código do
+> Elementor, das três origens de template (`local`, `cloud`, `remote`) só a
+> `remote` (a Biblioteca do Elementor, abas Páginas/Blocos) não implementa
+> importação, e o servidor devolve esse erro **antes de ler o arquivo**. No
+> editor, a origem enviada é a da aba ativa no momento do upload
+> (`elementor.templates.getFilter('source')`). Ou seja: o erro não depende do
+> conteúdo do `.json`.
+>
+> Há ainda um [bug aberto no Elementor 4.0.x](https://github.com/elementor/elementor/issues/35416)
+> em que o import pelo editor falha com essa mesma mensagem mesmo com arquivo
+> exportado pelo próprio Elementor, enquanto o mesmo arquivo importa pelo painel.
+> Se acontecer: (1) limpe o cache do site e da CDN e recarregue o editor;
+> (2) importe pelo painel (Templates → Templates salvos → Importar templates) e
+> depois insira pelo editor, em Meus templates; (3) via WP-CLI:
+> `wp elementor library import caminho/arquivo.json --returnType=ids`.
 
 ## Colar o bloco (.html), com imagens na Biblioteca de Mídia
 
